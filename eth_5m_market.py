@@ -51,13 +51,9 @@ class market_bot:
         latest_kdf.ignore = latest_kdf.ignore.astype("float")
         latest_kdf.set_index('opentime', inplace=True)  # 设置日期时间为索引
 
-        if latest_kdf.index[-1] <= self.kdf.index[-1]:
-            print('already latest')
-        else:
+        if latest_kdf.index[-1] > self.kdf.index[-1]:
             self.kdf = pd.concat([self.kdf, latest_kdf])  # 将最新K线数据添加到已有数据DataFrame
             self.kdf = self.kdf.iloc[1:]  # 移除最开始的一条数据
-            print('kdf updated')
-
 
     def get_aggrtrade(self,symbol):
         aggtrades  = self.client.agg_trades(symbol)
