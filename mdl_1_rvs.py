@@ -8,7 +8,7 @@ import time
 import warnings
 warnings.filterwarnings("ignore")
 from alp_adx_stochrsi_rvs import alp_adx_stochrsi_rvs
-from alp_engulf_hammer_rvs import alp_engulf_hammer_rvs
+from alp_engulf_rvs import alp_engulf_rvs
 from multiprocessing import Process, Queue
 import pickle
 
@@ -21,7 +21,7 @@ class mdl_1_rvs_exec:
         self.task_ts = None
 
         self.alpha_1 = alp_adx_stochrsi_rvs()
-        self.alpha_2 = alp_engulf_hammer_rvs()
+        self.alpha_2 = alp_engulf_rvs()
         self.queue = Queue()
         self.symbol = 'ETHUSDT'
     
@@ -121,7 +121,7 @@ class mdl_1_rvs_exec:
                 self.alpha_1.order_signal = self.alpha_1.gen_order_signal(self.alpha_1.index_signal) 
                 self.alpha_2.order_signal = self.alpha_2.gen_order_signal(self.alpha_2.index_signal) 
                 self.log(f'alp_adx_stochrsi_rvs position:{self.alpha_1.order_signal["position"][-1]}')
-                self.log(f'alp_engulf_hammer_rvs position:{self.alpha_2.order_signal["position"][-1]}')
+                self.log(f'alp_engulf_rvs position:{self.alpha_2.order_signal["position"][-1]}')
 
                 #序列化signal发送到通信队列
                 signal = self.merged_signal()
@@ -133,12 +133,12 @@ class mdl_1_rvs_exec:
                 self.log(e)
                 time.sleep(10)
 
-    def order_unfilled_check(self):  #未成交订单重新以新价格挂单   
+    def order_unfilled_check(self):  #未成交订单重新以新价格挂单 
         last_order = self.fetch_last_order(self.symbol)
         orderId = last_order["orderId"]
         side = last_order["side"] 
         if last_order["status"] in ['NEW','PARTIALLY_FILLED']: 
-            self.log['there is an opening order!']
+            self.log('there is an opening order!')
             orderAmt = float(last_order['origQty'])
             ticker = self.client.ticker_price(self.symbol)
             price = float(ticker['price'])
@@ -195,12 +195,12 @@ class mdl_1_rvs_exec:
 
         elif self.task_ts != queue_ts: #更新任务时间和任务状态
             self.task_ts = queue_ts
-            self.log(f'task refreshed at 5m start with ts of {queue_ts}\n\n--------------------------------------')
+            self.log(f'task refreshed at 5m start with ts of {queue_ts}\n')
         else:
             self.log(f'mismatch because of an opening order!\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --')
  
     def model_run(self):
-        self.log("model initiating......\n---------------------------------")
+        self.log("model initiating......\n---------------------------------------------------------------")
         while True:  
             try:
                 self.task()
