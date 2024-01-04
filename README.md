@@ -6,15 +6,15 @@ Main Workflow:
 (market) --kdata--  --update--
 
 
-(alpha_1) -- indicator_set1  -- order_signals-- (model)
-(alpha_2) -- indicator_set2  -- order_signals-- (model)
+(alpha_1) -- indicator_set1  -- position_signal-- (model)
+(alpha_2) -- indicator_set2  -- position_signal-- (model)
 ...
 (alpha_n) -- indicator_setn  -- order_signals-- (model)
 
 
-(model)  -- (execution)
+(model) & (execution)
+(run)
+(monitor)  'to be expected'
 
-(exucution) -- (monitor)  'to be expected'
 
-
-every model with fixed wlr & atr_multiplier and unique management
+every alpha with unique management
