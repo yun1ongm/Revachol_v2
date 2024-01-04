@@ -1,0 +1,43 @@
+2024-01-03 05:40:50,012, Start optimizing super_dema_atr on ETHUSDT 5m from 2023-09-24 00:00:00 to 2024-01-01
+2024-01-03 05:50:43,274, Top 10 results:
+Rank 1:
+  Params: {'sptr_len': 29, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 17, 'atr_k': 7.0, 'wlr': 1.5}
+  Value: 38.62009878168467
+
+Rank 2:
+  Params: {'sptr_len': 29, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 20, 'atr_k': 7.0, 'wlr': 1.5}
+  Value: 36.59552310935191
+
+Rank 3:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 19, 'atr_k': 7.0, 'wlr': 1.5}
+  Value: 36.438011147213274
+
+Rank 4:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 19, 'atr_k': 7.0, 'wlr': 1.5}
+  Value: 36.438011147213274
+
+Rank 5:
+  Params: {'sptr_len': 29, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 19, 'atr_k': 7.5, 'wlr': 1.5}
+  Value: 36.287254547526494
+
+Rank 6:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 24, 'atr_len': 21, 'atr_k': 7.5, 'wlr': 1.5}
+  Value: 36.038683204991855
+
+Rank 7:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 28, 'atr_len': 18, 'atr_k': 7.0, 'wlr': 1.5}
+  Value: 35.466624490389606
+
+Rank 8:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 25, 'atr_len': 21, 'atr_k': 7.5, 'wlr': 1.5}
+  Value: 35.22791982556114
+
+Rank 9:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 25, 'atr_len': 21, 'atr_k': 7.5, 'wlr': 1.5}
+  Value: 35.22791982556114
+
+Rank 10:
+  Params: {'sptr_len': 29, 'sptr_k': 3.5, 'dema_len': 24, 'atr_len': 21, 'atr_k': 8.0, 'wlr': 1.5}
+  Value: 35.21384882666269
+
+
