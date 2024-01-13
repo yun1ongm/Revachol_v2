@@ -1,8 +1,8 @@
 import logging
 import os
 import warnings
+warnings.filterwarnings("ignore")
 import sys
-
 temp_path = "/Users/rivachol/Desktop/Elysium"
 sys.path.append(temp_path)
 from binance.um_futures import UMFutures
@@ -10,15 +10,13 @@ from binance.error import ClientError
 from binance_api import key, secret
 import pandas as pd
 
-warnings.filterwarnings("ignore")
-
 
 class ExecPostmodern:
     executor = "exec_postmodern"
     symbol = "ETHUSDT"
-    slippage = -0.0001
+    slippage = -0.1
     equity = 200
-    leverage = 3
+    leverage = 5
 
     def __init__(self, interval) -> None:
         self._init_logger()
@@ -60,7 +58,8 @@ class ExecPostmodern:
             self._log("Position limit reached. No more order would be sent.")
             return None
         else:
-            price = round((1 + self.slippage) * ticker, 2)
+            price = round((ticker + self.slippage), 2)
+            self._log(f"Ticker: {ticker} Executing buy price:{price}")
             try:
                 self.orderId = self.client.new_order(
                     symbol=self.symbol,
@@ -82,7 +81,8 @@ class ExecPostmodern:
             self._log("Position limit reached. No more order would be sent.")
             return None
         else:
-            price = round((1 - self.slippage) * ticker, 2)
+            price = round((ticker - self.slippage), 2)
+            self._log(f"Ticker: {ticker} Executing sell price:{price}")
             try:
                 self.orderId = self.client.new_order(
                     symbol=self.symbol,
@@ -92,7 +92,6 @@ class ExecPostmodern:
                     timeInForce="GTX",
                     price=price,
                 )
-                self._log(f"Executing sell price:{price}")
 
             except ClientError as error:
                 self._log(error)
