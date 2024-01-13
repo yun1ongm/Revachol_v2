@@ -4,12 +4,19 @@ import logging
 import os
 
 
-class AtrCalculator:
-    def __init__(self, alpha_name, sizer, atr_k, wlr):
+class DematrCalculator:
+    """
+    alpha_name: str
+    sizer: int
+    atr_profit: float
+    atr_loss: float
+    """
+
+    def __init__(self, alpha_name, sizer, atr_profit, atr_loss):
         self.alpha_name = alpha_name
         self.sizer = sizer
-        self.atr_k = atr_k
-        self.wlr = wlr
+        self.atr_profit = atr_profit
+        self.atr_loss = atr_loss
         self._init_logger()
 
     def _init_logger(self) -> None:
@@ -43,28 +50,26 @@ class AtrCalculator:
         high,
         low,
         atr,
+        dema,
         entry_price,
-        stop_loss,
-        stop_profit,
         position,
     ) -> tuple:
         if position > 0:
+            stop_loss = dema - atr * self.atr_loss
+            stop_profit = dema + atr * self.atr_profit
             if low < stop_loss or high > stop_profit:
                 position = 0
             elif signal == -1:
                 entry_price = close
-                stop_loss = entry_price + atr * self.atr_k
-                stop_profit = entry_price - atr * self.atr_k * self.wlr
                 position = -self.sizer
 
         elif position < 0:
-            if high >= stop_loss or low <= stop_profit:
+            stop_loss = dema + atr * self.atr_loss
+            stop_profit = dema - atr * self.atr_profit
+            if high > stop_loss or low < stop_profit:
                 position = 0
-
             elif signal == 1:
                 entry_price = close
-                stop_loss = entry_price - atr * self.atr_k
-                stop_profit = entry_price + atr * self.atr_k * self.wlr
                 position = self.sizer
 
         else:
@@ -74,17 +79,13 @@ class AtrCalculator:
 
             if signal == 1:
                 entry_price = close
-                stop_loss = entry_price - atr * self.atr_k
-                stop_profit = entry_price + atr * self.atr_k * self.wlr
                 position = self.sizer
 
             elif signal == -1:
                 entry_price = close
-                stop_loss = entry_price + atr * self.atr_k
-                stop_profit = entry_price - atr * self.atr_k * self.wlr
                 position = -self.sizer
 
-        return entry_price, stop_loss, stop_profit, position
+        return entry_price, stop_profit, stop_loss, position
 
     def _record_current_values(
         self,
@@ -108,8 +109,8 @@ class AtrCalculator:
         port_info = self._initialize_portfolio_variables(index_signal)
         position = 0
         entry_price = 0
-        stop_loss = 0
         stop_profit = 0
+        stop_loss = 0
 
         for index, row in index_signal.iterrows():
             signal = row.signal
@@ -117,15 +118,15 @@ class AtrCalculator:
             high = row.high
             low = row.low
             atr = row.atr
-            entry_price, stop_loss, stop_profit, position = self._calculate_position(
+            dema = row.dema
+            entry_price, stop_profit, stop_loss, position = self._calculate_position(
                 signal,
                 close,
                 high,
                 low,
                 atr,
+                dema,
                 entry_price,
-                stop_loss,
-                stop_profit,
                 position,
             )
             port_info = self._record_current_values(
@@ -140,12 +141,18 @@ class AtrCalculator:
         self._log(f'position {port_info[f"position_{self.alpha_name}"][-1]}')
         self._log(f'signal {port_info[f"signal_{self.alpha_name}"][-1]}')
         self._log(f'entry_price {round(port_info["entry_price"][-1],2)}')
-        self._log(f'stop_loss {round(port_info["stop_loss"][-1],2)}')
         self._log(f'stop_profit {round(port_info["stop_profit"][-1],2)}')
+        self._log(f'stop_loss {round(port_info["stop_loss"][-1],2)}')
         return port_info[[f"position_{self.alpha_name}", f"signal_{self.alpha_name}"]]
 
 
 class VolCalculator:
+    """
+    alpha_name: str
+    sizer: int
+    vol_k: float
+    """
+
     def __init__(self, alpha_name, sizer, vol_k):
         self.alpha_name = alpha_name
         self.sizer = sizer
