@@ -1,19 +1,17 @@
-import sys
 import warnings
+warnings.filterwarnings("ignore")
 import time
-
+import sys
 temp_path = "/Users/rivachol/Desktop/Elysium"
 sys.path.append(temp_path)
 from model.model_urban import ModelUrban
 from model.execution_postmodern import ExecPostmodern
 import threading
 
-warnings.filterwarnings("ignore")
-
 
 class AlgoTrade:
     def __init__(self):
-        self.model = ModelUrban(60)
+        self.model = ModelUrban(20)
         self.execution = ExecPostmodern(10)
         self.signal_position = None  # Placeholder for position signal
 
@@ -25,7 +23,7 @@ class AlgoTrade:
                 time.sleep(self.model.interval)
             except Exception as e:
                 print(e)
-                time.sleep(self.model.interval / 2)
+                time.sleep(self.model.interval / 5)
 
     def execution_loop(self):
         """execute orders based on the signal"""
@@ -35,7 +33,7 @@ class AlgoTrade:
                 time.sleep(self.execution.interval)
             except Exception as e:
                 print(e)
-                time.sleep(self.execution.interval / 2)
+                time.sleep(self.execution.interval / 5)
 
     def run(self):
         alpha_thread = threading.Thread(target=self.alpha_loop)
