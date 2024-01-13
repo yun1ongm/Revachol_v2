@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import warnings
 import os
-import sys
-
+import warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
-
+import sys
 temp_path = "/Users/rivachol/Desktop/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
-from alpha.alp_super_dema_atr import AlpSuperDemaAtr
-from alpha.alp_adx_stochrsi_atr import AlpAdxStochrsiAtr
-from alpha.alp_macd_rvs_atr import AlpMacdRvsAtr
+from alpha.alp_super_dematr import AlpSuperDematr
+from alpha.alp_adx_stochrsi_dematr import AlpAdxStochrsiDematr
+from alpha.alp_macd_dematr import AlpMacdDematr
 
 
 warnings.filterwarnings("ignore")
@@ -25,9 +24,9 @@ class ModelUrban:
         self._init_logger()
         self.interval = interval
         self.alphas = [
-            AlpSuperDemaAtr(),
-            AlpAdxStochrsiAtr(),
-            AlpMacdRvsAtr(),
+            AlpSuperDematr(),
+            AlpAdxStochrsiDematr(),
+            AlpMacdDematr(),
         ]
         self.market5m = MarketEngine("ETHUSDT", "5m")
 
