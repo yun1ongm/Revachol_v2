@@ -31,43 +31,46 @@ class Indicators:
         stochrsi["DXvalue"] = np.where(condition3 & condition4, stochrsi["d"], 0)
         return stochrsi
 
-    def dematr(kdf, atr_len, dema_len):
-        atr = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_len, mamode="ema"
+    def double_atr(kdf, atr_f, atr_s):
+        atr_fast = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
         )
-        ema = ta.ema(atr, length=dema_len)
-        dematr = pd.concat([atr, ema], axis=1)
-        dematr.columns = ["atr_ema", "atr_dema"]
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] > dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) < dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        atr_slow = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
         )
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] < dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) > dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        datr = pd.concat([atr_fast, atr_slow], axis=1)
+        datr.columns = ["atr_fast", "atr_slow"]
+        datr["Xvalue"] = np.where(
+            (datr["atr_fast"] > datr["atr_slow"])
+            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
+            datr["atr_slow"],
+            np.where(
+                (datr["atr_fast"] < datr["atr_slow"])
+                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
+                datr["atr_slow"],
+                0,
+            ),
         )
-        # 如果dematr["Xvalue"]为0，那么填充为前一行的值
-        dematr["Xvalue"] = dematr["Xvalue"].replace(0, method="ffill")
-        return dematr
+        # 如果datr["Xvalue"]为0，那么填充为前一行的值
+        datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
+        return datr
 
 
-class AdxRsiAtr:
-    alpha_name = "adx_rsi_atr"
+class AdxRsiDemAtr:
+    alpha_name = "adx_rsi_dematr"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 9, 24, 0, 0, 0)
+    start = datetime(2023, 10, 1, 0, 0, 0)
     window_days = 100
 
-    adx_len = 30
-    rsi_len = 25
-    kd = 8
-    atr_len = 20
-    atr_k = 4
-    wlr = 1.5
+    adx_len = 24
+    rsi_len = 12
+    kd = 4
+    dema_len = 14
+    atr_f = 14
+    atr_s = 29
+    atr_profit = 8
+    atr_loss = 5
 
     def __init__(self) -> None:
         self.backtest = BacktestEngine(
@@ -78,9 +81,10 @@ class AdxRsiAtr:
         kdf = self.backtest.kdf
         adx = Indicators.adx(kdf, self.adx_len)
         stochrsi = Indicators.stochrsi(kdf, self.rsi_len, self.kd)
-        dematr = Indicators.dematr(kdf, self.atr_len, self.atr_len)
         kdf_sig = pd.concat([kdf[["high", "low", "close"]], adx, stochrsi], axis=1)
-        kdf_sig["atr"] = dematr["Xvalue"]
+        kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
+        datr = Indicators.double_atr(kdf, self.atr_f, self.atr_s)
+        kdf_sig["atr"] = datr["Xvalue"]
         kdf_sig["signal"] = 0
         kdf_sig.loc[
             (kdf_sig["adx"] >= 30)
@@ -90,20 +94,22 @@ class AdxRsiAtr:
         ] = 1
         kdf_sig.loc[(kdf_sig["adx"] >= 30) & (kdf_sig["DXvalue"] > 80), "signal"] = -1
 
-        return kdf_sig[["high", "low", "close", "signal", "atr"]]
+        return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
 
     def get_backtest_result(
-        self, adx_len, rsi_len, kd, atr_len, atr_k, wlr
+        self, adx_len, rsi_len, kd, dema_len, atr_f, atr_s, atr_profit, atr_loss
     ) -> pd.DataFrame:
         self.adx_len = adx_len
         self.rsi_len = rsi_len
         self.kd = kd
-        self.atr_len = atr_len
-        self.atr_k = atr_k
-        self.wlr = wlr
+        self.dema_len = dema_len
+        self.atr_f = atr_f
+        self.atr_s = atr_s
+        self.atr_profit = atr_profit
+        self.atr_loss = atr_loss
 
         kdf_sig = self._gen_index_signal()
-        result = self.backtest.run_stretegy_atr(kdf_sig, atr_k, wlr)
+        result = self.backtest.run_stretegy_dematr(kdf_sig, atr_profit, atr_loss)
         return result
 
     def evaluate_performance(self, result):
@@ -113,12 +119,14 @@ class AdxRsiAtr:
 
     def objective(self, trial):
         kwargs = {
-            "adx_len": trial.suggest_int("adx_len", 6, 30),
-            "rsi_len": trial.suggest_int("rsi_len", 6, 30),
-            "kd": trial.suggest_int("kd", 4, 16),
-            "atr_len": trial.suggest_int("atr_len", 6, 30),
-            "atr_k": trial.suggest_float("atr_k", 1, 4, step=0.5),
-            "wlr": trial.suggest_float("wlr", 1, 2, step=0.5),
+            "adx_len": trial.suggest_int("adx_len", 15, 30),
+            "rsi_len": trial.suggest_int("rsi_len", 6, 24),
+            "kd": trial.suggest_int("kd", 4, 12),
+            "dema_len": trial.suggest_int("dema_len", 12, 50),
+            "atr_f": trial.suggest_int("atr_f", 6, 15),
+            "atr_s": trial.suggest_int("atr_s", 15, 30),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 12),
+            "atr_loss": trial.suggest_int("atr_loss", 1, 6),
         }
 
         result = self.get_backtest_result(**kwargs)
@@ -127,7 +135,7 @@ class AdxRsiAtr:
         return performance[self.target]
 
 
-class Optimizer(AdxRsiAtr):
+class Optimizer(AdxRsiDemAtr):
     num_evals = 100
     target = "diysharpe"
     print_log = True
@@ -175,26 +183,29 @@ class Optimizer(AdxRsiAtr):
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
-            log_message += f"  Value: {trial.value}\n\n"
+            log_message += f"  Value: {trial.value}\n"
+            result = self.get_backtest_result(**trial.params)
+            performance = self.evaluate_performance(result)
+            log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
 
 
 if __name__ == "__main__":
-    test = AdxRsiAtr()
+    test = AdxRsiDemAtr()
     result = test.get_backtest_result(
         test.adx_len,
         test.rsi_len,
         test.kd,
-        test.atr_len,
-        test.atr_k,
-        test.wlr,
+        test.dema_len,
+        test.atr_f,
+        test.atr_s,
+        test.atr_profit,
+        test.atr_loss,
     )
     performance = test.evaluate_performance(result)
     print(performance)
     optimizer = Optimizer()
     best_params, best_value = optimizer.optimize_params()
-    print("Best parameters:")
-    print(best_params)
-    print("Best value:")
-    print(best_value)
+    print(f"Best parameters: {best_params}")
+    print(f"Best value: {best_value}")

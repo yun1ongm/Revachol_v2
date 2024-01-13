@@ -24,42 +24,45 @@ class Indicators:
 
         return supertrend[["bound", "direction"]]
 
-    def dematr(kdf, atr_len, dema_len):
-        atr = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_len, mamode="ema"
+    def double_atr(kdf, atr_f, atr_s):
+        atr_fast = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
         )
-        ema = ta.ema(atr, length=dema_len)
-        dematr = pd.concat([atr, ema], axis=1)
-        dematr.columns = ["atr_ema", "atr_dema"]
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] > dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) < dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        atr_slow = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
         )
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] < dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) > dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        datr = pd.concat([atr_fast, atr_slow], axis=1)
+        datr.columns = ["atr_fast", "atr_slow"]
+        datr["Xvalue"] = np.where(
+            (datr["atr_fast"] > datr["atr_slow"])
+            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
+            datr["atr_slow"],
+            np.where(
+                (datr["atr_fast"] < datr["atr_slow"])
+                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
+                datr["atr_slow"],
+                0,
+            ),
         )
-        dematr["Xvalue"] = dematr["Xvalue"].replace(0, method="ffill")
-        return dematr
+        # 如果datr["Xvalue"]为0，那么填充为前一行的值
+        datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
+        return datr
 
 
 class AlpSuperDemAtr:
-    alpha_name = "super_dema_atr"
+    alpha_name = "super_dematr"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 9, 24, 0, 0, 0)
+    start = datetime(2023, 10, 1, 0, 0, 0)
     window_days = 100
 
-    sptr_len = 29
-    sptr_k = 3.5
-    dema_len = 28
-    atr_len = 17
-    atr_k = 7
-    wlr = 1.5
+    sptr_len = 21
+    sptr_k = 4
+    dema_len = 24
+    atr_f = 8
+    atr_s = 21
+    atr_profit = 6
+    atr_loss = 5
 
     def __init__(self) -> None:
         self.backtest = BacktestEngine(
@@ -71,9 +74,9 @@ class AlpSuperDemAtr:
         supertrend = Indicators.supertrend(kdf, self.sptr_len, self.sptr_k)
         kdf_sig = pd.concat([kdf, supertrend], axis=1)
         kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-        dematr = Indicators.dematr(kdf_sig, self.atr_len, self.dema_len)
-        kdf_sig["atr"] = dematr["Xvalue"]
-        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_len)
+        datr = Indicators.double_atr(kdf_sig, self.atr_f, self.atr_s)
+        kdf_sig["atr"] = datr["Xvalue"]
+        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_f)
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
@@ -92,20 +95,21 @@ class AlpSuperDemAtr:
             "signal",
         ] = -1
 
-        return kdf_sig[["high", "low", "close", "atr", "signal"]]
+        return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
 
     def get_backtest_result(
-        self, sptr_len, sptr_k, dema_len, atr_len, atr_k, wlr
+        self, sptr_len, sptr_k, dema_len, atr_f, atr_s, atr_profit, atr_loss
     ) -> pd.DataFrame:
         self.sptr_len = sptr_len
         self.sptr_k = sptr_k
         self.dema_len = dema_len
-        self.atr_len = atr_len
-        self.atr_k = atr_k
-        self.wlr = wlr
+        self.atr_f = atr_f
+        self.atr_s = atr_s
+        self.atr_profit = atr_profit
+        self.atr_loss = atr_loss
 
         kdf_sig = self._gen_index_signal()
-        result = self.backtest.run_stretegy_atr(kdf_sig, atr_k, wlr)
+        result = self.backtest.run_stretegy_dematr(kdf_sig, atr_profit, atr_loss)
         return result
 
     def evaluate_performance(self, result):
@@ -115,12 +119,13 @@ class AlpSuperDemAtr:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 6, 30),
-            "sptr_k": trial.suggest_float("sptr_k", 1, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 6, 30),
-            "atr_len": trial.suggest_int("atr_len", 6, 30),
-            "atr_k": trial.suggest_float("atr_k", 2, 8, step=0.5),
-            "wlr": trial.suggest_float("wlr", 1, 2, step=0.5),
+            "sptr_len": trial.suggest_int("sptr_len", 15, 30),
+            "sptr_k": trial.suggest_float("sptr_k", 2, 4, step=0.5),
+            "dema_len": trial.suggest_int("dema_len", 12, 50),
+            "atr_f": trial.suggest_int("atr_f", 6, 15),
+            "atr_s": trial.suggest_int("atr_s", 15, 30),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 12),
+            "atr_loss": trial.suggest_int("atr_loss", 1, 6),
         }
         result = self.get_backtest_result(**kwargs)
         performance = self.evaluate_performance(result)
@@ -177,6 +182,9 @@ class Optimizer(AlpSuperDemAtr):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n\n"
+            result = self.get_backtest_result(**trial.params)
+            performance = self.evaluate_performance(result)
+            log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
 
@@ -187,9 +195,10 @@ if __name__ == "__main__":
         test.sptr_len,
         test.sptr_k,
         test.dema_len,
-        test.atr_len,
-        test.atr_k,
-        test.wlr,
+        test.atr_f,
+        test.atr_s,
+        test.atr_profit,
+        test.atr_loss,
     )
     performance = test.evaluate_performance(result)
     print(performance)

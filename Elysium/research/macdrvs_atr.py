@@ -27,44 +27,44 @@ class Indicators:
 
         return macd_df
 
-    def dematr(kdf, atr_len, dema_len):
-        atr = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_len, mamode="ema"
+    def double_atr(kdf, atr_f, atr_s):
+        atr_fast = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
         )
-        ema = ta.ema(atr, length=dema_len)
-        dematr = pd.concat([atr, ema], axis=1)
-        dematr.columns = ["atr_ema", "atr_dema"]
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] > dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) < dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        atr_slow = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
         )
-        dematr["Xvalue"] = np.where(
-            (dematr["atr_ema"] < dematr["atr_dema"])
-            & (dematr["atr_ema"].shift(1) > dematr["atr_dema"].shift(1)),
-            dematr["atr_dema"],
-            0,
+        datr = pd.concat([atr_fast, atr_slow], axis=1)
+        datr.columns = ["atr_fast", "atr_slow"]
+        datr["Xvalue"] = np.where(
+            (datr["atr_fast"] > datr["atr_slow"])
+            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
+            datr["atr_slow"],
+            np.where(
+                (datr["atr_fast"] < datr["atr_slow"])
+                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
+                datr["atr_slow"],
+                0,
+            ),
         )
-        # 如果dematr["Xvalue"]为0，那么填充为前一行的值
-        dematr["Xvalue"] = dematr["Xvalue"].replace(0, method="ffill")
-        return dematr
+        # 如果datr["Xvalue"]为0，那么填充为前一行的值
+        datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
+        return datr
 
 
-class AlpMacdRvsAtr:
-    alpha_name = "macd_rvs_atr"
+class AlpMacdRvsDemAtr:
+    alpha_name = "macd_rvs_dematr"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 9, 24, 0, 0, 0)
+    start = datetime(2023, 10, 1, 0, 0, 0)
     window_days = 100
 
     fast = 12
-    slow = 25
-    signaling = 8
+    slow = 28
+    signaling = 20
     threshold = 1
-    atr_len = 13
-    atr_k = 6
-    wlr = 1
+    atr_profit = 6
+    atr_loss = 5
 
     def __init__(self) -> None:
         self.backtest = BacktestEngine(
@@ -75,8 +75,9 @@ class AlpMacdRvsAtr:
         kdf = self.backtest.kdf
         macd = Indicators.macd(kdf, self.fast, self.slow, self.signaling)
         kdf_sig = pd.concat([kdf, macd], axis=1)
-        dematr = Indicators.dematr(kdf_sig, self.atr_len, self.slow)
-        kdf_sig["atr"] = dematr["Xvalue"]
+        kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.slow)
+        datr = Indicators.double_atr(kdf_sig, self.fast, self.slow)
+        kdf_sig["atr"] = datr["Xvalue"]
         kdf_sig["signal"] = 0
         # 零下金叉背离
         last_gx = 0
@@ -99,21 +100,20 @@ class AlpMacdRvsAtr:
                 last_dx = value
                 last_price = kdf_sig["close"].at[index]
 
-        return kdf_sig[["high", "low", "close", "atr", "signal"]]
+        return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
 
     def get_backtest_result(
-        self, fast, slow, signaling, threshold, atr_len, atr_k, wlr
+        self, fast, slow, signaling, threshold, atr_profit, atr_loss
     ) -> pd.DataFrame:
         self.fast = fast
         self.slow = slow
         self.signaling = signaling
         self.threshold = threshold
-        self.atr_len = atr_len
-        self.atr_k = atr_k
-        self.wlr = wlr
+        self.atr_profit = atr_profit
+        self.atr_loss = atr_loss
 
         kdf_sig = self._gen_index_signal()
-        result = self.backtest.run_stretegy_atr(kdf_sig, atr_k, wlr)
+        result = self.backtest.run_stretegy_dema(kdf_sig, atr_profit, atr_loss)
         return result
 
     def evaluate_performance(self, result):
@@ -123,13 +123,12 @@ class AlpMacdRvsAtr:
 
     def objective(self, trial):
         kwargs = {
-            "fast": trial.suggest_int("fast", 6, 18),
-            "slow": trial.suggest_int("slow", 16, 32),
+            "fast": trial.suggest_int("fast", 6, 15),
+            "slow": trial.suggest_int("slow", 15, 30),
             "signaling": trial.suggest_int("signaling", 8, 20),
             "threshold": trial.suggest_float("threshold", 0.5, 2, step=0.5),
-            "atr_len": trial.suggest_int("atr_len", 8, 30),
-            "atr_k": trial.suggest_int("atr_k", 2, 5),
-            "wlr": trial.suggest_float("wlr", 1, 2, step=0.5),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 12),
+            "atr_loss": trial.suggest_int("atr_loss", 1, 6),
         }
         result = self.get_backtest_result(**kwargs)
         performance = self.evaluate_performance(result)
@@ -137,7 +136,7 @@ class AlpMacdRvsAtr:
         return performance[self.target]
 
 
-class Optimizer(AlpMacdRvsAtr):
+class Optimizer(AlpMacdRvsDemAtr):
     num_evals = 100
     target = "diysharpe"
     print_log = True
@@ -186,20 +185,22 @@ class Optimizer(AlpMacdRvsAtr):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n\n"
+            result = self.get_backtest_result(**trial.params)
+            performance = self.evaluate_performance(result)
+            log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
 
 
 if __name__ == "__main__":
-    test = AlpMacdRvsAtr()
+    test = AlpMacdRvsDemAtr()
     result = test.get_backtest_result(
         test.fast,
         test.slow,
         test.signaling,
         test.threshold,
-        test.atr_len,
-        test.atr_k,
-        test.wlr,
+        test.atr_profit,
+        test.atr_loss,
     )
     performance = test.evaluate_performance(result)
     print(performance)

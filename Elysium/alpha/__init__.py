@@ -1,11 +1,9 @@
-from alpha.alp_adx_stochrsi_atr import AlpAdxStochrsiAtr
-from alpha.alp_hammer_shootingstar_atr import AlpHammerShootingstarAtr
-from alpha.alp_super_dema_atr import AlpSuperDemaAtr
-from alpha.alp_macd_rvs_atr import AlpMacdRvsAtr
+from alpha.alp_adx_stochrsi_dematr import AlpAdxStochrsiDematr
+from alpha.alp_super_dematr import AlpSuperDematr
+from alpha.alp_macd_dematr import AlpMacdDematr
 
 __all__ = [
-    "AlpAdxStochrsiAtr",
-    "AlpHammerShootingstarAtr",
-    "AlpSuperDemaAtr",
-    "AlpMacdRvsAtr",
+    "AlpAdxStochrsiDematr",
+    "AlpSuperDematr",
+    "AlpMacdDematr",
 ]

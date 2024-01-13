@@ -10,7 +10,7 @@ from retry import retry
 
 class BacktestEngine:
     initial_money = 100000
-    comm = 0.0002
+    comm = 0.0004
 
     def __init__(self, alpha_name, symbol, timeframe, start, window_days) -> None:
         self.alpha_name = alpha_name
@@ -21,16 +21,20 @@ class BacktestEngine:
         self.client = UMFutures(timeout=3)
         self.sizer = self._determine_sizer(symbol)
         self.kdf = self._gen_testdata()
-        self.pfdf_volume = self._initialize_portfolio_variables(self.kdf)
-        self.pfdf_fixed = self._initialize_portfolio_variables(self.kdf)
+        self._init_performance_df()
 
     def _determine_sizer(self, symbol: str) -> int:
         if symbol == "BTCUSDT":
-            sizer = 1
+            sizer = 2
         elif symbol == "ETHUSDT":
-            sizer = 20
+            sizer = 40
 
         return sizer
+
+    def _init_performance_df(self) -> None:
+        self.pfdf_volume = self._initialize_portfolio_variables(self.kdf)
+        self.pfdf_atr = self._initialize_portfolio_variables(self.kdf)
+        self.pfdf_dematr = self._initialize_portfolio_variables(self.kdf)
 
     @retry(tries=2)
     def _gen_testdata(self) -> pd.DataFrame:
@@ -110,7 +114,13 @@ class BacktestEngine:
     def run_stretegy_volume(
         self, kdf_signal: pd.DataFrame, volume_k: float
     ) -> pd.DataFrame:
-        """this strategy aims to close position with high volume candle"""
+        """this strategy aims to close position with high volume candle
+
+        Args:
+            kdf_signal (pd.DataFrame): dataframe with signal
+            volume_k (float): volume threshold
+
+        """
         value = self.initial_money
         position = 0
 
@@ -122,49 +132,49 @@ class BacktestEngine:
             stop_price = row.stop_price
             realized_pnl = 0
             commission = 0
-            volume_condition = volume_USDT > volume_k * volume_ema
+            volume_condition = volume_USDT >= volume_k * volume_ema
 
             if position > 0:
-                unrealized_pnl = (close - entryprice) * position
+                unrealized_pnl = (close - entry_price) * position
                 if close <= stop_price or volume_condition:
                     value += unrealized_pnl - self.comm * self.sizer * close
                     position = 0
                     realized_pnl = unrealized_pnl
                     commission = self.comm * self.sizer * close
                 elif signal == -1:
-                    entryprice = close
+                    entry_price = close
                     position = -self.sizer
                     value += unrealized_pnl - 2 * self.comm * self.sizer * close
                     realized_pnl = unrealized_pnl
                     commission = 2 * self.comm * self.sizer * close
 
             elif position < 0:
-                unrealized_pnl = (close - entryprice) * position
+                unrealized_pnl = (close - entry_price) * position
                 if close >= stop_price or volume_condition:
                     value += unrealized_pnl - self.comm * self.sizer * close
                     position = 0
                     realized_pnl = unrealized_pnl
                     commission = self.comm * self.sizer * close
                 elif signal == 1:
-                    entryprice = close
+                    entry_price = close
                     position = self.sizer
                     value += unrealized_pnl - 2 * self.comm * self.sizer * close
                     realized_pnl = unrealized_pnl
                     commission = 2 * self.comm * self.sizer * close
 
             else:
-                entryprice = 0
+                entry_price = 0
                 stop_price = 0
                 unrealized_pnl = 0
 
                 if signal == 1:
-                    entryprice = close
+                    entry_price = close
                     position = self.sizer
                     value -= self.comm * self.sizer * close
                     commission = self.comm * self.sizer * close
 
                 elif signal == -1:
-                    entryprice = close
+                    entry_price = close
                     position = -self.sizer
                     value -= self.comm * self.sizer * close
                     commission = self.comm * self.sizer * close
@@ -172,7 +182,7 @@ class BacktestEngine:
             self.pfdf_volume["value"].at[index] = value
             self.pfdf_volume["signal"].at[index] = signal
             self.pfdf_volume["position"].at[index] = position
-            self.pfdf_volume["entry_price"].at[index] = entryprice
+            self.pfdf_volume["entry_price"].at[index] = entry_price
             self.pfdf_volume["stop_price"].at[index] = stop_price
             self.pfdf_volume["unrealized_pnl"].at[index] = unrealized_pnl
             self.pfdf_volume["realized_pnl"].at[index] = realized_pnl
@@ -183,7 +193,13 @@ class BacktestEngine:
     def run_stretegy_atr(
         self, kdf_signal: pd.DataFrame, atr_k: float, wlr: float
     ) -> np.ndarray:
-        """this strategy aims to close position with fixed stoploss and stopprofit based on atr"""
+        """this strategy aims to close position with fixed stoploss and stopprofit based on atr
+
+        Args:
+            kdf_signal (pd.DataFrame): dataframe with signal
+            atr_k (float): atr multiplier
+            wlr (float): win loss ratio
+        """
         value = self.initial_money
         position = 0
 
@@ -198,70 +214,153 @@ class BacktestEngine:
             commission = 0
 
             if position > 0:
-                unrealized_pnl = (close - entryprice) * position
+                unrealized_pnl = (close - entry_price) * position
                 if low < stop_loss or high > stop_profit:
                     value += unrealized_pnl - self.comm * self.sizer * close
                     position = 0
                     realized_pnl = unrealized_pnl
                     commission = self.comm * self.sizer * close
                 elif signal == -1:
-                    entryprice = close
-                    stop_loss = entryprice + atr * atr_k
-                    stop_profit = entryprice - atr * atr_k * wlr
+                    entry_price = close
+                    stop_loss = entry_price + atr * atr_k
+                    stop_profit = entry_price - atr * atr_k * wlr
                     position = -self.sizer
                     value += unrealized_pnl - 2 * self.comm * self.sizer * close
                     realized_pnl = unrealized_pnl
                     commission = 2 * self.comm * self.sizer * close
 
             elif position < 0:
-                unrealized_pnl = (close - entryprice) * position
+                unrealized_pnl = (close - entry_price) * position
                 if high >= stop_loss or low <= stop_profit:
                     value += unrealized_pnl - self.comm * self.sizer * close
                     position = 0
                     realized_pnl = unrealized_pnl
                     commission = self.comm * self.sizer * close
                 elif signal == 1:
-                    entryprice = close
-                    stop_loss = entryprice - atr * atr_k
-                    stop_profit = entryprice + atr * atr_k * wlr
+                    entry_price = close
+                    stop_loss = entry_price - atr * atr_k
+                    stop_profit = entry_price + atr * atr_k * wlr
                     position = self.sizer
                     value += unrealized_pnl - 2 * self.comm * self.sizer * close
                     realized_pnl = unrealized_pnl
                     commission = 2 * self.comm * self.sizer * close
 
             else:
-                entryprice = 0
+                entry_price = 0
                 stop_loss = 0
                 stop_profit = 0
                 unrealized_pnl = 0
 
                 if signal == 1:
-                    entryprice = close
-                    stop_loss = entryprice - atr * atr_k
-                    stop_profit = entryprice + atr * atr_k * wlr
+                    entry_price = close
+                    stop_loss = entry_price - atr * atr_k
+                    stop_profit = entry_price + atr * atr_k * wlr
                     position = self.sizer
                     value -= self.comm * self.sizer * close
                     commission = self.comm * self.sizer * close
 
                 elif signal == -1:
-                    entryprice = close
-                    stop_loss = entryprice + atr * atr_k
-                    stop_profit = entryprice - atr * atr_k * wlr
+                    entry_price = close
+                    stop_loss = entry_price + atr * atr_k
+                    stop_profit = entry_price - atr * atr_k * wlr
                     position = -self.sizer
                     value -= self.comm * self.sizer * close
                     commission = self.comm * self.sizer * close
 
-            self.pfdf_fixed["value"].at[index] = value
-            self.pfdf_fixed["signal"].at[index] = signal
-            self.pfdf_fixed["position"].at[index] = position
-            self.pfdf_fixed["entry_price"].at[index] = entryprice
-            self.pfdf_fixed["stop_loss"].at[index] = stop_loss
-            self.pfdf_fixed["stop_profit"].at[index] = stop_profit
-            self.pfdf_fixed["unrealized_pnl"].at[index] = unrealized_pnl
-            self.pfdf_fixed["realized_pnl"].at[index] = realized_pnl
-            self.pfdf_fixed["commission"].at[index] = commission
+            self.pfdf_atr["value"].at[index] = value
+            self.pfdf_atr["signal"].at[index] = signal
+            self.pfdf_atr["position"].at[index] = position
+            self.pfdf_atr["entry_price"].at[index] = entry_price
+            self.pfdf_atr["stop_loss"].at[index] = stop_loss
+            self.pfdf_atr["stop_profit"].at[index] = stop_profit
+            self.pfdf_atr["unrealized_pnl"].at[index] = unrealized_pnl
+            self.pfdf_atr["realized_pnl"].at[index] = realized_pnl
+            self.pfdf_atr["commission"].at[index] = commission
 
-        return self.pfdf_fixed
+        return self.pfdf_atr
+
+    def run_stretegy_dematr(
+        self,
+        kdf_signal: pd.DataFrame,
+        atr_profit: float,
+        atr_loss: float,
+    ) -> np.ndarray:
+        """this strategy aims to change position with candle's close based on ema and atr"""
+        value = self.initial_money
+        position = 0
+
+        for index, row in kdf_signal.iterrows():
+            signal = row.signal
+            close = row.close
+            high = row.high
+            low = row.low
+            atr = row.atr
+            dema = row.dema
+
+            realized_pnl = 0
+            commission = 0
+
+            if position > 0:
+                unrealized_pnl = (close - entry_price) * position
+                stop_loss = dema - atr * atr_loss
+                stop_profit = dema + atr * atr_profit
+                if low < stop_loss or high > stop_profit:
+                    value += unrealized_pnl - self.comm * self.sizer * close
+                    position = 0
+                    realized_pnl = unrealized_pnl
+                    commission = self.comm * self.sizer * close
+                elif signal == -1:
+                    entry_price = close
+                    position = -self.sizer
+                    value += unrealized_pnl - 2 * self.comm * self.sizer * close
+                    realized_pnl = unrealized_pnl
+                    commission = 2 * self.comm * self.sizer * close
+
+            elif position < 0:
+                unrealized_pnl = (close - entry_price) * position
+                stop_loss = dema + atr * atr_loss
+                stop_profit = dema - atr * atr_profit
+                if high > stop_loss or low < stop_profit:
+                    value += unrealized_pnl - self.comm * self.sizer * close
+                    position = 0
+                    realized_pnl = unrealized_pnl
+                    commission = self.comm * self.sizer * close
+                elif signal == 1:
+                    entry_price = close
+                    position = self.sizer
+                    value += unrealized_pnl - 2 * self.comm * self.sizer * close
+                    realized_pnl = unrealized_pnl
+                    commission = 2 * self.comm * self.sizer * close
+
+            else:
+                entry_price = 0
+                stop_loss = 0
+                stop_profit = 0
+                unrealized_pnl = 0
+
+                if signal == 1:
+                    entry_price = close
+                    position = self.sizer
+                    value -= self.comm * self.sizer * close
+                    commission = self.comm * self.sizer * close
+
+                elif signal == -1:
+                    entry_price = close
+                    position = -self.sizer
+                    value -= self.comm * self.sizer * close
+                    commission = self.comm * self.sizer * close
+
+            self.pfdf_dematr["value"].at[index] = value
+            self.pfdf_dematr["signal"].at[index] = signal
+            self.pfdf_dematr["position"].at[index] = position
+            self.pfdf_dematr["entry_price"].at[index] = entry_price
+            self.pfdf_dematr["stop_loss"].at[index] = stop_loss
+            self.pfdf_dematr["stop_profit"].at[index] = stop_profit
+            self.pfdf_dematr["unrealized_pnl"].at[index] = unrealized_pnl
+            self.pfdf_dematr["realized_pnl"].at[index] = realized_pnl
+            self.pfdf_dematr["commission"].at[index] = commission
+
+        return self.pfdf_dematr
 
     def calc_performance(self, result) -> dict:
         trades = {
