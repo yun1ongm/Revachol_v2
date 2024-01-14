@@ -6,7 +6,7 @@ import pandas_ta as ta
 import numpy as np
 
 import sys
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 import warnings
 warnings.filterwarnings("ignore")

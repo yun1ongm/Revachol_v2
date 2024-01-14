@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import time
 import sys
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from model.model_urban import ModelUrban
 from model.execution_postmodern import ExecPostmodern
@@ -11,7 +11,7 @@ import threading
 
 class AlgoTrade:
     def __init__(self):
-        self.model = ModelUrban(20)
+        self.model = ModelUrban(15)
         self.execution = ExecPostmodern(10)
         self.signal_position = None  # Placeholder for position signal
 

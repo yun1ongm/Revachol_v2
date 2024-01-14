@@ -5,7 +5,7 @@ import warnings
 import pandas as pd
 import pandas_ta as ta
 
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
 from alpha.alpha_base import VolCalculator

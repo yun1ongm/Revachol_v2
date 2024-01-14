@@ -90,8 +90,9 @@ class MarketEngine:
     @retry(tries=1, delay=1)
     def update_CKlines(self) -> None:
         latest_ohlcv = self.client.continuous_klines(
-            self.symbol, "PERPETUAL", self.timeframe, limit=1
+            self.symbol, "PERPETUAL", self.timeframe, limit=2
         )
+        latest_ohlcv.pop(0)
         latest_kdf = pd.DataFrame(
             latest_ohlcv,
             columns=self.kdf_columns,
@@ -99,8 +100,7 @@ class MarketEngine:
         latest_kdf = self._convert_kdf_datatype(latest_kdf)
 
         if latest_kdf.index[-1] == self.kdf.index[-1]:
-            self.kdf = self.kdf.iloc[:-1]
-            self.kdf = pd.concat([self.kdf, latest_kdf])
+            pass
 
         else:
             self.kdf = pd.concat([self.kdf, latest_kdf])

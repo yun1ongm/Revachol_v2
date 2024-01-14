@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import pandas as pd
 import sys
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
 from alpha.alp_super_dematr import AlpSuperDematr

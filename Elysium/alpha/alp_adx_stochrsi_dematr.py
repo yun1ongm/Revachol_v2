@@ -5,7 +5,7 @@ import pandas_ta as ta
 import numpy as np
 
 import sys
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 import warnings
 warnings.filterwarnings("ignore")
@@ -59,7 +59,7 @@ class AlpAdxStochrsiDematr(DematrCalculator):
     alpha_name = "alp_adx_stochrsi_dematr"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    sizer = 0.5
+    sizer = 0.4
 
     adx_len = 24
     rsi_len = 12

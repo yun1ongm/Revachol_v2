@@ -9,13 +9,14 @@ from binance.um_futures import UMFutures
 from binance.error import ClientError
 from binance_api import key, secret
 import pandas as pd
+from retry import retry
 
 
 class ExecPostmodern:
     executor = "exec_postmodern"
     symbol = "ETHUSDT"
-    slippage = -0.1
-    equity = 200
+    slippage = -0.01
+    equity = 500
     leverage = 5
 
     def __init__(self, interval) -> None:
@@ -37,6 +38,7 @@ class ExecPostmodern:
     def _log(self, string) -> None:
         self.logger.info(string)
 
+    @retry(ClientError, tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:
         """connect binance client with apikey and apisecret"""
         client = UMFutures(key=key, secret=secret, timeout=3)
@@ -47,10 +49,11 @@ class ExecPostmodern:
         """check position limit before sending order"""
         positions = pd.DataFrame(self.client.get_position_risk(recvWindow=6000))
         notional = positions.query("symbol == @self.symbol").loc[:, "notional"]
-        notionalAmt = abs(float(notional))
+        notionalAmt = float(notional)
 
         return notionalAmt
 
+    @retry(ClientError, tries=3, delay=1)       
     def _maker_buy(self, amount, ticker) -> None:
         """send post-only buy order"""
         notionalAmt = self._fetch_notional()
@@ -74,6 +77,7 @@ class ExecPostmodern:
             except ClientError as error:
                 self._log(error)
 
+    @retry(ClientError, tries=3, delay=1)  
     def _maker_sell(self, amount, ticker) -> None:
         """send post-only sell order"""
         notionalAmt = self._fetch_notional()
@@ -95,7 +99,8 @@ class ExecPostmodern:
 
             except ClientError as error:
                 self._log(error)
-
+            
+    @retry(ClientError, tries=3, delay=1)  
     def _cancel_open_orders(self) -> None:
         status = "NEW" or "PARTIALLY_FILLED"
         orders = pd.DataFrame(self.client.get_all_orders(symbol=self.symbol))
@@ -103,8 +108,8 @@ class ExecPostmodern:
         try:
             for orderId in open_orders["orderId"]:
                 self.client.cancel_order(symbol=self.symbol, orderId=orderId)
-        except:
-            pass
+        except ClientError as error:
+            self._log(error)
 
     def _check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""

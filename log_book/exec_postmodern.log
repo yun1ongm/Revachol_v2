@@ -1,0 +1,44 @@
+2024-01-14 22:00:07,608, signal position: 0
+2024-01-14 22:00:07,746, actual position is 0.0
+2024-01-14 22:00:07,746, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:02:01,380, signal position: -0.9
+2024-01-14 22:02:01,516, actual position is 0.0
+2024-01-14 22:02:01,645, @@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@
+2024-01-14 22:02:02,009, Ticker: 2535.22 Executing sell price:2535.23
+2024-01-14 22:02:02,146, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-14 22:02:12,428, signal position: -0.9
+2024-01-14 22:02:12,582, actual position is 0.0
+2024-01-14 22:02:12,709, @@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@
+2024-01-14 22:02:12,850, Ticker: 2535.05 Executing sell price:2535.06
+2024-01-14 22:02:12,987, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-14 22:02:23,137, signal position: -0.9
+2024-01-14 22:02:23,276, actual position is -0.9
+2024-01-14 22:02:23,276, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:02:33,422, signal position: -0.9
+2024-01-14 22:02:33,562, actual position is -0.9
+2024-01-14 22:02:33,562, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:02:43,707, signal position: -0.9
+2024-01-14 22:02:43,846, actual position is -0.9
+2024-01-14 22:02:43,847, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:02:54,088, signal position: -0.9
+2024-01-14 22:02:54,226, actual position is -0.9
+2024-01-14 22:02:54,227, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:03:04,372, signal position: -0.9
+2024-01-14 22:03:04,511, actual position is -0.9
+2024-01-14 22:03:04,512, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:03:14,655, signal position: -0.9
+2024-01-14 22:03:14,796, actual position is -0.9
+2024-01-14 22:03:14,796, Position & signals are cross checked.
+-- -- -- --
+2024-01-14 22:03:24,941, signal position: -0.9
+2024-01-14 22:03:25,079, actual position is -0.9
+2024-01-14 22:03:25,079, Position & signals are cross checked.
+-- -- -- --
