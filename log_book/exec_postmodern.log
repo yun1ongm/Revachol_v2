@@ -1,44 +1,112 @@
-2024-01-14 22:00:07,608, signal position: 0
-2024-01-14 22:00:07,746, actual position is 0.0
-2024-01-14 22:00:07,746, Position & signals are cross checked.
--- -- -- --
-2024-01-14 22:02:01,380, signal position: -0.9
-2024-01-14 22:02:01,516, actual position is 0.0
-2024-01-14 22:02:01,645, @@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@
-2024-01-14 22:02:02,009, Ticker: 2535.22 Executing sell price:2535.23
-2024-01-14 22:02:02,146, Gap to match!
+2024-01-27 06:10:55,035, signal position: 1.4
+2024-01-27 06:10:55,129, actual position is 0.0
+2024-01-27 06:10:55,211, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:10:55,302, Ticker: 2259.16 Executing buy price:2259.15
+2024-01-27 06:10:55,389, Executing buy price:2259.15
+2024-01-27 06:10:55,389, Gap to match!
 -- -- -- -- -- -- -- -- -- 
-2024-01-14 22:02:12,428, signal position: -0.9
-2024-01-14 22:02:12,582, actual position is 0.0
-2024-01-14 22:02:12,709, @@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@
-2024-01-14 22:02:12,850, Ticker: 2535.05 Executing sell price:2535.06
-2024-01-14 22:02:12,987, Gap to match!
+2024-01-27 06:11:05,574, signal position: 1.4
+2024-01-27 06:11:05,664, actual position is 1.4
+2024-01-27 06:11:05,664, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:11:15,930, signal position: 1.4
+2024-01-27 06:11:16,025, actual position is 1.4
+2024-01-27 06:11:16,026, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:11:26,214, signal position: 1.4
+2024-01-27 06:11:26,308, actual position is 1.4
+2024-01-27 06:11:26,308, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:11:36,498, signal position: 1.4
+2024-01-27 06:11:36,594, actual position is 1.4
+2024-01-27 06:11:36,594, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:11:46,825, signal position: 1.4
+2024-01-27 06:11:46,924, actual position is 1.4
+2024-01-27 06:11:46,924, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:11:57,020, signal position: 1.4
+2024-01-27 06:11:57,108, actual position is 1.4
+2024-01-27 06:11:57,108, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:12:07,209, signal position: 1.4
+2024-01-27 06:12:07,305, actual position is 0.0
+2024-01-27 06:12:07,387, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:12:07,485, Ticker: 2257.63 Executing buy price:2257.62
+2024-01-27 06:12:07,573, Executing buy price:2257.62
+2024-01-27 06:12:07,573, Gap to match!
 -- -- -- -- -- -- -- -- -- 
-2024-01-14 22:02:23,137, signal position: -0.9
-2024-01-14 22:02:23,276, actual position is -0.9
-2024-01-14 22:02:23,276, Position & signals are cross checked.
+2024-01-27 06:12:17,679, signal position: 1.4
+2024-01-27 06:12:17,779, actual position is 0.0
+2024-01-27 06:12:17,861, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:12:17,954, Ticker: 2258.54 Executing buy price:2258.53
+2024-01-27 06:12:18,041, Executing buy price:2258.53
+2024-01-27 06:12:18,041, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-27 06:12:28,229, signal position: 1.4
+2024-01-27 06:12:28,321, actual position is 1.4
+2024-01-27 06:12:28,321, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:02:33,422, signal position: -0.9
-2024-01-14 22:02:33,562, actual position is -0.9
-2024-01-14 22:02:33,562, Position & signals are cross checked.
+2024-01-27 06:12:38,424, signal position: 1.4
+2024-01-27 06:12:38,527, actual position is 1.4
+2024-01-27 06:12:38,528, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:02:43,707, signal position: -0.9
-2024-01-14 22:02:43,846, actual position is -0.9
-2024-01-14 22:02:43,847, Position & signals are cross checked.
+2024-01-27 06:12:48,717, signal position: 1.4
+2024-01-27 06:12:48,809, actual position is 1.4
+2024-01-27 06:12:48,810, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:02:54,088, signal position: -0.9
-2024-01-14 22:02:54,226, actual position is -0.9
-2024-01-14 22:02:54,227, Position & signals are cross checked.
+2024-01-27 06:12:58,920, signal position: 1.4
+2024-01-27 06:12:59,079, actual position is 1.4
+2024-01-27 06:12:59,081, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:03:04,372, signal position: -0.9
-2024-01-14 22:03:04,511, actual position is -0.9
-2024-01-14 22:03:04,512, Position & signals are cross checked.
+2024-01-27 06:13:09,185, signal position: 1.4
+2024-01-27 06:13:09,284, actual position is 1.4
+2024-01-27 06:13:09,284, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:03:14,655, signal position: -0.9
-2024-01-14 22:03:14,796, actual position is -0.9
-2024-01-14 22:03:14,796, Position & signals are cross checked.
+2024-01-27 06:13:19,389, signal position: 1.4
+2024-01-27 06:13:19,479, actual position is 1.4
+2024-01-27 06:13:19,479, Position & signals are cross checked.
 -- -- -- --
-2024-01-14 22:03:24,941, signal position: -0.9
-2024-01-14 22:03:25,079, actual position is -0.9
-2024-01-14 22:03:25,079, Position & signals are cross checked.
+2024-01-27 06:13:29,667, signal position: 1.4
+2024-01-27 06:13:29,762, actual position is 1.4
+2024-01-27 06:13:29,762, Position & signals are cross checked.
 -- -- -- --
+2024-01-27 06:13:39,871, signal position: 1.4
+2024-01-27 06:13:39,964, actual position is 1.4
+2024-01-27 06:13:39,964, Position & signals are cross checked.
+-- -- -- --
+2024-01-27 06:13:50,065, signal position: 1.4
+2024-01-27 06:13:50,155, actual position is 0.0
+2024-01-27 06:13:50,236, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:13:50,331, Ticker: 2259.65 Executing buy price:2259.64
+2024-01-27 06:13:50,416, Executing buy price:2259.64
+2024-01-27 06:13:50,417, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-27 06:14:00,515, signal position: 1.4
+2024-01-27 06:14:00,608, actual position is 0.0
+2024-01-27 06:14:00,688, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:14:00,778, Ticker: 2260.0 Executing buy price:2259.99
+2024-01-27 06:14:00,864, Executing buy price:2259.99
+2024-01-27 06:14:00,864, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-27 06:14:10,965, signal position: 1.4
+2024-01-27 06:14:11,057, actual position is 0.0
+2024-01-27 06:14:11,140, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:14:11,232, Ticker: 2260.0 Executing buy price:2259.99
+2024-01-27 06:14:11,318, Executing buy price:2259.99
+2024-01-27 06:14:11,318, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-27 06:14:21,420, signal position: 1.4
+2024-01-27 06:14:21,509, actual position is 0.0
+2024-01-27 06:14:21,589, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:14:21,685, Ticker: 2262.37 Executing buy price:2262.36
+2024-01-27 06:14:21,769, Executing buy price:2262.36
+2024-01-27 06:14:21,770, Gap to match!
+-- -- -- -- -- -- -- -- -- 
+2024-01-27 06:14:31,872, signal position: 1.4
+2024-01-27 06:14:31,964, actual position is 0.0
+2024-01-27 06:14:32,045, @@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@
+2024-01-27 06:14:32,139, Ticker: 2263.31 Executing buy price:2263.3
+2024-01-27 06:14:32,223, (400, -5022, 'Due to the order could not be executed as maker, the Post Only order will be rejected. The order will not be recorded in the order history', {'Date': 'Fri, 26 Jan 2024 22:14:32 GMT', 'Content-Type': 'application/json', 'Content-Length': '161', 'Connection': 'keep-alive', 'Server': 'Tengine', 'x-mbx-used-weight-1m': '-1', 'x-mbx-order-count-10s': '1', 'x-mbx-order-count-1m': '4', 'x-response-time': '3ms', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'})
+2024-01-27 06:14:32,223, Gap to match!
+-- -- -- -- -- -- -- -- -- 

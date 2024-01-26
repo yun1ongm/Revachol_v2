@@ -1,0 +1,63 @@
+2024-01-27 04:53:25,878, Start optimizing super_dematr_multi for goal score on ETHUSDT 5m from 2023-10-18 00:00:00 to 2024-01-25
+2024-01-27 05:04:30,245, Top 10 results:
+Rank 1:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 15, 'atr_f': 13, 'atr_s': 19, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 274624.8150861211
+
+  Performance: {'final_value': 409317.912230636, 'win_ratio': 0.3215460261886492, 'single_avg_wlr': 2.761159919070511, 'total_trades': 1216, 'return': 3.09317912230636, 'diysharpe': 137.63980754135267, 'commission': 0.9002652543999999, 'score': 274624.8150861211}
+
+Rank 2:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 16, 'atr_f': 14, 'atr_s': 20, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 265372.1199906497
+
+  Performance: {'final_value': 404413.91108889127, 'win_ratio': 0.3274410498786995, 'single_avg_wlr': 2.6623041852072378, 'total_trades': 1188, 'return': 3.0441391108889126, 'diysharpe': 134.3831445824083, 'commission': 0.8977641279999999, 'score': 265372.1199906497}
+
+Rank 3:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 14, 'atr_f': 14, 'atr_s': 19, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 263821.7191775424
+
+  Performance: {'final_value': 402588.76927619154, 'win_ratio': 0.3279999737600021, 'single_avg_wlr': 2.658177221707208, 'total_trades': 1250, 'return': 3.0258876927619154, 'diysharpe': 135.5607688440246, 'commission': 0.9093513360000001, 'score': 263821.7191775424}
+
+Rank 4:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 14, 'atr_f': 13, 'atr_s': 19, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 260607.51929499232
+
+  Performance: {'final_value': 398131.6928198946, 'win_ratio': 0.3287999736960021, 'single_avg_wlr': 2.6585634027671547, 'total_trades': 1250, 'return': 2.981316928198946, 'diysharpe': 134.8147827932384, 'commission': 0.9104171376000001, 'score': 260607.51929499232}
+
+Rank 5:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 16, 'atr_f': 13, 'atr_s': 20, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 258061.7599127525
+
+  Performance: {'final_value': 397772.5227739707, 'win_ratio': 0.3308144138694867, 'single_avg_wlr': 2.619718400286906, 'total_trades': 1191, 'return': 2.9777252277397066, 'diysharpe': 132.12841463222472, 'commission': 0.8966599248, 'score': 258061.7599127525}
+
+Rank 6:
+  Params: {'sptr_len': 26, 'sptr_k': 3.5, 'dema_len': 15, 'atr_f': 8, 'atr_s': 16, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 250450.5532250691
+
+  Performance: {'final_value': 382951.8102727884, 'win_ratio': 0.30749997437500215, 'single_avg_wlr': 2.878488075085731, 'total_trades': 1200, 'return': 2.829518102727884, 'diysharpe': 129.69179601624944, 'commission': 0.87991376, 'score': 250450.5532250691}
+
+Rank 7:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 17, 'atr_f': 14, 'atr_s': 20, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 239002.93016478443
+
+  Performance: {'final_value': 378056.64411111205, 'win_ratio': 0.32340422779538486, 'single_avg_wlr': 2.657811984787106, 'total_trades': 1175, 'return': 2.7805664411111204, 'diysharpe': 125.44908663827093, 'commission': 0.89077372, 'score': 239002.93016478443}
+
+Rank 8:
+  Params: {'sptr_len': 26, 'sptr_k': 3.5, 'dema_len': 14, 'atr_f': 8, 'atr_s': 16, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 235279.49810236503
+
+  Performance: {'final_value': 376342.0322461832, 'win_ratio': 0.31179318967744835, 'single_avg_wlr': 2.7306781361018895, 'total_trades': 1238, 'return': 2.763420322461832, 'diysharpe': 126.61517414004408, 'commission': 0.893776936, 'score': 235279.49810236503}
+
+Rank 9:
+  Params: {'sptr_len': 26, 'sptr_k': 3.5, 'dema_len': 14, 'atr_f': 8, 'atr_s': 15, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 233607.0472969456
+
+  Performance: {'final_value': 375593.0663261832, 'win_ratio': 0.3142164528096565, 'single_avg_wlr': 2.697669436965206, 'total_trades': 1238, 'return': 2.755930663261832, 'diysharpe': 126.43420342523554, 'commission': 0.8923905952, 'score': 233607.0472969456}
+
+Rank 10:
+  Params: {'sptr_len': 26, 'sptr_k': 3.5, 'dema_len': 16, 'atr_f': 8, 'atr_s': 16, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 226723.35940210568
+
+  Performance: {'final_value': 373361.9226607714, 'win_ratio': 0.32176119206086434, 'single_avg_wlr': 2.5776537866373626, 'total_trades': 1181, 'return': 2.733619226607714, 'diysharpe': 123.9110809557259, 'commission': 0.8787477119999999, 'score': 226723.35940210568}
+
+

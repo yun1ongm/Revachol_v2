@@ -9,9 +9,9 @@ import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
-from alpha.alp_super_dematr import AlpSuperDematr
-from alpha.alp_adx_stochrsi_dematr import AlpAdxStochrsiDematr
-from alpha.alp_macd_dematr import AlpMacdDematr
+from alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
+from alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
+from alpha.alp_macd_dematr_sing import AlpMacdDematr
 
 
 warnings.filterwarnings("ignore")
@@ -24,9 +24,9 @@ class ModelUrban:
         self._init_logger()
         self.interval = interval
         self.alphas = [
-            AlpSuperDematr(),
-            AlpAdxStochrsiDematr(),
-            AlpMacdDematr(),
+            AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1),
+            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.2),
+            AlpMacdDematr(money = 500, leverage = 5, sizer = 0.3),
         ]
         self.market5m = MarketEngine("ETHUSDT", "5m")
 
@@ -46,21 +46,19 @@ class ModelUrban:
 
     def merging_signal(self) -> float:
         """generate signals from each alpha and merge them into a single dataframe"""
-        merged = pd.DataFrame()
+        merged_position = 0
+        self.market5m.update_CKlines()
         for alpha in self.alphas:
-            index = alpha.gen_index_signal(self.market5m.kdf)
-            signal = alpha.generate_signal_position(index)
-            merged[alpha.alpha_name] = signal[f"position_{alpha.alpha_name}"]
+            position = alpha.generate_signal_position(self.market5m.kdf)
+            merged_position += position
             self._log(
-                f"{alpha.alpha_name} Position:{signal[f'position_{alpha.alpha_name}'][-1]}"
+                f"{alpha.alpha_name} Position:{position}"
             )
-        merged["total_position"] = merged.sum(axis=1)
-        total_position = round(merged["total_position"][-1], 2)
-        self._log(
-            f"Combined Signal Position:{total_position}\n-- -- -- -- -- -- -- -- --"
-        )
-        return total_position
 
+        self._log(
+            f"Combined Signal Position:{merged_position}\n-- -- -- -- -- -- -- -- --"
+        )
+        return merged_position
 
 if __name__ == "__main__":
     test = ModelUrban(10)
