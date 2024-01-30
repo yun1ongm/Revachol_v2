@@ -5,8 +5,6 @@ import warnings
 from retry import retry
 from binance.um_futures import UMFutures
 import logging
-import os
-
 warnings.filterwarnings("ignore")
 
 
@@ -25,27 +23,13 @@ class MarketEngine:
         "taker_buy_quota_volume",
         "ignore",
     ]
+    logger = logging.getLogger(__name__)
 
     def __init__(self, symbol: str, timeframe: str) -> None:
         self.symbol = symbol
         self.timeframe = timeframe
         self.client = UMFutures(timeout=3)
-        self._init_logger()
         self.kdf = self._get_CKlines_df()
-
-    def _init_logger(self) -> None:
-        self.logger = logging.getLogger("MarketBot")
-        self.logger.setLevel(logging.INFO)
-        log_file = "log_book/market_bot.log"
-        os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s, %(message)s")
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
-
-    def _log(self, string) -> None:
-        self.logger.info(string)
 
     @retry(tries=3, delay=1)
     def _get_CKlines_df(self) -> pd.DataFrame:
@@ -60,11 +44,11 @@ class MarketEngine:
                 columns=self.kdf_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
-            self._log(f"Market bot started with candle {kdf.closetime[-1]}.")
+            self.logger.info(f"Market bot started with candle {kdf.closetime[-1]}.")
 
             return kdf
         except Exception as e:
-            self._log(e)
+            self.logger.exception(e)
 
     def _convert_kdf_datatype(self, kdf) -> pd.DataFrame:
         kdf.opentime = [
@@ -105,7 +89,7 @@ class MarketEngine:
         else:
             self.kdf = pd.concat([self.kdf, latest_kdf])
             self.kdf = self.kdf.iloc[1:]
-            self._log(
+            self.logger.info(
                 f"Candle close time: {self.kdf.closetime[-1]} Updated Close: {self.kdf.close[-1]} Volume(USDT): {self.kdf.volume_USDT[-1]}\n-----------"
             )
 

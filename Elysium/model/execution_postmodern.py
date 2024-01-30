@@ -1,9 +1,8 @@
 import logging
-import os
 import warnings
 warnings.filterwarnings("ignore")
 import sys
-temp_path = "/Users/rivachol/Desktop/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from binance.um_futures import UMFutures
 from binance.error import ClientError
@@ -11,32 +10,18 @@ from binance_api import key, secret
 import pandas as pd
 from retry import retry
 
-
 class ExecPostmodern:
     executor = "exec_postmodern"
     symbol = "ETHUSDT"
     slippage = -0.01
     equity = 500
     leverage = 5
+    
+    logger = logging.getLogger(executor)
 
     def __init__(self, interval) -> None:
-        self._init_logger()
         self.client = self._connect_api(key=key, secret=secret)
         self.interval = interval
-
-    def _init_logger(self) -> None:
-        self.logger = logging.getLogger(self.executor)
-        self.logger.setLevel(logging.INFO)
-        log_file = f"log_book/{self.executor}.log"
-        os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s, %(message)s")
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
-
-    def _log(self, string) -> None:
-        self.logger.info(string)
 
     @retry(ClientError, tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:
@@ -58,11 +43,11 @@ class ExecPostmodern:
         """send post-only buy order"""
         notionalAmt = self._fetch_notional()
         if notionalAmt > self.equity * self.leverage:
-            self._log("Position limit reached. No more order would be sent.")
+            self.logger.warning("Position limit reached. No more order would be sent.")
             return None
         else:
             price = round((ticker + self.slippage), 2)
-            self._log(f"Ticker: {ticker} Executing buy price:{price}")
+            self.logger.info(f"Ticker: {ticker} Executing buy price:{price}")
             try:
                 self.orderId = self.client.new_order(
                     symbol=self.symbol,
@@ -72,21 +57,21 @@ class ExecPostmodern:
                     timeInForce="GTX",
                     price=price,
                 )
-                self._log(f"Executing buy price:{price}")
+                self.logger.info(f"Executing buy price:{price}")
 
             except ClientError as error:
-                self._log(error)
+                self.logger.error(error)
 
     @retry(ClientError, tries=3, delay=1)  
     def _maker_sell(self, amount, ticker) -> None:
         """send post-only sell order"""
         notionalAmt = self._fetch_notional()
         if notionalAmt < -self.equity * self.leverage:
-            self._log("Position limit reached. No more order would be sent.")
+            self.logger.warning("Position limit reached. No more order would be sent.")
             return None
         else:
             price = round((ticker - self.slippage), 2)
-            self._log(f"Ticker: {ticker} Executing sell price:{price}")
+            self.logger.info(f"Ticker: {ticker} Executing sell price:{price}")
             try:
                 self.orderId = self.client.new_order(
                     symbol=self.symbol,
@@ -98,7 +83,7 @@ class ExecPostmodern:
                 )
 
             except ClientError as error:
-                self._log(error)
+                self.logger.error(error)
             
     @retry(ClientError, tries=3, delay=1)  
     def _cancel_open_orders(self) -> None:
@@ -109,14 +94,14 @@ class ExecPostmodern:
             for orderId in open_orders["orderId"]:
                 self.client.cancel_order(symbol=self.symbol, orderId=orderId)
         except ClientError as error:
-            self._log(error)
+            self.logger.error(error)
 
     def _check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""
         positions = pd.DataFrame(self.client.get_position_risk(recvWindow=6000))
         positionAmt = positions.query("symbol == @self.symbol").loc[:, "positionAmt"]
         actual_position = float(positionAmt)
-        self._log(f"actual position is {actual_position}")
+        self.logger.info(f"actual position is {actual_position}")
         if actual_position == signal_position:
             return True
         else:
@@ -124,10 +109,10 @@ class ExecPostmodern:
             ticker = self.client.ticker_price(self.symbol)
             price = float(ticker["price"])
             if position_diff > 0:
-                self._log("@@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@")
+                self.logger.info("@@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@")
                 self._maker_buy(position_diff, price)
             else:
-                self._log("@@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@")
+                self.logger.info("@@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@")
                 self._maker_sell(-position_diff, price)
             return False
 
@@ -135,11 +120,11 @@ class ExecPostmodern:
         """main task"""
         self._cancel_open_orders()
         signal_position = round(signal_position, 2)
-        self._log(f"signal position: {signal_position}")
+        self.logger.info(f"signal position: {signal_position}")
         if self._check_position_diff(signal_position):
-            self._log(f"Position & signals are cross checked.\n-- -- -- --")
+            self.logger.info(f"Position & signals are cross checked.\n-- -- -- --")
         else:
-            self._log(f"Gap to match!\n-- -- -- -- -- -- -- -- -- ")
+            self.logger.warning(f"Gap to match!\n-- -- -- -- -- -- -- -- -- ")
 
 
 if __name__ == "__main__":
