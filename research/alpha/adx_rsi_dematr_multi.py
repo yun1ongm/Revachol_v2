@@ -61,25 +61,25 @@ class AdxRsiDemAtrMulti:
     alpha_name = "adx_rsi_dematr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 18, 0, 0, 0)
+    start = datetime(2023, 10, 20, 0, 0, 0)
     window_days = 100
 
-    adx_len = 30
-    rsi_len = 9
-    kd = 7
+    adx_len = 23
+    rsi_len = 28
+    kd = 4
     dema_len = 14
-    atr_f = 8
-    atr_s = 16
-    atr_profit = 3
+    atr_f = 7
+    atr_s = 23
+    atr_profit = 4
     atr_loss = 4
 
     def __init__(self) -> None:
-        self.backtest = StgyDematrMulti(
+        self.strategy = StgyDematrMulti(
             self.alpha_name, self.symbol, self.timeframe, self.start, self.window_days
         )
 
     def _gen_index_signal(self) -> pd.DataFrame:
-        kdf = self.backtest.kdf
+        kdf = self.strategy.kdf
         adx = Indicators.adx(kdf, self.adx_len)
         stochrsi = Indicators.stochrsi(kdf, self.rsi_len, self.kd)
         kdf_sig = pd.concat([kdf[["high", "low", "close"]], adx, stochrsi], axis=1)
@@ -110,11 +110,18 @@ class AdxRsiDemAtrMulti:
         self.atr_loss = atr_loss
 
         kdf_sig = self._gen_index_signal()
-        result = self.backtest.run(kdf_sig, atr_profit, atr_loss)
+        result = self.strategy.run(kdf_sig, atr_profit, atr_loss)
+        self.output_result(result)
         return result
 
+    def output_result(self, result:pd.DataFrame) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
+
     def evaluate_performance(self, result):
-        perf = self.backtest.calc_performance(result)
+        perf = self.strategy.calc_performance(result)
 
         return perf
 
@@ -143,16 +150,17 @@ class Optimizer(AdxRsiDemAtrMulti):
 
     def __init__(self):
         super().__init__()
-        self.end_date = self.backtest.kdf.index[-1].strftime("%Y-%m-%d")
+        self.start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
+        self.end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
         self._init_logger()
         self._log(
-            f"Start optimizing {self.alpha_name} for goal {self.target} on {self.symbol} {self.timeframe} from {self.start} to {self.end_date} based on goal of {self.target}"
+            f"Start optimizing {self.alpha_name} for goal {self.target} on {self.symbol} {self.timeframe} from {self.start_date} to {self.end_date} based on goal of {self.target}"
         )
 
     def _init_logger(self) -> None:
         self.logger = logging.getLogger(self.alpha_name)
         self.logger.setLevel(logging.INFO)
-        log_file = f"study_log/{self.end_date}_{self.alpha_name}.log"
+        log_file = f"study_log/{self.alpha_name}_{self.start_date}to{self.end_date}.log"
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)
@@ -190,7 +198,6 @@ class Optimizer(AdxRsiDemAtrMulti):
             log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
-
 
 if __name__ == "__main__":
     test = AdxRsiDemAtrMulti()
