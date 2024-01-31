@@ -109,10 +109,10 @@ class ExecPostmodern:
             ticker = self.client.ticker_price(self.symbol)
             price = float(ticker["price"])
             if position_diff > 0:
-                self.logger.info("@@@@@@@@@@@@  Sendong Buy Order @@@@@@@@@@@@")
+                self.logger.warning("@@@@@@@@@@@@  Sending Buy Order @@@@@@@@@@@@")
                 self._maker_buy(position_diff, price)
             else:
-                self.logger.info("@@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@")
+                self.logger.warning("@@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@")
                 self._maker_sell(-position_diff, price)
             return False
 

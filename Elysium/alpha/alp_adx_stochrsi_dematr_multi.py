@@ -50,7 +50,7 @@ class AlpAdxStochrsiDematr:
         self.logger.info(f'signal {port_info[f"signal_{self.strategy_name}"][-1]}')
         self.logger.info(f'entry_price {round(port_info["entry_price"][-1],2)}')
         self.logger.info(f'stop_profit {round(port_info["stop_profit"][-1],2)}')
-        self.logger.info(f'stop_loss {round(port_info["stop_loss"][-1],2)}')
+        self.logger.info(f'stop_loss {round(port_info["stop_loss"][-1],2)}\n------------------')
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:

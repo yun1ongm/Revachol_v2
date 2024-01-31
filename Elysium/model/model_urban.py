@@ -38,7 +38,7 @@ class ModelUrban:
         self.logger.info(
             f"Combined Signal Position:{merged_position}\n-- -- -- -- -- -- -- -- --"
         )
-        return merged_position
+        return round(merged_position,2)
 
 if __name__ == "__main__":
     test = ModelUrban(10)

@@ -48,7 +48,7 @@ class AlpSuperDemaBodyatr:
         self.logger.info(f'position {port_info[f"position_{self.strategy_name}"][-1]}')
         self.logger.info(f'signal {port_info[f"signal_{self.strategy_name}"][-1]}')
         self.logger.info(f'entry_price {round(port_info["entry_price"][-1],2)}')
-        self.logger.info(f'stop_price {round(port_info["stop_price"][-1],2)}')
+        self.logger.info(f'stop_price {round(port_info["stop_price"][-1],2)}\n------------------')
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:

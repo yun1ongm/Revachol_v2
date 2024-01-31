@@ -23,7 +23,7 @@ class AlgoTrade:
         while True:
             try:
                 self.model.market5m.update_CKlines()
-                previous_signal_position = self.signal_position
+                previous_signal_position = self.signal_position if self.signal_position is not None else 0
                 self.signal_position = self.model.merging_signal()
                 if self.signal_position != previous_signal_position:
                     change = self.signal_position - previous_signal_position

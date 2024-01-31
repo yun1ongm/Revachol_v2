@@ -62,7 +62,7 @@ class AlpSuperDematr:
         self._log(f'signal {port_info[f"signal_{self.strategy_name}"][-1]}')
         self._log(f'entry_price {round(port_info["entry_price"][-1],2)}')
         self._log(f'stop_profit {round(port_info["stop_profit"][-1],2)}')
-        self._log(f'stop_loss {round(port_info["stop_loss"][-1],2)}')
+        self._log(f'stop_loss {round(port_info["stop_loss"][-1],2)}\n------------------')
 
     def main(self,interval = 15) -> None:
         market = MarketEngine(self.symbol, self.timeframe)
