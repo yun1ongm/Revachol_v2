@@ -57,14 +57,14 @@ class AlpMacdDemAtrSing:
     alpha_name = "macd_dematr_sing"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 20, 0, 0, 0)
+    start = datetime(2023, 10, 25, 0, 0, 0)
     window_days = 100
 
-    fast = 17
-    slow = 19
-    signaling = 5
-    threshold = 0.9
-    dema_len = 23
+    fast = 16
+    slow = 17
+    signaling = 8
+    threshold = 0.5
+    dema_len = 21
     atr_profit = 3
     atr_loss = 4
 
@@ -126,7 +126,7 @@ class AlpMacdDemAtrSing:
             "signaling": trial.suggest_int("signaling", 4, 16),
             "threshold": trial.suggest_float("threshold", 0.1, 1, step=0.1),
             "dema_len": trial.suggest_int("dema_len", 12, 50),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 1, 4),
         }
         result = self.get_backtest_result(**kwargs)

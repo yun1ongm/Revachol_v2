@@ -17,19 +17,18 @@ class AlgoTrade:
     def __init__(self):
         self.model = ModelUrban(15)
         self.execution = ExecPostmodern(10)
-        self.signal_position = None  # Placeholder for position signal
 
     def _alpha_loop(self) -> None:
         while True:
             try:
+                previous_signal_position = self.model.signal_position if self.model.signal_position is not None else 0
                 self.model.market5m.update_CKlines()
-                previous_signal_position = self.signal_position if self.signal_position is not None else 0
-                self.signal_position = self.model.merging_signal()
-                if self.signal_position != previous_signal_position:
-                    change = self.signal_position - previous_signal_position
-                    self.logger.warning(
+                self.model.merging_signal()
+                if self.model.signal_position != previous_signal_position:
+                    change = self.model.signal_position - previous_signal_position
+                    self.model.logger.warning(
                         f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
-                    )
+                    )   
                 time.sleep(self.model.interval)
             except Exception as e:
                 self.logger.exception(e)
@@ -39,8 +38,8 @@ class AlgoTrade:
         """execute orders based on the signal"""
         while True:
             try:
-                if self.signal_position is not None:
-                    self.execution.task(self.signal_position)
+                if self.model.signal_position:
+                    self.execution.task(self.model.signal_position)
                     time.sleep(self.execution.interval)
             except Exception as e:
                 self.logger.exception(e)

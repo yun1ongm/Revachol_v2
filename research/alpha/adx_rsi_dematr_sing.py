@@ -61,16 +61,16 @@ class AdxRsiDemAtrSing:
     alpha_name = "adx_rsi_dematr_sing"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 14, 0, 0, 0)
+    start = datetime(2023, 10, 25, 0, 0, 0)
     window_days = 100
 
-    adx_len = 19
-    rsi_len = 21
-    kd = 11
-    dema_len = 19
-    atr_f = 11
+    adx_len = 20
+    rsi_len = 7
+    kd = 8
+    dema_len = 13
+    atr_f = 14
     atr_s = 26
-    atr_profit = 4
+    atr_profit = 5
     atr_loss = 4
 
     def __init__(self) -> None:
@@ -111,7 +111,14 @@ class AdxRsiDemAtrSing:
 
         kdf_sig = self._gen_index_signal()
         result = self.backtest.run(kdf_sig, atr_profit, atr_loss)
+        self.output_result(result)
         return result
+
+    def output_result(self, result:pd.DataFrame) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.backtest.calc_performance(result)
@@ -126,7 +133,7 @@ class AdxRsiDemAtrSing:
             "dema_len": trial.suggest_int("dema_len", 12, 50),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 1, 4),
         }
 
@@ -143,16 +150,17 @@ class Optimizer(AdxRsiDemAtrSing):
 
     def __init__(self):
         super().__init__()
-        self.end_date = self.backtest.kdf.index[-1].strftime("%Y-%m-%d")
+        self.start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
+        self.end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
         self._init_logger()
         self._log(
-            f"Start optimizing {self.alpha_name} for target {self.target} on {self.symbol} {self.timeframe} from {self.start} to {self.end_date}"
+            f"Start optimizing {self.alpha_name} for goal {self.target} on {self.symbol} {self.timeframe} from {self.start_date} to {self.end_date} based on goal of {self.target}"
         )
 
     def _init_logger(self) -> None:
         self.logger = logging.getLogger(self.alpha_name)
         self.logger.setLevel(logging.INFO)
-        log_file = f"study_log/{self.end_date}_{self.alpha_name}.log"
+        log_file = f"study_log/{self.alpha_name}_{self.start_date}to{self.end_date}.log"
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)

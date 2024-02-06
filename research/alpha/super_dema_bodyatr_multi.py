@@ -38,14 +38,14 @@ class AlpSuperDemaBodyatrMulti:
     alpha_name = "super_dema_bodyatr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 20, 0, 0, 0)
+    start = datetime(2023, 10, 25, 0, 0, 0)
     window_days = 100
 
-    sptr_len = 20
+    sptr_len = 22
     sptr_k = 4
-    dema_len = 26
-    atr_len = 11
-    upbody_ratio = 2.4
+    dema_len = 38
+    atr_len = 10
+    upbody_ratio = 2.2
     downbody_ratio = 1.1
 
     def __init__(self) -> None:

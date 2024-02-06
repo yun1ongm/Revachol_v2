@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 import pandas as pd
 import sys
@@ -29,13 +28,14 @@ class AlpMacdDematr:
     symbol = "ETHUSDT"
     timeframe = "5m"
 
-    fast = 12
-    slow = 40
-    signaling = 12
-    threshold = 0.4
-    dema_len = 29
-    atr_profit = 5
+    fast = 16
+    slow = 17
+    signaling = 8
+    threshold = 0.5
+    dema_len = 21
+    atr_profit = 3
     atr_loss = 4
+
 
     logger = logging.getLogger(alpha_name)
 
@@ -44,30 +44,38 @@ class AlpMacdDematr:
         self.leverage = leverage
         self.sizer = sizer
 
-    def _log_stgy_res(self, port_info) -> None:
-        self.logger.info(f'position {port_info[f"position_{self.strategy_name}"][-1]}')
-        self.logger.info(f'signal {port_info[f"signal_{self.strategy_name}"][-1]}')
-        self.logger.info(f'entry_price {round(port_info["entry_price"][-1],2)}')
-        self.logger.info(f'stop_profit {round(port_info["stop_profit"][-1],2)}')
-        self.logger.info(f'stop_loss {round(port_info["stop_loss"][-1],2)}\n------------------')
-
-    def generate_signal_position(self, kdf:pd.DataFrame) -> float:
+    def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
             index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
             strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
             idx_signal = index.generate_dematr_signal()
+            update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_signal_position(idx_signal)
             position = stgy_signal[f"position_{self.strategy_name}"][-1]
-            self._log_stgy_res(stgy_signal)
-            return position
+            signal = stgy_signal[f"signal_{self.strategy_name}"][-1]
+            entry_price = stgy_signal["entry_price"][-1]
+            stop_profit = stgy_signal["stop_profit"][-1]
+            stop_loss = stgy_signal["stop_loss"][-1]
+            signal_position ={
+                "position": position,
+                "signal": signal,
+                "entry_price": entry_price,
+                "stop_profit": stop_profit,
+                "stop_loss": stop_loss,
+                "update_time": update_time
+            }
+            self.logger.info(f"{signal_position}")
+
+            return signal_position
         except Exception as e:
             self.logger.exception(e)
-            return None
 
 if __name__ == "__main__":
+    import contek_timbersaw as timbersaw
+    timbersaw.setup()
     alp = AlpMacdDematr(money = 500, leverage = 5, sizer = 0.1)
     market = MarketEngine(alp.symbol, alp.timeframe)
     while True:
         market.update_CKlines()
         alp.generate_signal_position(market.kdf)
-        time.sleep(15)
+        time.sleep(10)

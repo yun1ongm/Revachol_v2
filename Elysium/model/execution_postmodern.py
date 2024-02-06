@@ -47,6 +47,7 @@ class ExecPostmodern:
             return None
         else:
             price = round((ticker + self.slippage), 2)
+            amount = round(amount, 2)
             self.logger.info(f"Ticker: {ticker} Executing buy price:{price}")
             try:
                 self.orderId = self.client.new_order(
@@ -71,6 +72,7 @@ class ExecPostmodern:
             return None
         else:
             price = round((ticker - self.slippage), 2)
+            amount = round(amount, 2)
             self.logger.info(f"Ticker: {ticker} Executing sell price:{price}")
             try:
                 self.orderId = self.client.new_order(
@@ -119,7 +121,6 @@ class ExecPostmodern:
     def task(self, signal_position: float) -> None:
         """main task"""
         self._cancel_open_orders()
-        signal_position = round(signal_position, 2)
         self.logger.info(f"signal position: {signal_position}")
         if self._check_position_diff(signal_position):
             self.logger.info(f"Position & signals are cross checked.\n-- -- -- --")

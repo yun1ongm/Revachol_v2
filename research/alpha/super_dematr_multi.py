@@ -52,7 +52,7 @@ class AlpSuperDemAtrMulti:
     alpha_name = "super_dematr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 18, 0, 0, 0)
+    start = datetime(2023, 10, 25, 0, 0, 0)
     window_days = 100
 
     sptr_len = 19
@@ -109,7 +109,14 @@ class AlpSuperDemAtrMulti:
 
         kdf_sig = self._gen_index_signal()
         result = self.strategy.run(kdf_sig, atr_profit, atr_loss)
+        self.output_result(result)
         return result
+
+    def output_result(self, result:pd.DataFrame) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.strategy.calc_performance(result)
@@ -123,7 +130,7 @@ class AlpSuperDemAtrMulti:
             "dema_len": trial.suggest_int("dema_len", 12, 50),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 1, 4),
         }
         result = self.get_backtest_result(**kwargs)
@@ -139,16 +146,17 @@ class Optimizer(AlpSuperDemAtrMulti):
 
     def __init__(self):
         super().__init__()
+        self.start_date = self.strategy.kdf.index[0].strftime("%Y-%m-%d")
         self.end_date = self.strategy.kdf.index[-1].strftime("%Y-%m-%d")
         self._init_logger()
         self._log(
-            f"Start optimizing {self.alpha_name} for goal {self.target} on {self.symbol} {self.timeframe} from {self.start} to {self.end_date}"
+            f"Start optimizing {self.alpha_name} for goal {self.target} on {self.symbol} {self.timeframe} from {self.start_date} to {self.end_date} based on goal of {self.target}"
         )
 
     def _init_logger(self) -> None:
         self.logger = logging.getLogger(self.alpha_name)
         self.logger.setLevel(logging.INFO)
-        log_file = f"study_log/{self.end_date}_{self.alpha_name}.log"
+        log_file = f"study_log/{self.alpha_name}_{self.start_date}to{self.end_date}.log"
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)

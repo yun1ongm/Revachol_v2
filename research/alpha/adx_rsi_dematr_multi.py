@@ -61,7 +61,7 @@ class AdxRsiDemAtrMulti:
     alpha_name = "adx_rsi_dematr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 20, 0, 0, 0)
+    start = datetime(2023, 10, 25, 0, 0, 0)
     window_days = 100
 
     adx_len = 23
@@ -133,7 +133,7 @@ class AdxRsiDemAtrMulti:
             "dema_len": trial.suggest_int("dema_len", 12, 50),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 1, 4),
         }
 

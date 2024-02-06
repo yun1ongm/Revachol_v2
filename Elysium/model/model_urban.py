@@ -3,16 +3,14 @@
 import logging
 import warnings
 warnings.filterwarnings("ignore")
-import pandas as pd
+import time
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
 from alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
-from alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
+from alpha.alp_adx_stochrsi_dematr_sing import AlpAdxStochrsiDematr
 from alpha.alp_macd_dematr_sing import AlpMacdDematr
-
-warnings.filterwarnings("ignore")
 
 
 class ModelUrban:
@@ -27,19 +25,40 @@ class ModelUrban:
             AlpMacdDematr(money = 500, leverage = 5, sizer = 0.3),
         ]
         self.market5m = MarketEngine("ETHUSDT", "5m")
+        self.signal_position = None
 
-    def merging_signal(self) -> float:
+    def merging_signal(self) -> None:
         """generate signals from each alpha and merge them into a single dataframe"""
         merged_position = 0
-        self.market5m.update_CKlines()
         for alpha in self.alphas:
-            position = alpha.generate_signal_position(self.market5m.kdf)
-            merged_position += position
+            signal_position = alpha.generate_signal_position(self.market5m.kdf)
+            if signal_position:
+                merged_position += signal_position["position"]
+            else:
+                self.logger.info(f"Alpha:{alpha.alpha_name} did not generate a signal")
+        self.signal_position = round(merged_position,2)
         self.logger.info(
-            f"Combined Signal Position:{merged_position}\n-- -- -- -- -- -- -- -- --"
+            f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --"
         )
-        return round(merged_position,2)
+
 
 if __name__ == "__main__":
-    test = ModelUrban(10)
-    res = test.merging_signal()
+    import contek_timbersaw as timbersaw
+    timbersaw.setup()
+    model = ModelUrban(10)
+    def alpha_loop(model):
+        while True:
+            try:
+                previous_signal_position = model.signal_position if model.signal_position is not None else 0
+                model.market5m.update_CKlines()
+                model.merging_signal()
+                if model.signal_position != previous_signal_position:
+                    change = model.signal_position - previous_signal_position
+                    model.logger.warning(
+                        f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
+                    )
+                time.sleep(model.interval)
+            except Exception as e:
+                model.logger.exception(e)
+                time.sleep(model.interval/2)
+    alpha_loop(model)

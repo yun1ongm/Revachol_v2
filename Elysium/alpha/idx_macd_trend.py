@@ -77,4 +77,3 @@ class IdxMacdTrend:
             return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
         except Exception as e:
             print(e)
-            return None
