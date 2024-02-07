@@ -14,14 +14,13 @@ class ExecPostmodern:
     executor = "exec_postmodern"
     symbol = "ETHUSDT"
     slippage = -0.01
-    equity = 500
+    equity = 1000
     leverage = 5
     
     logger = logging.getLogger(executor)
 
-    def __init__(self, interval) -> None:
+    def __init__(self) -> None:
         self.client = self._connect_api(key=key, secret=secret)
-        self.interval = interval
 
     @retry(ClientError, tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:
@@ -108,14 +107,15 @@ class ExecPostmodern:
             return True
         else:
             position_diff = signal_position - actual_position
-            ticker = self.client.ticker_price(self.symbol)
-            price = float(ticker["price"])
+            book_ticker = self.client.book_ticker(self.symbol)
+            bid_price = float(book_ticker["bidPrice"])
+            ask_price = float(book_ticker["askPrice"])
             if position_diff > 0:
                 self.logger.warning("@@@@@@@@@@@@  Sending Buy Order @@@@@@@@@@@@")
-                self._maker_buy(position_diff, price)
+                self._maker_buy(position_diff, bid_price)
             else:
                 self.logger.warning("@@@@@@@@@@@@ Sending Sell Order @@@@@@@@@@@@")
-                self._maker_sell(-position_diff, price)
+                self._maker_sell(-position_diff, ask_price)
             return False
 
     def task(self, signal_position: float) -> None:

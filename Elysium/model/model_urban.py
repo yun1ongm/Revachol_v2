@@ -17,8 +17,7 @@ class ModelUrban:
     model_name = "model_urban"
     logger = logging.getLogger(model_name)
 
-    def __init__(self, interval) -> None:
-        self.interval = interval
+    def __init__(self) -> None:
         self.alphas = [
             AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1),
             AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.2),
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     import contek_timbersaw as timbersaw
     timbersaw.setup()
     model = ModelUrban(10)
-    def alpha_loop(model):
+    def calc_signal_position(model):
         while True:
             try:
                 previous_signal_position = model.signal_position if model.signal_position is not None else 0
@@ -57,8 +56,8 @@ if __name__ == "__main__":
                     model.logger.warning(
                         f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
                     )
-                time.sleep(model.interval)
+                time.sleep(10)
             except Exception as e:
                 model.logger.exception(e)
-                time.sleep(model.interval/2)
-    alpha_loop(model)
+                time.sleep(5)
+    calc_signal_position(model)

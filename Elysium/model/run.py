@@ -14,47 +14,33 @@ timbersaw.setup()
 class AlgoTrade:
     logger = logging.getLogger(__name__)
 
-    def __init__(self):
-        self.model = ModelUrban(15)
-        self.execution = ExecPostmodern(10)
+    def __init__(self, interval: int = 10):
+        self.model = ModelUrban()
+        self.execution = ExecPostmodern()
+        self.interval = interval
 
-    def _alpha_loop(self) -> None:
+    def _calc_signal_position(self) -> None:
+        previous_signal_position = self.model.signal_position if self.model.signal_position is not None else 0
+        self.model.market5m.update_CKlines()
+        self.model.merging_signal()
+        if self.model.signal_position != previous_signal_position:
+            change = self.model.signal_position - previous_signal_position
+            self.model.logger.warning(
+                f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
+            )
+
+    def run(self) -> None:
         while True:
             try:
-                previous_signal_position = self.model.signal_position if self.model.signal_position is not None else 0
-                self.model.market5m.update_CKlines()
-                self.model.merging_signal()
-                if self.model.signal_position != previous_signal_position:
-                    change = self.model.signal_position - previous_signal_position
-                    self.model.logger.warning(
-                        f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
-                    )   
-                time.sleep(self.model.interval)
-            except Exception as e:
-                self.logger.exception(e)
-                time.sleep(self.model.interval / 5)
-
-    def _execution_loop(self):
-        """execute orders based on the signal"""
-        while True:
-            try:
+                self._calc_signal_position()
                 if self.model.signal_position:
                     self.execution.task(self.model.signal_position)
-                    time.sleep(self.execution.interval)
+                time.sleep(self.interval)
             except Exception as e:
                 self.logger.exception(e)
-                time.sleep(self.execution.interval / 5)
-
-    def run(self):
-        alpha_thread = threading.Thread(target=self._alpha_loop)
-        execution_thread = threading.Thread(target=self._execution_loop)
-
-        alpha_thread.start()
-        execution_thread.start()
-
-        alpha_thread.join()
-        execution_thread.join()
+                time.sleep(self.interval / 3)
 
 
 if __name__ == "__main__":
-    AlgoTrade().run()
+    algo = AlgoTrade(10)
+    algo.run()
