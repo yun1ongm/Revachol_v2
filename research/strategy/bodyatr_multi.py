@@ -10,7 +10,7 @@ class StgyBodyatrMulti(BacktestEngine):
         super().__init__(alpha_name, symbol, timeframe, start, window_days)
         self.performance_df = self.initialize_portfolio_variables(self.kdf)
 
-    def run(self, kdf_signal: pd.DataFrame, upbody_ratio: float, downbody_ratio: float) -> pd.DataFrame:
+    def run(self, kdf_signal: pd.DataFrame, harvest_ratio: float, retreat_ratio: float) -> pd.DataFrame:
         """
 
         Args:
@@ -34,7 +34,7 @@ class StgyBodyatrMulti(BacktestEngine):
             if position > 0:
                 unrealized_pnl = (close - entry_price) * position
                 money_thresh = (entry_price * position < self.initial_money * self.leverage)
-                if close < stop_price or abs(bodyatr) > upbody_ratio:
+                if close < stop_price or bodyatr > harvest_ratio:
                     realized_pnl = unrealized_pnl
                     entry_price = 0
                     position = 0
@@ -62,7 +62,7 @@ class StgyBodyatrMulti(BacktestEngine):
             elif position < 0:
                 unrealized_pnl = (close - entry_price) * position
                 money_thresh = (entry_price * -position < self.initial_money * self.leverage)
-                if close > stop_price or abs(bodyatr) > downbody_ratio:
+                if close > stop_price or bodyatr > retreat_ratio:
                     realized_pnl = unrealized_pnl
                     entry_price = 0
                     position = 0

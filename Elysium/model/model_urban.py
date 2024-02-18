@@ -10,7 +10,7 @@ sys.path.append(temp_path)
 from market.market_bot import MarketEngine
 from alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
 from alpha.alp_adx_stochrsi_dematr_sing import AlpAdxStochrsiDematr
-from alpha.alp_macd_dematr_sing import AlpMacdDematr
+from alpha.alp_macd_dematr_multi import AlpMacdDematr
 
 
 class ModelUrban:
@@ -19,9 +19,9 @@ class ModelUrban:
 
     def __init__(self) -> None:
         self.alphas = [
-            AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1),
+            AlpSuperDemaBodyatr(money = 1000, leverage = 5, sizer = 0.2),
             AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.2),
-            AlpMacdDematr(money = 500, leverage = 5, sizer = 0.3),
+            AlpMacdDematr(money = 500, leverage = 5, sizer = 0.1),
         ]
         self.market5m = MarketEngine("ETHUSDT", "5m")
         self.signal_position = None
@@ -44,7 +44,7 @@ class ModelUrban:
 if __name__ == "__main__":
     import contek_timbersaw as timbersaw
     timbersaw.setup()
-    model = ModelUrban(10)
+    model = ModelUrban()
     def calc_signal_position(model):
         while True:
             try:

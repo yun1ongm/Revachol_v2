@@ -1,7 +1,6 @@
 import logging
-import os
 import time
-
+import pandas as pd
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
@@ -37,51 +36,48 @@ class AlpSuperDematr:
     atr_profit = 6
     atr_loss = 5
 
+    logger = logging.getLogger(alpha_name)
+
     def __init__(self, money, leverage, sizer) -> None:
         self.money = money
         self.leverage = leverage
         self.sizer = sizer
-        self._init_logger()
-    
-    def _init_logger(self) -> None:
-        self.logger = logging.getLogger(self.alpha_name)
-        self.logger.setLevel(logging.INFO)
-        log_file = f"log_book/{self.alpha_name}.log"
-        os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s, %(message)s")
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
 
-    def _log(self, string) -> None:
-        self.logger.info(string)
-   
-    def _log_stgy_res(self, port_info) -> None:
-        self._log(f'position {port_info[f"position_{self.strategy_name}"][-1]}')
-        self._log(f'signal {port_info[f"signal_{self.strategy_name}"][-1]}')
-        self._log(f'entry_price {round(port_info["entry_price"][-1],2)}')
-        self._log(f'stop_profit {round(port_info["stop_profit"][-1],2)}')
-        self._log(f'stop_loss {round(port_info["stop_loss"][-1],2)}\n------------------')
 
-    def main(self,interval = 15) -> None:
-        market = MarketEngine(self.symbol, self.timeframe)
-        while True:
-            try:
-                market.update_CKlines()
-                index = IdxSuperDema(market.kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_f)
-                strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
-                idx_signal = index.generate_dematr_signal(self.atr_f, self.atr_s)
-                stgy_signal = strategy.generate_signal_position(idx_signal)
-                self.position = stgy_signal[f"position_{self.strategy_name}"][-1]
-                self._log_stgy_res(stgy_signal)
-                time.sleep(interval)
+    def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
+        try:
+            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_f, self.atr_s)
+            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+            idx_signal = index.generate_dematr_signal()
+            update_time = idx_signal.index[-1]
+            stgy_signal = strategy.generate_signal_position(idx_signal)
+            position = stgy_signal[f"position_{self.strategy_name}"][-1]
+            signal = stgy_signal[f"signal_{self.strategy_name}"][-1]
+            entry_price = stgy_signal["entry_price"][-1]
+            stop_loss = stgy_signal["stop_loss"][-1]
+            stop_profit = stgy_signal["stop_profit"][-1]
+            signal_position ={
+                "position": position,
+                "signal": signal,
+                "entry_price": entry_price,
+                "stop_loss": stop_loss,
+                "stop_profit": stop_profit,
+                "update_time": update_time
+            }
+            self.logger.info(f"{signal_position}")
                 
-            except Exception as e:
-                self._log(e)
-                time.sleep(interval / 2)
+            return signal_position
+        except Exception as e:
+            self.logger.exception(e)
+
 
 if __name__ == "__main__":
+    import contek_timbersaw as timbersaw
+    timbersaw.setup()
     alp = AlpSuperDematr(money = 500, leverage = 5, sizer = 0.1)
-    alp.main()
+    market = MarketEngine(alp.symbol, alp.timeframe)
+    while True:
+        market.update_CKlines()
+        position = alp.generate_signal_position(market.kdf)
+        time.sleep(10)
     

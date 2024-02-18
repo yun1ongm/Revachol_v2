@@ -14,36 +14,29 @@ class IdxSuperDema:
     """
     index_name = "idx_super_dema"
     
-    def __init__(self, kdf, sptr_len, sptr_k, dema_len, atr_len) -> None:
+    def __init__(self, kdf, sptr_len, sptr_k, dema_len,  atr_f, atr_s) -> None:
         self.kdf = kdf
         self.sptr_len = sptr_len
         self.sptr_k = sptr_k
         self.dema_len = dema_len
-        self.atr_len = atr_len
+        self.atr_f = atr_f
+        self.atr_s = atr_s
 
     def _supertrend(self) -> pd.DataFrame:
         supertrend = ta.supertrend(
             self.kdf["high"], self.kdf["low"], self.kdf["close"], self.sptr_len, self.sptr_k
         )
-        supertrend.columns = ["bound", "direction", "lbound", "ubound"]
+        supertrend.columns = ["stop_price", "direction", "lbound", "ubound"]
 
-        return supertrend[["bound", "direction"]]
+        return supertrend[["stop_price", "direction"]]
     
-    def _body2atr(self):
-        body2atr = pd.DataFrame()
-        body2atr["atr"] = ta.atr(
-            self.kdf["high"], self.kdf["low"], self.kdf["close"], length= self.atr_len, mamode="ema"
-        )
-        body2atr['body'] = self.kdf['close'] - self.kdf['open']
-        body2atr['bodyatr'] = body2atr['body'] / body2atr['atr']
-        return  body2atr[['bodyatr', 'atr']]
-    
-    def _double_atr(self, atr_f, atr_s):
+    def _bodyatr(self) -> pd.DataFrame:
+        kdf = self.kdf
         atr_fast = ta.atr(
-            self.kdf["high"], self.kdf["low"], self.kdf["close"], length=atr_f, mamode="ema"
+            kdf["high"], kdf["low"], kdf["close"], length=self.atr_f, mamode="ema"
         )
         atr_slow = ta.atr(
-            self.kdf["high"], self.kdf["low"], self.kdf["close"], length=atr_s, mamode="ema"
+            kdf["high"], kdf["low"], kdf["close"], length=self.atr_s, mamode="ema"
         )
         datr = pd.concat([atr_fast, atr_slow], axis=1)
         datr.columns = ["atr_fast", "atr_slow"]
@@ -58,18 +51,42 @@ class IdxSuperDema:
                 0,
             ),
         )
-        # 如果datr["Xvalue"]为0，那么填充为前一行的值
+        datr["atr"] = datr["Xvalue"].replace(0, method="ffill")
+        datr['body'] = kdf['high'] - kdf['low']
+        datr['bodyatr'] = datr['body'] / datr['atr']
+        return datr[['bodyatr', 'atr']]
+    
+    def _double_atr(self) -> pd.DataFrame:
+        kdf = self.kdf
+        atr_fast = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length= self.atr_f, mamode="ema"
+        )
+        atr_slow = ta.atr(
+            kdf["high"], kdf["low"], kdf["close"], length= self.atr_s, mamode="ema"
+        )
+        datr = pd.concat([atr_fast, atr_slow], axis=1)
+        datr.columns = ["atr_fast", "atr_slow"]
+        datr["Xvalue"] = np.where(
+            (datr["atr_fast"] > datr["atr_slow"])
+            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
+            datr["atr_slow"],
+            np.where(
+                (datr["atr_fast"] < datr["atr_slow"])
+                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
+                datr["atr_slow"],
+                0,
+            ),
+        )
         datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
         return datr
     
     def generate_bodyatr_signal(self) -> pd.DataFrame:
         try:
             supertrend = self._supertrend()
-            body2atr = self._body2atr()
-            kdf_sig = pd.concat([self.kdf, supertrend, body2atr], axis=1)
+            bodyatr = self._bodyatr()
+            kdf_sig = pd.concat([self.kdf, supertrend, bodyatr], axis=1)
             kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_len)
-            kdf_sig["stop_price"] = kdf_sig["bound"]
+            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_s)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
@@ -88,20 +105,19 @@ class IdxSuperDema:
                 "signal",
             ] = -1
 
-            return kdf_sig[["signal", "close", "stop_price", "bodyatr"]]
+            return kdf_sig[["close", "stop_price", "bodyatr", "signal"]]
         except Exception as e:
             print(e)
             return None
     
-    def generate_dematr_signal(self, atr_f, atr_s) -> pd.DataFrame:
+    def generate_dematr_signal(self) -> pd.DataFrame:
         try:
             supertrend = self._supertrend()
-            datr = self._double_atr(atr_f, atr_s)
             kdf_sig = pd.concat([self.kdf, supertrend], axis=1)
             kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-
+            datr = self._double_atr()
             kdf_sig["atr"] = datr["Xvalue"]
-            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_len)
+            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_f)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[

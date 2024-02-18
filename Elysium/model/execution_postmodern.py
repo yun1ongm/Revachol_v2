@@ -118,16 +118,18 @@ class ExecPostmodern:
                 self._maker_sell(-position_diff, ask_price)
             return False
 
-    def task(self, signal_position: float) -> None:
+    def task(self, signal_position: float) -> bool:
         """main task"""
         self._cancel_open_orders()
         self.logger.info(f"signal position: {signal_position}")
         if self._check_position_diff(signal_position):
             self.logger.info(f"Position & signals are cross checked.\n-- -- -- --")
+            return True
         else:
             self.logger.warning(f"Gap to match!\n-- -- -- -- -- -- -- -- -- ")
+            return False
 
 
 if __name__ == "__main__":
-    test = ExecPostmodern(10)
+    test = ExecPostmodern()
     test.task(0)

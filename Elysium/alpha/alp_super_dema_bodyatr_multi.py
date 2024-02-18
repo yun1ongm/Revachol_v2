@@ -28,12 +28,13 @@ class AlpSuperDemaBodyatr:
     symbol = "ETHUSDT"
     timeframe = "5m"
 
-    sptr_len = 22
+    sptr_len = 14
     sptr_k = 4
-    dema_len = 38
-    atr_len = 10
-    upbody_ratio = 2.2
-    downbody_ratio = 1.1
+    dema_len = 49
+    atr_f = 7
+    atr_s = 26
+    harvest_ratio = 2.3
+    retreat_ratio = 1.9
 
     logger = logging.getLogger(alpha_name)
 
@@ -44,8 +45,8 @@ class AlpSuperDemaBodyatr:
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
-            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_len)
-            strategy = StgyBodyatrMulti(self.upbody_ratio, self.downbody_ratio, self.money, self.leverage, self.sizer)
+            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_f, self.atr_s)
+            strategy = StgyBodyatrMulti(self.harvest_ratio, self.retreat_ratio, self.money, self.leverage, self.sizer)
             idx_signal = index.generate_bodyatr_signal()
             update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_signal_position(idx_signal)

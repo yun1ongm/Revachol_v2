@@ -7,7 +7,6 @@ temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from model.model_urban import ModelUrban
 from model.execution_postmodern import ExecPostmodern
-import threading
 import contek_timbersaw as timbersaw
 timbersaw.setup()
 
@@ -34,13 +33,16 @@ class AlgoTrade:
             try:
                 self._calc_signal_position()
                 if self.model.signal_position:
-                    self.execution.task(self.model.signal_position)
-                time.sleep(self.interval)
+                    complete = self.execution.task(self.model.signal_position)
+                    if complete:
+                        time.sleep(self.interval)
+                    else:
+                        time.sleep(self.interval / 3)
             except Exception as e:
                 self.logger.exception(e)
                 time.sleep(self.interval / 3)
 
 
 if __name__ == "__main__":
-    algo = AlgoTrade(10)
+    algo = AlgoTrade(15)
     algo.run()

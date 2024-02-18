@@ -61,7 +61,7 @@ class AdxRsiDemAtrSing:
     alpha_name = "adx_rsi_dematr_sing"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 25, 0, 0, 0)
+    start = datetime(2023, 11, 10, 0, 0, 0)
     window_days = 100
 
     adx_len = 20
@@ -74,12 +74,12 @@ class AdxRsiDemAtrSing:
     atr_loss = 4
 
     def __init__(self) -> None:
-        self.backtest = StgyDematrSing(
+        self.strategy = StgyDematrSing(
             self.alpha_name, self.symbol, self.timeframe, self.start, self.window_days
         )
 
     def _gen_index_signal(self) -> pd.DataFrame:
-        kdf = self.backtest.kdf
+        kdf = self.strategy.kdf
         adx = Indicators.adx(kdf, self.adx_len)
         stochrsi = Indicators.stochrsi(kdf, self.rsi_len, self.kd)
         kdf_sig = pd.concat([kdf[["high", "low", "close"]], adx, stochrsi], axis=1)
@@ -110,7 +110,7 @@ class AdxRsiDemAtrSing:
         self.atr_loss = atr_loss
 
         kdf_sig = self._gen_index_signal()
-        result = self.backtest.run(kdf_sig, atr_profit, atr_loss)
+        result = self.strategy.run(kdf_sig, atr_profit, atr_loss)
         self.output_result(result)
         return result
 
@@ -121,7 +121,7 @@ class AdxRsiDemAtrSing:
         result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
-        perf = self.backtest.calc_performance(result)
+        perf = self.strategy.calc_performance(result)
 
         return perf
 

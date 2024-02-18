@@ -29,12 +29,12 @@ class AlpAdxStochrsiDematr:
     timeframe = "5m"
 
 
-    adx_len = 20
-    rsi_len = 7
-    kd = 8
-    dema_len = 13
-    atr_f = 14
-    atr_s = 26
+    adx_len = 30 
+    rsi_len = 18
+    kd = 7
+    dema_len = 14
+    atr_f = 13
+    atr_s = 25
     atr_profit = 5
     atr_loss = 4
 

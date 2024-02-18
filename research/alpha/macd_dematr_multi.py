@@ -57,7 +57,7 @@ class AlpMacdDemAtrMulti:
     alpha_name = "macd_dematr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 10, 25, 0, 0, 0)
+    start = datetime(2023, 11, 10, 0, 0, 0)
     window_days = 100
 
     fast = 12
