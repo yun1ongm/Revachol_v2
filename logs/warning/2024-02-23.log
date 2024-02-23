@@ -1,0 +1,20 @@
+2024-02-23T10:37:02 ERROR __init__.py:60 - Unhandled exception.
+Traceback (most recent call last):
+  File "/Users/rivachol/Desktop/Rivachol_v2/Disco/tracker/binance_okx_arbi.py", line 105, in <module>
+    asyncio.run(arbi.main())
+  File "/opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11/asyncio/base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/Disco/tracker/binance_okx_arbi.py", line 94, in main
+    tickers = await self.fetch_tickers()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/Disco/tracker/binance_okx_arbi.py", line 39, in fetch_tickers
+    okx_ticker = await self.okx.get_orderbook(instId = okx_symbol)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression

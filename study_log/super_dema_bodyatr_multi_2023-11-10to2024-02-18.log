@@ -1,0 +1,63 @@
+2024-02-21 07:33:28,143, Start optimizing super_dema_bodyatr_multi for goal score on ETHUSDT 5m from 2023-11-10 to 2024-02-18
+2024-02-21 07:43:34,426, Top 10 results:
+Rank 1:
+  Params: {'sptr_len': 21, 'sptr_k': 4.0, 'dema_len': 39, 'atr_f': 11, 'atr_s': 24, 'harvest_ratio': 2.3, 'retreat_ratio': 1.5}
+  Value: 23884.386128710164
+
+  Performance: {'final_value': 134520.87776000018, 'win_ratio': 0.4640197935459313, 'single_avg_wlr': 1.49106215407599, 'total_trades': 806, 'return': 0.3452087776000017, 'diysharpe': 18.321997375831153, 'commission': 0.9239872224, 'score': 23884.386128710164}
+
+Rank 2:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 45, 'atr_f': 9, 'atr_s': 28, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 20789.25447111003
+
+  Performance: {'final_value': 128678.92687999902, 'win_ratio': 0.44444438113327905, 'single_avg_wlr': 1.6310174163400128, 'total_trades': 702, 'return': 0.2867892687999902, 'diysharpe': 16.512421347930957, 'commission': 0.7596867312000001, 'score': 20789.25447111003}
+
+Rank 3:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 45, 'atr_f': 9, 'atr_s': 28, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 20535.766747093912
+
+  Performance: {'final_value': 128439.2230399992, 'win_ratio': 0.4465049291719074, 'single_avg_wlr': 1.6172119355138497, 'total_trades': 701, 'return': 0.28439223039999195, 'diysharpe': 16.41530077466872, 'commission': 0.7579357696000001, 'score': 20535.766747093912}
+
+Rank 4:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 43, 'atr_f': 9, 'atr_s': 27, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 17988.581641634144
+
+  Performance: {'final_value': 124940.82847999933, 'win_ratio': 0.4424409927266307, 'single_avg_wlr': 1.6301617091042104, 'total_trades': 721, 'return': 0.24940828479999322, 'diysharpe': 14.531316129714996, 'commission': 0.7798677152, 'score': 17988.581641634144}
+
+Rank 5:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 43, 'atr_f': 9, 'atr_s': 27, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 17988.581641634144
+
+  Performance: {'final_value': 124940.82847999933, 'win_ratio': 0.4424409927266307, 'single_avg_wlr': 1.6301617091042104, 'total_trades': 721, 'return': 0.24940828479999322, 'diysharpe': 14.531316129714996, 'commission': 0.7798677152, 'score': 17988.581641634144}
+
+Rank 6:
+  Params: {'sptr_len': 29, 'sptr_k': 3.5, 'dema_len': 47, 'atr_f': 8, 'atr_s': 29, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 17152.441764804837
+
+  Performance: {'final_value': 123785.83519999924, 'win_ratio': 0.44380397063343363, 'single_avg_wlr': 1.624861559865526, 'total_trades': 694, 'return': 0.2378583519999924, 'diysharpe': 14.014456796060314, 'commission': 0.7495336480000001, 'score': 17152.441764804837}
+
+Rank 7:
+  Params: {'sptr_len': 28, 'sptr_k': 3.5, 'dema_len': 45, 'atr_f': 8, 'atr_s': 29, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 16921.9301956649
+
+  Performance: {'final_value': 123431.29087999908, 'win_ratio': 0.44079879589175525, 'single_avg_wlr': 1.6383748936419191, 'total_trades': 701, 'return': 0.2343129087999909, 'diysharpe': 13.604296229546328, 'commission': 0.7675870912, 'score': 16921.9301956649}
+
+Rank 8:
+  Params: {'sptr_len': 30, 'sptr_k': 4.0, 'dema_len': 38, 'atr_f': 10, 'atr_s': 26, 'harvest_ratio': 2.4, 'retreat_ratio': 1.5}
+  Value: 16625.212013195047
+
+  Performance: {'final_value': 123884.57632000031, 'win_ratio': 0.44900491927799513, 'single_avg_wlr': 1.5502386177267993, 'total_trades': 804, 'return': 0.23884576320000317, 'diysharpe': 12.692769802059194, 'commission': 0.9179022367999999, 'score': 16625.212013195047}
+
+Rank 9:
+  Params: {'sptr_len': 24, 'sptr_k': 4.0, 'dema_len': 35, 'atr_f': 11, 'atr_s': 24, 'harvest_ratio': 2.3, 'retreat_ratio': 1.5}
+  Value: 16113.391714067477
+
+  Performance: {'final_value': 124395.58016000074, 'win_ratio': 0.4757395886698712, 'single_avg_wlr': 1.388374157813812, 'total_trades': 845, 'return': 0.2439558016000074, 'diysharpe': 13.008301497862488, 'commission': 0.9635321984, 'score': 16113.391714067477}
+
+Rank 10:
+  Params: {'sptr_len': 30, 'sptr_k': 3.5, 'dema_len': 43, 'atr_f': 10, 'atr_s': 26, 'harvest_ratio': 2.5, 'retreat_ratio': 1.5}
+  Value: 15775.292499605408
+
+  Performance: {'final_value': 122063.32895999923, 'win_ratio': 0.4421198825495283, 'single_avg_wlr': 1.6172096876871498, 'total_trades': 717, 'return': 0.2206332895999923, 'diysharpe': 12.771020407918856, 'commission': 0.7755867104, 'score': 15775.292499605408}
+
+

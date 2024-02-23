@@ -39,7 +39,7 @@ class ModelUrban:
         self.logger.info(
             f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --"
         )
-
+    
 
 if __name__ == "__main__":
     import contek_timbersaw as timbersaw

@@ -54,7 +54,7 @@ class AlpSuperDemaBodyatrMulti:
     alpha_name = "super_dema_bodyatr_multi"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 10, 0, 0, 0)
+    start = datetime(2023, 11, 11, 0, 0, 0)
     window_days = 100
 
     sptr_len = 14
@@ -80,16 +80,16 @@ class AlpSuperDemaBodyatrMulti:
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
-            (kdf_sig["close"] > kdf_sig["dema"])
-            & (kdf_sig["low"] <= kdf_sig["dema"])
+            (kdf_sig["close"] <= kdf_sig["dema"])
+            & (kdf_sig["close"] > kdf_sig["open"])
             & (kdf_sig["direction"] == 1)
             & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
             "signal",
         ] = 1
 
         kdf_sig.loc[
-            (kdf_sig["close"] < kdf_sig["dema"])
-            & (kdf_sig["high"] >= kdf_sig["dema"])
+            (kdf_sig["close"] >= kdf_sig["dema"])
+            & (kdf_sig["close"] < kdf_sig["open"])
             & (kdf_sig["direction"] == -1)
             & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
             "signal",
