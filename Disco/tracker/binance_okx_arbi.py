@@ -11,14 +11,20 @@ timbersaw.setup()
 
 class BnOkxArbi:
     arbitrage_name = "binance_okx_arbitrage"
-    symbols_list = ["BTCUSD", "ETHUSD"]
+    symbols_list = ["BTCUSD", "ETHUSD", "SOLUSD", "WLDUSD", "ORDIUSD" ]
     binance_symbol_mapping = {
         "BTCUSD": "BTCUSDT",
         "ETHUSD": "ETHUSDT",
+        "SOLUSD": "SOLUSDT",  
+        "WLDUSD": "WLDUSDT",
+        "ORDIUSD": "ORDIUSDT",
     }
     okx_symbol_mapping = {
-        "BTCUSD": "BTC-USD-SWAP",
-        "ETHUSD": "ETH-USD-SWAP",
+        "BTCUSD": "BTC-USDT-SWAP",
+        "ETHUSD": "ETH-USDT-SWAP", 
+        "SOLUSD": "SOL-USDT-SWAP",
+        "WLDUSD": "WLD-USDT-SWAP",
+        "ORDIUSD": "ORDI-USDT-SWAP",
     }
     bin_comm = 0.0005
     okx_comm = 0.0005
@@ -58,19 +64,22 @@ class BnOkxArbi:
                 'bin_ask': float(binance_ticker['askPrice']),
                 'bin_ask_size' : float(binance_ticker['askQty'])
             }
-        self.logger.info(f'Order book: {order_book}')
         
         return order_book
     
     def is_arbi_trade(self, order_book: dict) -> bool:
         for symbol, book in order_book.items():
-            okx_bid_offset = book['okx_bid']*(1-self.okx_comm)
-            okx_ask_offset = book['okx_ask']* (1+self.okx_comm)
-            bin_bid_offset= book['bin_bid']*(1-self.bin_comm)
-            bin_ask_offset = book['bin_ask']* (1+self.bin_comm)
+            price = book['okx_bid']
+            okx_bid_offset = book['okx_bid']*(1-self.okx_comm*1.4)
+            okx_ask_offset = book['okx_ask']* (1+self.okx_comm*1.4)
+            bin_bid_offset= book['bin_bid']*(1-self.bin_comm*1.4)
+            bin_ask_offset = book['bin_ask']* (1+self.bin_comm*1.4)
+            bid_gap = round((okx_bid_offset - bin_bid_offset)/price,4)
+            self.logger.info(f'{symbol} bid gap: {bid_gap}')
 
             if okx_bid_offset > bin_ask_offset:
-                self.logger.warning(f'Buy {symbol} on Binance, Sell {symbol} on Okx')
+                gap_price = okx_bid_offset - bin_ask_offset
+                self.logger.warning(f'Buy {symbol} on Binance, Sell {symbol} on Okx, gap: {gap_price}')
                 okx_bid_size = book['okx_bid_size']
                 bin_ask_size = book['bin_ask_size']
                 trading_lot = min(okx_bid_size, bin_ask_size)
@@ -78,15 +87,15 @@ class BnOkxArbi:
                 return True
             
             elif bin_bid_offset > okx_ask_offset:
-                self.logger.warning(f'Buy {symbol} on Okx, Sell {symbol} on Binance')
+                gap_price = round(bin_bid_offset - okx_ask_offset, 2)
+                self.logger.warning(f'Buy {symbol} on Okx, Sell {symbol} on Binance, gap: {gap_price}')
                 okx_ask_size = book['okx_ask_size']
                 bin_bid_size = book['bin_bid_size']
                 trading_lot = min(okx_ask_size, bin_bid_size)
                 self.logger.warning(f'size: {trading_lot}')
                 return True
             
-            else:
-                return False
+        return False
             
     def main(self):
         while True:
@@ -96,7 +105,7 @@ class BnOkxArbi:
                 flag = self.is_arbi_trade(orderbook)
                 if flag:
                     self.logger.warning('trade to be made!\n--------------------------')
-            time.sleep(1)
+            time.sleep(2)
 
 if __name__ == "__main__":
     arbi = BnOkxArbi()
