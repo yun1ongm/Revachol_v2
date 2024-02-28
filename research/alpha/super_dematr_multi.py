@@ -50,18 +50,18 @@ class Indicators:
 
 class AlpSuperDemAtrMulti:
     alpha_name = "super_dematr_multi"
-    symbol = "ETHUSDT"
+    symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 11, 0, 0, 0)
+    start = datetime(2023, 11, 18, 0, 0, 0)
     window_days = 100
 
-    sptr_len = 19
-    sptr_k = 2
-    dema_len = 18
+    sptr_len = 14
+    sptr_k = 2.5
+    dema_len = 57
     atr_f = 14
-    atr_s = 28
-    atr_profit = 5
-    atr_loss = 4
+    atr_s = 29
+    atr_profit = 2
+    atr_loss = 3
 
     def __init__(self) -> None:
         self.strategy = StgyDematrMulti(
@@ -75,14 +75,14 @@ class AlpSuperDemAtrMulti:
         kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
         datr = Indicators.double_atr(kdf_sig, self.atr_f, self.atr_s)
         kdf_sig["atr"] = datr["Xvalue"]
-        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_f)
+        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_f)
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
             (kdf_sig["close"] <= kdf_sig["dema"])
             & (kdf_sig["close"] > kdf_sig["open"])
             & (kdf_sig["direction"] == 1)
-            & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+            & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
             "signal",
         ] = 1
 
@@ -90,7 +90,7 @@ class AlpSuperDemAtrMulti:
             (kdf_sig["close"] >= kdf_sig["dema"])
             & (kdf_sig["close"] < kdf_sig["open"])
             & (kdf_sig["direction"] == -1)
-            & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+            & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
             "signal",
         ] = -1
 
@@ -125,9 +125,9 @@ class AlpSuperDemAtrMulti:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 15, 30),
-            "sptr_k": trial.suggest_float("sptr_k", 2, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 12, 50),
+            "sptr_len": trial.suggest_int("sptr_len", 12, 30),
+            "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
+            "dema_len": trial.suggest_int("dema_len", 15, 60),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
             "atr_profit": trial.suggest_int("atr_profit", 2, 6),
@@ -141,7 +141,7 @@ class AlpSuperDemAtrMulti:
 
 class Optimizer(AlpSuperDemAtrMulti):
     num_evals = 100
-    target = "diysharpe"
+    target = "t_sharpe"
     print_log = True
 
     def __init__(self):

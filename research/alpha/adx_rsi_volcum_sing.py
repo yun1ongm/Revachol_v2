@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import sys
 sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
-from research.strategy.dematr_single import StgyDematrSing
+from research.strategy.volcum_single import StgyVolcumSing
 
 
 class Indicators:
@@ -31,50 +31,42 @@ class Indicators:
         condition4 = stochrsi["k"].shift(1) >= stochrsi["d"].shift(1)
         stochrsi["DXvalue"] = np.where(condition3 & condition4, stochrsi["d"], 0)
         return stochrsi
+    
+    def volume_cumshot(kdf, shot, period):
+        cumulative = kdf["volume_USDT"].rolling(shot).sum()
+        volume_ema = ta.ema(kdf["volume_USDT"],period)
+        vol_cumshot = pd.concat([cumulative, volume_ema], axis=1)
+        vol_cumshot.columns = ["cumulative", "volume_ema"]
+        vol_cumshot["cumshot"] = vol_cumshot["cumulative"] / vol_cumshot["volume_ema"]
+        return vol_cumshot
+    
+    # def calc_stop_by_atr(kdf, period, atr_ratio):
+    #     dema = ta.dema(kdf["close"], length=period)
+    #     atr = ta.atr(kdf["close"], length=period, mamode = 'ema')
+    #     stopatr = pd.concat([dema,atr], axis=1)
+    #     stopatr.columns = ['dema','atr']
+    #     stopatr['stop_price'] = stopatr['dema']
 
-    def double_atr(kdf, atr_f, atr_s):
-        atr_fast = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
-        )
-        atr_slow = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
-        )
-        datr = pd.concat([atr_fast, atr_slow], axis=1)
-        datr.columns = ["atr_fast", "atr_slow"]
-        datr["Xvalue"] = np.where(
-            (datr["atr_fast"] > datr["atr_slow"])
-            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
-            datr["atr_slow"],
-            np.where(
-                (datr["atr_fast"] < datr["atr_slow"])
-                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
-                datr["atr_slow"],
-                0,
-            ),
-        )
-        # 如果datr["Xvalue"]为0，那么填充为前一行的值
-        datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
-        return datr
+    #     kdf["stop_price"] = 
 
 
-class AdxRsiDemAtrSing:
-    alpha_name = "adx_rsi_dematr_sing"
+
+class AdxRsiVolcumSing:
+    alpha_name = "adx_rsi_volcum_sing"
     symbol = "ETHUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 10, 0, 0, 0)
+    start = datetime(2023, 11, 15, 0, 0, 0)
     window_days = 100
 
     adx_len = 20
     rsi_len = 7
     kd = 8
-    dema_len = 13
-    atr_f = 14
-    atr_s = 26
-    atr_profit = 5
-    atr_loss = 4
+    shot = 2
+    dema_len = 39
+    atr_loss = 3
 
     def __init__(self) -> None:
-        self.strategy = StgyDematrSing(
+        self.strategy = StgyVolcumSing(
             self.alpha_name, self.symbol, self.timeframe, self.start, self.window_days
         )
 
@@ -83,9 +75,8 @@ class AdxRsiDemAtrSing:
         adx = Indicators.adx(kdf, self.adx_len)
         stochrsi = Indicators.stochrsi(kdf, self.rsi_len, self.kd)
         kdf_sig = pd.concat([kdf[["high", "low", "close"]], adx, stochrsi], axis=1)
-        kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-        datr = Indicators.double_atr(kdf, self.atr_f, self.atr_s)
-        kdf_sig["atr"] = datr["Xvalue"]
+
+        
         kdf_sig["signal"] = 0
         kdf_sig.loc[
             (kdf_sig["adx"] >= 30)

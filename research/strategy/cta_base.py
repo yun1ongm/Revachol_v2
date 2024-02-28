@@ -25,9 +25,9 @@ class BacktestEngine:
 
     def _determine_sizer(self, symbol: str) -> int:
         if symbol == "BTCUSDT":
-            sizer = 2
+            sizer = 1
         elif symbol == "ETHUSDT":
-            sizer = 40
+            sizer = 20
 
         return sizer
 
@@ -59,10 +59,10 @@ class BacktestEngine:
                 "close",
                 "volume",
                 "closetime",
-                "volume_USDT",
+                "volume_U",
                 "num_trade",
                 "taker_buy",
-                "taker_buy_volume_USDT",
+                "taker_buy_volume_U",
                 "ignore",
             ],
         )
@@ -82,10 +82,10 @@ class BacktestEngine:
         kdf.closetime = [
             datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.closetime
         ]
-        kdf.volume_USDT = kdf.volume_USDT.astype("float")
+        kdf.volume_U = kdf.volume_U.astype("float")
         kdf.num_trade = kdf.num_trade.astype("int")
         kdf.taker_buy = kdf.taker_buy.astype("float")
-        kdf.taker_buy_volume_USDT = kdf.taker_buy_volume_USDT.astype("float")
+        kdf.taker_buy_volume_U = kdf.taker_buy_volume_U.astype("float")
         kdf.ignore = kdf.ignore.astype("float")
         kdf.set_index("opentime", inplace=True)
 
@@ -101,7 +101,7 @@ class BacktestEngine:
             pd.DataFrame: portfolio dataframe
         
         """
-        portfolio = kdf[["open", "high", "low", "close", "volume_USDT"]]
+        portfolio = kdf[["open", "high", "low", "close", "volume_U"]]
         portfolio["value"] = np.zeros(len(portfolio))
         portfolio["signal"] = np.zeros(len(portfolio))
         portfolio["position"] = np.zeros(len(portfolio))
@@ -148,7 +148,7 @@ class BacktestEngine:
             (pnl - avg_trade_pnl) ** 2 for pnl in result["realized_pnl"] if pnl != 0
         )
         sigma = np.sqrt(sigma_sum / (trades["total"] + 0.0001))
-        diysharpe = (final_value - self.initial_money) / sigma
+        t_sharpe = (final_value - self.initial_money) / sigma
 
         performances = {
             "final_value": final_value,
@@ -156,7 +156,7 @@ class BacktestEngine:
             "single_avg_wlr": single_avg_wlr,
             "total_trades": trades["total"],
             "return": ret,
-            "diysharpe": diysharpe,
+            "t_sharpe": t_sharpe,
             "commission": comm_ratio,
             "score": score,
         }

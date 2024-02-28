@@ -48,7 +48,7 @@ class StgyBodyatrMulti(BacktestEngine):
                     value -= commission
                 elif signal == -1:
                     if position > self.sizer:
-                        realized_pnl = (close - entry_price) * self.sizer
+                        entry_price =(entry_price * position - close * self.sizer)/(position - self.sizer)
                         position += -self.sizer
                         commission = self.comm * self.sizer * close
                         value -= commission
@@ -76,7 +76,7 @@ class StgyBodyatrMulti(BacktestEngine):
                     value -= commission
                 elif signal == 1:
                     if position < -self.sizer:
-                        realized_pnl = (close - entry_price) * -self.sizer
+                        entry_price = (entry_price * position + close * self.sizer) / (position + self.sizer)
                         position += self.sizer
                         commission = self.comm * self.sizer * close
                         value -= commission

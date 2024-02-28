@@ -10,8 +10,14 @@ class StgyVolcumSing(BacktestEngine):
         super().__init__(alpha_name, symbol, timeframe, start, window_days)
         self.performance_df = self.initialize_portfolio_variables(self.kdf)
 
-    def run(self, kdf_signal: pd.DataFrame, harvest_ratio: float, retreat_ratio: float) -> pd.DataFrame:
-        """this strategy aims to change position with candle's volume based on ema of volume"""
+    def run(self, kdf_signal: pd.DataFrame, harvest_ratio: float) -> pd.DataFrame:
+        """
+        Args:
+            kdf_signal (pd.DataFrame): signal dataframe
+            harvest_ratio (float): harvest ratio
+            Returns:
+            pd.DataFrame: performance dataframe
+        """
         value = self.initial_money
         position = 0
 
@@ -74,8 +80,7 @@ class StgyVolcumSing(BacktestEngine):
             self.performance_df["signal"].at[index] = signal
             self.performance_df["position"].at[index] = position
             self.performance_df["entry_price"].at[index] = entry_price
-            self.performance_df["stop_loss"].at[index] = stop_loss
-            self.performance_df["stop_profit"].at[index] = stop_profit
+            self.performance_df["stop_price"].at[index] = stop_price
             self.performance_df["unrealized_pnl"].at[index] = unrealized_pnl
             self.performance_df["realized_pnl"].at[index] = realized_pnl
             self.performance_df["commission"].at[index] = commission

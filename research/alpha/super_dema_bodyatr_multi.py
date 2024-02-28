@@ -52,18 +52,18 @@ class Indicators:
 
 class AlpSuperDemaBodyatrMulti:
     alpha_name = "super_dema_bodyatr_multi"
-    symbol = "ETHUSDT"
+    symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 11, 0, 0, 0)
+    start = datetime(2023, 11, 18, 0, 0, 0)
     window_days = 100
 
-    sptr_len = 14
-    sptr_k = 4
-    dema_len = 49
-    atr_f = 7
-    atr_s = 26
-    harvest_ratio = 2.3
-    retreat_ratio = 1.9
+    sptr_len = 17
+    sptr_k = 3.5
+    dema_len = 50
+    atr_f = 11
+    atr_s = 25
+    harvest_ratio = 2.2
+    retreat_ratio = 2
 
     def __init__(self) -> None:
         self.strategy = StgyBodyatrMulti(
@@ -76,14 +76,14 @@ class AlpSuperDemaBodyatrMulti:
         bodyatr = Indicators.bodyatr(kdf, self.atr_f, self.atr_s)
         kdf_sig = pd.concat([kdf, supertrend, bodyatr], axis=1)
         kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_s)
+        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_s)
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
             (kdf_sig["close"] <= kdf_sig["dema"])
             & (kdf_sig["close"] > kdf_sig["open"])
             & (kdf_sig["direction"] == 1)
-            & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+            & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
             "signal",
         ] = 1
 
@@ -91,7 +91,7 @@ class AlpSuperDemaBodyatrMulti:
             (kdf_sig["close"] >= kdf_sig["dema"])
             & (kdf_sig["close"] < kdf_sig["open"])
             & (kdf_sig["direction"] == -1)
-            & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+            & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
             "signal",
         ] = -1
 

@@ -75,11 +75,11 @@ class BnOkxArbi:
             bin_bid_offset= book['bin_bid']*(1-self.bin_comm*1.4)
             bin_ask_offset = book['bin_ask']* (1+self.bin_comm*1.4)
             bid_gap = round((okx_bid_offset - bin_bid_offset)/price,4)
-            self.logger.info(f'{symbol} bid gap: {bid_gap}')
+            self.logger.info(f'{symbol} bid gap: {bid_gap}%')
 
             if okx_bid_offset > bin_ask_offset:
-                gap_price = okx_bid_offset - bin_ask_offset
-                self.logger.warning(f'Buy {symbol} on Binance, Sell {symbol} on Okx, gap: {gap_price}')
+                gap_price = (okx_bid_offset - bin_ask_offset) / price
+                self.logger.warning(f'Buy {symbol} on Binance, Sell {symbol} on Okx, gap: {gap_price}%')
                 okx_bid_size = book['okx_bid_size']
                 bin_ask_size = book['bin_ask_size']
                 trading_lot = min(okx_bid_size, bin_ask_size)

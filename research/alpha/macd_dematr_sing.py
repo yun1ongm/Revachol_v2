@@ -55,9 +55,9 @@ class Indicators:
 
 class AlpMacdDemAtrSing:
     alpha_name = "macd_dematr_sing"
-    symbol = "ETHUSDT"
+    symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 10, 0, 0, 0)
+    start = datetime(2023, 11, 18, 0, 0, 0)
     window_days = 100
 
     fast = 16
@@ -125,7 +125,7 @@ class AlpMacdDemAtrSing:
             "slow": trial.suggest_int("slow", 15, 45),
             "signaling": trial.suggest_int("signaling", 4, 16),
             "threshold": trial.suggest_float("threshold", 0.1, 1, step=0.1),
-            "dema_len": trial.suggest_int("dema_len", 12, 50),
+            "dema_len": trial.suggest_int("dema_len", 15, 60),
             "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 1, 4),
         }
@@ -137,7 +137,7 @@ class AlpMacdDemAtrSing:
 
 class Optimizer(AlpMacdDemAtrSing):
     num_evals = 100
-    target = "score"
+    target = "t_sharpe"
     print_log = True
 
     def __init__(self):

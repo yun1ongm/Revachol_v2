@@ -1,0 +1,63 @@
+2024-02-28 17:43:44,677, Start optimizing macdrvs_dematr_sing for goal t_sharpe on BTCUSDT 5m from 2023-11-17 to 2024-02-25 based on goal of t_sharpe
+2024-02-28 17:54:37,865, Top 10 results:
+Rank 1:
+  Params: {'fast': 11, 'slow': 45, 'signaling': 16, 'threshold': 0.6, 'dema_len': 21, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 4.153098639188524
+
+  Performance: {'final_value': 101337.15375999994, 'win_ratio': 0.4329892443409852, 'single_avg_wlr': 2.169337286368189, 'total_trades': 97, 'return': 0.013371537599999428, 't_sharpe': 4.153098639188524, 'commission': 0.033332462400000006, 'score': 1255.988142129363}
+
+Rank 2:
+  Params: {'fast': 11, 'slow': 45, 'signaling': 16, 'threshold': 0.1, 'dema_len': 23, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.5743059607909924
+
+  Performance: {'final_value': 101158.89051999994, 'win_ratio': 0.4315784930752704, 'single_avg_wlr': 2.1461080670773334, 'total_trades': 95, 'return': 0.011588905199999333, 't_sharpe': 3.5743059607909924, 'commission': 0.0326900948, 'score': 1073.3807232527568}
+
+Rank 3:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 25, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 4:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 23, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 5:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 23, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 6:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 23, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 7:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 23, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 8:
+  Params: {'fast': 11, 'slow': 42, 'signaling': 16, 'threshold': 0.1, 'dema_len': 22, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.355151202845662
+
+  Performance: {'final_value': 101204.84303999999, 'win_ratio': 0.44791620008729155, 'single_avg_wlr': 1.8690920256259962, 'total_trades': 96, 'return': 0.012048430399999921, 't_sharpe': 3.355151202845662, 'commission': 0.0333315696, 'score': 1008.6904938888987}
+
+Rank 9:
+  Params: {'fast': 11, 'slow': 44, 'signaling': 15, 'threshold': 0.1, 'dema_len': 20, 'atr_profit': 5, 'atr_loss': 2}
+  Value: 3.11766291409267
+
+  Performance: {'final_value': 101097.69128000003, 'win_ratio': 0.4361697487555864, 'single_avg_wlr': 1.97761136268522, 'total_trades': 94, 'return': 0.010976912800000349, 't_sharpe': 3.11766291409267, 'commission': 0.0326430872, 'score': 946.840233893263}
+
+Rank 10:
+  Params: {'fast': 10, 'slow': 41, 'signaling': 14, 'threshold': 0.2, 'dema_len': 26, 'atr_profit': 5, 'atr_loss': 3}
+  Value: 2.976065672331011
+
+  Performance: {'final_value': 101368.8203999999, 'win_ratio': 0.441859951325638, 'single_avg_wlr': 1.6566674011809952, 'total_trades': 86, 'return': 0.013688203999999038, 't_sharpe': 2.976065672331011, 'commission': 0.029827796000000004, 'score': 1001.9970339633505}
+
+
