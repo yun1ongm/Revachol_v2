@@ -25,16 +25,14 @@ class AlpSuperDematr:
     alpha_name = "alp_super_dematr_multi"
     index_name = "idx_super_dema"
     strategy_name = "stgy_dematr_multi"
-    symbol = "ETHUSDT"
-    timeframe = "5m"
 
-    sptr_len = 21
-    sptr_k = 4
-    dema_len = 24
-    atr_f = 8
-    atr_s = 21
-    atr_profit = 6
-    atr_loss = 5
+    sptr_len = 14
+    sptr_k = 2.5
+    dema_len = 57
+    atr_f = 14
+    atr_s = 29
+    atr_profit = 2
+    atr_loss = 3
 
     logger = logging.getLogger(alpha_name)
 
@@ -74,8 +72,8 @@ class AlpSuperDematr:
 if __name__ == "__main__":
     import contek_timbersaw as timbersaw
     timbersaw.setup()
-    alp = AlpSuperDematr(money = 500, leverage = 5, sizer = 0.1)
-    market = MarketEngine(alp.symbol, alp.timeframe)
+    alp = AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.2)
+    market = MarketEngine('BTCUSDT', '5m')
     while True:
         market.update_CKlines()
         position = alp.generate_signal_position(market.kdf)

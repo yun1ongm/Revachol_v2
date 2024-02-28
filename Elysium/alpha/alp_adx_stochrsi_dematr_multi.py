@@ -24,15 +24,13 @@ class AlpAdxStochrsiDematr:
     alpha_name = "alp_adx_stochrsi_dematr"
     index_name = "idx_adx_stochrsi"
     strategy_name = "stgy_dematr_multi"
-    symbol = "ETHUSDT"
-    timeframe = "5m"
 
-    adx_len = 30
-    rsi_len = 9
-    kd = 7
-    dema_len = 14
-    atr_f = 8
-    atr_s = 16
+    adx_len = 16
+    rsi_len = 27
+    kd = 12
+    dema_len = 51
+    atr_f = 10
+    atr_s = 19
     atr_profit = 3
     atr_loss = 4
 
@@ -73,7 +71,7 @@ if __name__ == "__main__":
     import contek_timbersaw as timbersaw
     timbersaw.setup()
     alp = AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.1)
-    market = MarketEngine(alp.symbol, alp.timeframe)
+    market = MarketEngine('BTCUSDT', '5m')
     while True:
         market.update_CKlines()
         alp.generate_signal_position(market.kdf)

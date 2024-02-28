@@ -11,16 +11,36 @@ import pandas as pd
 from retry import retry
 
 class ExecPostmodern:
+    """
+    Executor Postmodern is a class that sends post-only orders to binance futures
+    Args:
+        symbol: str: symbol of the trading pair
+    Attributes:
+        client: UMFutures: binance futures client
+        symbol: str: symbol of the trading pair
+        slippage: int: slippage for the trading pair
+        equity: int: equity of the trading account
+        leverage: int: leverage of the trading account
+        logger: logger for the class
+    """
     executor = "exec_postmodern"
-    symbol = "ETHUSDT"
-    slippage = -0.01
     equity = 1000
     leverage = 5
     
     logger = logging.getLogger(executor)
 
-    def __init__(self) -> None:
+    def __init__(self, symbol) -> None:
         self.client = self._connect_api(key=key, secret=secret)
+        self.symbol = symbol
+        self.slippage = self._determine_slippage(symbol)
+
+    def _determine_slippage(self, symbol: str) -> int:
+        if symbol == "BTCUSDT":
+            slippage = -5
+        elif symbol == "ETHUSDT":
+            slippage = -0.3
+
+        return slippage
 
     @retry(ClientError, tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:
@@ -88,14 +108,14 @@ class ExecPostmodern:
             
     @retry(ClientError, tries=3, delay=1)  
     def _cancel_open_orders(self) -> None:
-        status = "NEW" or "PARTIALLY_FILLED"
         orders = pd.DataFrame(self.client.get_all_orders(symbol=self.symbol))
-        open_orders = orders.query("status == @status")
-        try:
-            for orderId in open_orders["orderId"]:
-                self.client.cancel_order(symbol=self.symbol, orderId=orderId)
-        except ClientError as error:
-            self.logger.error(error)
+        if not orders.empty:
+            try:
+                open_orders = orders.query('status == ["NEW", "PARTIALLY_FILLED"]')
+                for orderId in open_orders["orderId"]:
+                    self.client.cancel_order(symbol=self.symbol, orderId=orderId)
+            except ClientError as error:
+                self.logger.error(error)
 
     def _check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""
@@ -131,5 +151,8 @@ class ExecPostmodern:
 
 
 if __name__ == "__main__":
-    test = ExecPostmodern()
-    test.task(0)
+    import contek_timbersaw as timbersaw
+    timbersaw.setup()
+    test = ExecPostmodern(symbol = "BTCUSDT")
+    complete = test.task(0)
+    print(complete)
