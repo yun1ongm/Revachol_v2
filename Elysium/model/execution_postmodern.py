@@ -66,7 +66,7 @@ class ExecPostmodern:
             return None
         else:
             price = round((ticker + self.slippage), 2)
-            amount = round(amount, 2)
+            amount = round(amount, 3)
             self.logger.info(f"Ticker: {ticker} Executing buy price:{price}")
             try:
                 self.orderId = self.client.new_order(
@@ -91,7 +91,7 @@ class ExecPostmodern:
             return None
         else:
             price = round((ticker - self.slippage), 2)
-            amount = round(amount, 2)
+            amount = round(amount, 3)
             self.logger.info(f"Ticker: {ticker} Executing sell price:{price}")
             try:
                 self.orderId = self.client.new_order(

@@ -1,0 +1,80 @@
+2024-03-01T18:00:05 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=BTC-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:06 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ETH-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:07 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:07 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=WLD-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:07 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ORDI-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:07 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=DOGE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:08 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:08 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=PEOPLE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - BTCUSD bid gap: -0.03%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - ETHUSD bid gap: -0.04%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - SOLUSD bid gap: -0.04%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - WLDUSD bid gap: -0.09%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - ORDIUSD bid gap: -0.04%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - DOGEUSD bid gap: -0.05%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - XRPUSD bid gap: -0.1%
+2024-03-01T18:00:08 INFO binance_okx_arbi.py:85 - PEOPLEUSD bid gap: -0.09%
+2024-03-01T18:00:10 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=BTC-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:10 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ETH-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:11 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:11 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=WLD-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:11 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ORDI-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:11 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=DOGE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:12 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:12 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=PEOPLE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - BTCUSD bid gap: -0.03%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - ETHUSD bid gap: -0.04%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - SOLUSD bid gap: -0.03%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - WLDUSD bid gap: -0.11%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - ORDIUSD bid gap: -0.04%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - DOGEUSD bid gap: -0.03%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - XRPUSD bid gap: -0.08%
+2024-03-01T18:00:12 INFO binance_okx_arbi.py:85 - PEOPLEUSD bid gap: 0.0%
+2024-03-01T18:00:14 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=BTC-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:14 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ETH-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:15 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:15 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=WLD-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:15 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ORDI-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:15 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=DOGE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:16 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:16 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=PEOPLE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - BTCUSD bid gap: -0.03%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - ETHUSD bid gap: -0.03%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - SOLUSD bid gap: -0.04%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - WLDUSD bid gap: -0.1%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - ORDIUSD bid gap: -0.02%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - DOGEUSD bid gap: -0.04%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - XRPUSD bid gap: -0.1%
+2024-03-01T18:00:16 INFO binance_okx_arbi.py:85 - PEOPLEUSD bid gap: -0.18%
+2024-03-01T18:00:18 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=BTC-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:18 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ETH-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:19 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:19 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=WLD-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:19 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ORDI-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:19 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=DOGE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:20 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:20 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=PEOPLE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - BTCUSD bid gap: -0.03%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - ETHUSD bid gap: -0.03%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - SOLUSD bid gap: -0.05%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - WLDUSD bid gap: -0.11%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - ORDIUSD bid gap: -0.03%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - DOGEUSD bid gap: -0.03%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - XRPUSD bid gap: -0.08%
+2024-03-01T18:00:20 INFO binance_okx_arbi.py:85 - PEOPLEUSD bid gap: -0.07%
+2024-03-01T18:00:22 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=BTC-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:22 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ETH-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:23 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:23 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=WLD-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:23 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=ORDI-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:24 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=DOGE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:24 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:24 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/market/books?instId=PEOPLE-USDT-SWAP "HTTP/2 200 OK"
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - BTCUSD bid gap: -0.03%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - ETHUSD bid gap: -0.03%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - SOLUSD bid gap: -0.04%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - WLDUSD bid gap: -0.11%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - ORDIUSD bid gap: -0.03%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - DOGEUSD bid gap: -0.04%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - XRPUSD bid gap: -0.08%
+2024-03-01T18:00:24 INFO binance_okx_arbi.py:85 - PEOPLEUSD bid gap: -0.09%

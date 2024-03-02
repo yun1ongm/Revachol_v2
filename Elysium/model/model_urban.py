@@ -43,7 +43,7 @@ class ModelUrban:
                 merged_position += signal_position["position"]
             else:
                 self.logger.info(f"Alpha:{alpha.alpha_name} did not generate a signal")
-        self.signal_position = round(merged_position,2)
+        self.signal_position = round(merged_position,3)
         self.logger.info(
             f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --"
         )

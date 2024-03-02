@@ -10,14 +10,21 @@ import contek_timbersaw as timbersaw
 timbersaw.setup()
 
 class BnOkxArbi:
+    """
+    This class is used to track arbitrage opportunities between Binance and Okx
+    """
     arbitrage_name = "binance_okx_arbitrage"
-    symbols_list = ["BTCUSD", "ETHUSD", "SOLUSD", "WLDUSD", "ORDIUSD" ]
+    symbols_list = ["BTCUSD", "ETHUSD", "SOLUSD", "WLDUSD", "ORDIUSD", 
+                    "DOGEUSD", "XRPUSD", "PEOPLEUSD"]
     binance_symbol_mapping = {
         "BTCUSD": "BTCUSDT",
         "ETHUSD": "ETHUSDT",
         "SOLUSD": "SOLUSDT",  
         "WLDUSD": "WLDUSDT",
         "ORDIUSD": "ORDIUSDT",
+        "DOGEUSD": "DOGEUSDT",
+        "XRPUSD": "XRPUSDT",
+        "PEOPLEUSD": "PEOPLEUSDT",
     }
     okx_symbol_mapping = {
         "BTCUSD": "BTC-USDT-SWAP",
@@ -25,6 +32,9 @@ class BnOkxArbi:
         "SOLUSD": "SOL-USDT-SWAP",
         "WLDUSD": "WLD-USDT-SWAP",
         "ORDIUSD": "ORDI-USDT-SWAP",
+        "DOGEUSD": "DOGE-USDT-SWAP",
+        "XRPUSD": "XRP-USDT-SWAP",
+        "PEOPLEUSD": "PEOPLE-USDT-SWAP"
     }
     bin_comm = 0.0005
     okx_comm = 0.0005
@@ -70,15 +80,15 @@ class BnOkxArbi:
     def is_arbi_trade(self, order_book: dict) -> bool:
         for symbol, book in order_book.items():
             price = book['okx_bid']
-            okx_bid_offset = book['okx_bid']*(1-self.okx_comm*1.4)
-            okx_ask_offset = book['okx_ask']* (1+self.okx_comm*1.4)
-            bin_bid_offset= book['bin_bid']*(1-self.bin_comm*1.4)
-            bin_ask_offset = book['bin_ask']* (1+self.bin_comm*1.4)
-            bid_gap = round((okx_bid_offset - bin_bid_offset)/price,4)
+            okx_bid_offset = book['okx_bid']*(1-self.okx_comm*2)
+            okx_ask_offset = book['okx_ask']* (1+self.okx_comm*2)
+            bin_bid_offset= book['bin_bid']*(1-self.bin_comm*2)
+            bin_ask_offset = book['bin_ask']* (1+self.bin_comm*2)
+            bid_gap = round((okx_bid_offset - bin_bid_offset) *100/price, 2)
             self.logger.info(f'{symbol} bid gap: {bid_gap}%')
 
             if okx_bid_offset > bin_ask_offset:
-                gap_price = (okx_bid_offset - bin_ask_offset) / price
+                gap_price = round((okx_bid_offset - bin_ask_offset) *100 / price, 2)
                 self.logger.warning(f'Buy {symbol} on Binance, Sell {symbol} on Okx, gap: {gap_price}%')
                 okx_bid_size = book['okx_bid_size']
                 bin_ask_size = book['bin_ask_size']
@@ -87,7 +97,7 @@ class BnOkxArbi:
                 return True
             
             elif bin_bid_offset > okx_ask_offset:
-                gap_price = round(bin_bid_offset - okx_ask_offset, 2)
+                gap_price = round((bin_bid_offset - okx_ask_offset *100 / price), 2)
                 self.logger.warning(f'Buy {symbol} on Okx, Sell {symbol} on Binance, gap: {gap_price}')
                 okx_ask_size = book['okx_ask_size']
                 bin_bid_size = book['bin_bid_size']
