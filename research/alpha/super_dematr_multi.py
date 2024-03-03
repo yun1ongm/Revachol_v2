@@ -52,7 +52,7 @@ class AlpSuperDemAtrMulti:
     alpha_name = "super_dematr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 18, 0, 0, 0)
+    start = datetime(2023, 11, 22, 0, 0, 0)
     window_days = 100
 
     sptr_len = 14
@@ -125,9 +125,9 @@ class AlpSuperDemAtrMulti:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 12, 30),
+            "sptr_len": trial.suggest_int("sptr_len", 8, 30),
             "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 15, 60),
+            "dema_len": trial.suggest_int("dema_len", 12, 60),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
             "atr_profit": trial.suggest_int("atr_profit", 2, 6),

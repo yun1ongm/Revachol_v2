@@ -17,7 +17,7 @@ class MarketEngine:
         "close",
         "volume",
         "closetime",
-        "volume_USDT",
+        "volume_U",
         "num_trade",
         "taker_buy",
         "taker_buy_quota_volume",
@@ -62,7 +62,7 @@ class MarketEngine:
         kdf.closetime = [
             datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.closetime
         ]
-        kdf.volume_USDT = kdf.volume_USDT.astype("float")
+        kdf.volume_U = kdf.volume_U.astype("float")
         kdf.num_trade = kdf.num_trade.astype("int")
         kdf.taker_buy = kdf.taker_buy.astype("float")
         kdf.taker_buy_quota_volume = kdf.taker_buy_quota_volume.astype("float")
@@ -88,9 +88,10 @@ class MarketEngine:
 
         else:
             self.kdf = pd.concat([self.kdf, latest_kdf])
-            self.kdf = self.kdf.iloc[1:]
+            if len(self.kdf) > 7*24*12:
+                self.kdf = self.kdf.iloc[1:]
             self.logger.info(
-                f"Candle close time: {self.kdf.closetime[-1]} Updated Close: {self.kdf.close[-1]} Volume(USDT): {self.kdf.volume_USDT[-1]}\n-----------"
+                f"Candle close time: {self.kdf.closetime[-1]} Updated Close: {self.kdf.close[-1]} Volume(U): {self.kdf.volume_U[-1]}\n-----------"
             )
 
     def get_aggrtrade(self) -> pd.DataFrame:

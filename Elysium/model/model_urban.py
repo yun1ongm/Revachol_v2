@@ -9,6 +9,7 @@ temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
 sys.path.append(temp_path)
 from market.market_bot import MarketEngine
 from alpha.alp_super_dematr_multi import AlpSuperDematr
+from alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
 from alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
 
 class ModelUrban:
@@ -28,8 +29,9 @@ class ModelUrban:
 
     def __init__(self, symbol, timeframe) -> None:
         self.alphas = [
-            AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.02),
-            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.01),
+            AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.01),
+            AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.01),
+            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.02),
         ]
         self.market = MarketEngine(symbol, timeframe)
         self.signal_position = None

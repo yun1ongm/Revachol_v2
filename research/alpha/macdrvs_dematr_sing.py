@@ -56,7 +56,7 @@ class AlpMacdRvsDemAtrSing:
     alpha_name = "macdrvs_dematr_sing"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 18, 0, 0, 0)
+    start = datetime(2023, 11, 22, 0, 0, 0)
     window_days = 100
 
     fast = 17

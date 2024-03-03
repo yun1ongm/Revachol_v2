@@ -77,13 +77,13 @@ class IdxAdxStochrsi:
             kdf_sig["atr"] = datr["Xvalue"]
             kdf_sig["signal"] = 0
             kdf_sig.loc[
-                (kdf_sig["adx"] >= 30)
-                & (kdf_sig["GXvalue"] < 20)
+                (kdf_sig["adx"] >= 25)
+                & (kdf_sig["GXvalue"] < 25)
                 & (0 < kdf_sig["GXvalue"]),
                 "signal",
             ] = 1
             kdf_sig.loc[
-                (kdf_sig["adx"] >= 30) & (kdf_sig["DXvalue"] > 80), "signal"
+                (kdf_sig["adx"] >= 25) & (kdf_sig["DXvalue"] > 75), "signal"
             ] = -1
 
             return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]

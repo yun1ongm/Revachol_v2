@@ -28,11 +28,11 @@ class AlpSuperDematr:
 
     sptr_len = 14
     sptr_k = 2.5
-    dema_len = 57
-    atr_f = 14
-    atr_s = 29
+    dema_len = 53
+    atr_f = 10
+    atr_s = 28
     atr_profit = 2
-    atr_loss = 3
+    atr_loss = 4
 
     logger = logging.getLogger(alpha_name)
 

@@ -25,16 +25,15 @@ class AlpSuperDemaBodyatr:
     alpha_name = "alp_super_dema_bodyatr"
     index_name = "idx_super_dema"
     strategy_name = "stgy_bodyatr_multi"
-    symbol = "ETHUSDT"
-    timeframe = "5m"
 
-    sptr_len = 14
-    sptr_k = 4
-    dema_len = 49
-    atr_f = 7
+
+    sptr_len = 18
+    sptr_k = 2.5
+    dema_len = 60
+    atr_f = 9
     atr_s = 26
-    harvest_ratio = 2.3
-    retreat_ratio = 1.9
+    harvest_ratio = 2.4
+    retreat_ratio = 1
 
     logger = logging.getLogger(alpha_name)
 
@@ -71,7 +70,7 @@ if __name__ == "__main__":
     import contek_timbersaw as timbersaw
     timbersaw.setup()
     alp = AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1)
-    market = MarketEngine(alp.symbol, alp.timeframe)
+    market = MarketEngine('BTCUSDT', '5m')
     while True:
         market.update_CKlines()
         position = alp.generate_signal_position(market.kdf)

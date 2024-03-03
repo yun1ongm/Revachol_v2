@@ -88,7 +88,7 @@ class BnOkxArbi:
             offset = round(book['bin_bid'] * self.okx_comm*2,4)
             positive_gap = round((book['okx_bid'] - book['bin_ask']),4)
             negative_gap = round((book['bin_bid'] - book['okx_ask']),4)
-            self.logger.warning(f'{symbol}:positive gap: {positive_gap}, negative gap: {negative_gap}, offset: {offset}')
+            self.logger.info(f'{symbol}:positive gap: {positive_gap}, negative gap: {negative_gap}, offset: {offset}')
 
             if positive_gap > offset:
                 okx_bid = book['okx_bid']
@@ -119,7 +119,7 @@ class BnOkxArbi:
                 orderbook = self.parse_orderbook(tickers)
                 flag = self.is_arbi_trade(orderbook)
                 if flag:
-                    self.logger.warning('trade to be made!\n--------------------------')
+                    self.logger.warning('------------------trade to be made!----------------------')
             time.sleep(2)
 
 if __name__ == "__main__":

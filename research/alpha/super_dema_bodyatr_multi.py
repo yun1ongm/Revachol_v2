@@ -54,7 +54,7 @@ class AlpSuperDemaBodyatrMulti:
     alpha_name = "super_dema_bodyatr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 18, 0, 0, 0)
+    start = datetime(2023, 11, 22, 0, 0, 0)
     window_days = 100
 
     sptr_len = 17
@@ -126,13 +126,13 @@ class AlpSuperDemaBodyatrMulti:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 12, 30),
-            "sptr_k": trial.suggest_float("sptr_k", 2, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 12, 50),
+            "sptr_len": trial.suggest_int("sptr_len", 8, 30),
+            "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
+            "dema_len": trial.suggest_int("dema_len", 12, 60),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),
-            "harvest_ratio": trial.suggest_float("harvest_ratio", 1.5, 2.5, step=0.1),
-            "retreat_ratio": trial.suggest_float("retreat_ratio", 1.5, 2.5, step=0.1),
+            "harvest_ratio": trial.suggest_float("harvest_ratio", 1, 2.4, step=0.2),
+            "retreat_ratio": trial.suggest_float("retreat_ratio", 1, 2.4, step=0.2),
         }
         result = self.get_backtest_result(**kwargs)
         performance = self.evaluate_performance(result)
@@ -142,7 +142,7 @@ class AlpSuperDemaBodyatrMulti:
 
 class Optimizer(AlpSuperDemaBodyatrMulti):
     num_evals = 100
-    target = "score"
+    target = "t_sharpe"
     print_log = True
 
     def __init__(self):

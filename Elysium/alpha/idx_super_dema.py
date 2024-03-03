@@ -86,22 +86,22 @@ class IdxSuperDema:
             bodyatr = self._bodyatr()
             kdf_sig = pd.concat([self.kdf, supertrend, bodyatr], axis=1)
             kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_s)
+            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_s)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
-                (kdf_sig["close"] > kdf_sig["dema"])
-                & (kdf_sig["low"] <= kdf_sig["dema"])
+                (kdf_sig["close"] <= kdf_sig["dema"])
+                & (kdf_sig["close"] > kdf_sig["open"])
                 & (kdf_sig["direction"] == 1)
-                & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = 1
 
             kdf_sig.loc[
-                (kdf_sig["close"] < kdf_sig["dema"])
-                & (kdf_sig["high"] >= kdf_sig["dema"])
+                (kdf_sig["close"] >= kdf_sig["dema"])
+                & (kdf_sig["close"] < kdf_sig["open"])
                 & (kdf_sig["direction"] == -1)
-                & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = -1
 
@@ -117,14 +117,14 @@ class IdxSuperDema:
             kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
             datr = self._double_atr()
             kdf_sig["atr"] = datr["Xvalue"]
-            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_USDT"], length=self.atr_f)
+            kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_f)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
                 (kdf_sig["close"] > kdf_sig["dema"])
                 & (kdf_sig["low"] <= kdf_sig["dema"])
                 & (kdf_sig["direction"] == 1)
-                & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = 1
 
@@ -132,7 +132,7 @@ class IdxSuperDema:
                 (kdf_sig["close"] < kdf_sig["dema"])
                 & (kdf_sig["high"] >= kdf_sig["dema"])
                 & (kdf_sig["direction"] == -1)
-                & (kdf_sig["volume_USDT"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = -1
 

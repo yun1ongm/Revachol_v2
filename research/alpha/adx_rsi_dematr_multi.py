@@ -61,7 +61,7 @@ class AdxRsiDemAtrMulti:
     alpha_name = "adx_rsi_dematr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 18, 0, 0, 0)
+    start = datetime(2023, 11, 22, 0, 0, 0)
     window_days = 100
 
     adx_len = 23
@@ -88,12 +88,16 @@ class AdxRsiDemAtrMulti:
         kdf_sig["atr"] = datr["Xvalue"]
         kdf_sig["signal"] = 0
         kdf_sig.loc[
-            (kdf_sig["adx"] >= 30)
-            & (kdf_sig["GXvalue"] < 20)
+            (kdf_sig["adx"] >= 25)
+            & (kdf_sig["GXvalue"] < 25)
             & (0 < kdf_sig["GXvalue"]),
             "signal",
         ] = 1
-        kdf_sig.loc[(kdf_sig["adx"] >= 30) & (kdf_sig["DXvalue"] > 80), "signal"] = -1
+        kdf_sig.loc[
+            (kdf_sig["adx"] >= 25) 
+            & (kdf_sig["DXvalue"] > 75), 
+            "signal"
+        ] = -1
 
         return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
 
@@ -129,7 +133,7 @@ class AdxRsiDemAtrMulti:
         kwargs = {
             "adx_len": trial.suggest_int("adx_len", 6, 30),
             "rsi_len": trial.suggest_int("rsi_len", 6, 30),
-            "kd": trial.suggest_int("kd", 4, 12),
+            "kd": trial.suggest_int("kd", 2, 10),
             "dema_len": trial.suggest_int("dema_len", 15, 60),
             "atr_f": trial.suggest_int("atr_f", 6, 15),
             "atr_s": trial.suggest_int("atr_s", 15, 30),

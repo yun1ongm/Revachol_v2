@@ -25,12 +25,12 @@ class AlpAdxStochrsiDematr:
     index_name = "idx_adx_stochrsi"
     strategy_name = "stgy_dematr_multi"
 
-    adx_len = 16
-    rsi_len = 27
-    kd = 12
-    dema_len = 51
-    atr_f = 10
-    atr_s = 19
+    adx_len = 28
+    rsi_len = 28
+    kd = 4
+    dema_len = 32
+    atr_f = 13
+    atr_s = 28
     atr_profit = 3
     atr_loss = 4
 
