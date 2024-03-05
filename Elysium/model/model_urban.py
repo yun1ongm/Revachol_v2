@@ -5,12 +5,13 @@ import warnings
 warnings.filterwarnings("ignore")
 import time
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(temp_path)
-from market.market_bot import MarketEngine
-from alpha.alp_super_dematr_multi import AlpSuperDematr
-from alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
-from alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
+import contek_timbersaw as timbersaw
+from Elysium.market.market_bot import MarketEngine
+from Elysium.alpha.alp_super_dematr_multi import AlpSuperDematr
+from Elysium.alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
+from Elysium.alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
 
 class ModelUrban:
     """
@@ -52,7 +53,6 @@ class ModelUrban:
     
 
 if __name__ == "__main__":
-    import contek_timbersaw as timbersaw
     timbersaw.setup()
     model = ModelUrban(symbol="BTCUSDT", timeframe="5m")
     def calc_signal_position(model):

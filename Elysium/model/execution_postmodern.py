@@ -2,11 +2,12 @@ import logging
 import warnings
 warnings.filterwarnings("ignore")
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(temp_path)
 from binance.um_futures import UMFutures
 from binance.error import ClientError
-from binance_api import key, secret
+from config.binance_api import bn_key, bn_secret
+import contek_timbersaw as timbersaw
 import pandas as pd
 from retry import retry
 
@@ -30,7 +31,7 @@ class ExecPostmodern:
     logger = logging.getLogger(executor)
 
     def __init__(self, symbol) -> None:
-        self.client = self._connect_api(key=key, secret=secret)
+        self.client = self._connect_api(key=bn_key, secret=bn_secret)
         self.symbol = symbol
         self.slippage = self._determine_slippage(symbol)
 
@@ -151,7 +152,6 @@ class ExecPostmodern:
 
 
 if __name__ == "__main__":
-    import contek_timbersaw as timbersaw
     timbersaw.setup()
     test = ExecPostmodern(symbol = "BTCUSDT")
     complete = test.task(0)

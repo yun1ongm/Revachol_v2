@@ -4,10 +4,10 @@ warnings.filterwarnings("ignore")
 import time
 import sys
 import threading
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(temp_path)
-from model.model_urban import ModelUrban
-from model.execution_postmodern import ExecPostmodern
+from Elysium.model.model_urban import ModelUrban
+from Elysium.model.execution_postmodern import ExecPostmodern
 import contek_timbersaw as timbersaw
 timbersaw.setup()
 
