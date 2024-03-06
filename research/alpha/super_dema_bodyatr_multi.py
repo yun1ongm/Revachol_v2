@@ -7,7 +7,6 @@ from datetime import datetime
 
 import pandas as pd
 import pandas_ta as ta
-import numpy as np
 import optuna
 
 sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
@@ -25,43 +24,24 @@ class Indicators:
 
         return supertrend[["stop_price", "direction"]]
 
-    def bodyatr(kdf, atr_f, atr_s):
-        atr_fast = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
-        )
-        atr_slow = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
-        )
-        datr = pd.concat([atr_fast, atr_slow], axis=1)
-        datr.columns = ["atr_fast", "atr_slow"]
-        datr["Xvalue"] = np.where(
-            (datr["atr_fast"] > datr["atr_slow"])
-            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
-            datr["atr_slow"],
-            np.where(
-                (datr["atr_fast"] < datr["atr_slow"])
-                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
-                datr["atr_slow"],
-                0,
-            ),
-        )
-        datr["atr"] = datr["Xvalue"].replace(0, method="ffill")
-        datr['body'] = kdf['high'] - kdf['low']
-        datr['bodyatr'] = datr['body'] / datr['atr']
-        return datr[['bodyatr', 'atr']]
+    def bodyatr(kdf, atr_len):
+        batr = kdf[["high", "low", "close"]]
+        batr["atr"] = ta.atr(batr["high"], batr["low"], batr["close"], atr_len)
+        batr['body'] = batr['high'] - batr['low']
+        batr['bodyatr'] = batr['body'] / batr['atr']
+        return batr[['bodyatr', 'atr']]
 
 class AlpSuperDemaBodyatrMulti:
     alpha_name = "super_dema_bodyatr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 22, 0, 0, 0)
+    start = datetime(2023, 11, 26, 0, 0, 0)
     window_days = 100
 
     sptr_len = 17
     sptr_k = 3.5
     dema_len = 50
-    atr_f = 11
-    atr_s = 25
+    atr_len = 14
     harvest_ratio = 2.2
     retreat_ratio = 2
 
@@ -73,10 +53,10 @@ class AlpSuperDemaBodyatrMulti:
     def _gen_index_signal(self) -> pd.DataFrame:
         kdf = self.strategy.kdf
         supertrend = Indicators.supertrend(kdf, self.sptr_len, self.sptr_k)
-        bodyatr = Indicators.bodyatr(kdf, self.atr_f, self.atr_s)
+        bodyatr = Indicators.bodyatr(kdf, self.atr_len)
         kdf_sig = pd.concat([kdf, supertrend, bodyatr], axis=1)
         kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_s)
+        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_len)
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
@@ -98,13 +78,12 @@ class AlpSuperDemaBodyatrMulti:
         return kdf_sig[["close", "stop_price", "bodyatr", "signal"]]
 
     def get_backtest_result(
-        self, sptr_len, sptr_k, dema_len, atr_f, atr_s, harvest_ratio, retreat_ratio
+        self, sptr_len, sptr_k, dema_len, atr_len, harvest_ratio, retreat_ratio
     ) -> pd.DataFrame:
         self.sptr_len = sptr_len
         self.sptr_k = sptr_k
         self.dema_len = dema_len
-        self.atr_f = atr_f
-        self.atr_s = atr_s
+        self.atr_len = atr_len
         self.harvest_ratio = harvest_ratio
         self.retreat_ratio = retreat_ratio
 
@@ -126,11 +105,10 @@ class AlpSuperDemaBodyatrMulti:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 8, 30),
+            "sptr_len": trial.suggest_int("sptr_len",  6, 30, step=3),
             "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 12, 60),
-            "atr_f": trial.suggest_int("atr_f", 6, 15),
-            "atr_s": trial.suggest_int("atr_s", 15, 30),
+            "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
+            "atr_len": trial.suggest_int("atr_len", 12, 60, step=3),
             "harvest_ratio": trial.suggest_float("harvest_ratio", 1, 2.4, step=0.2),
             "retreat_ratio": trial.suggest_float("retreat_ratio", 1, 2.4, step=0.2),
         }
@@ -203,8 +181,7 @@ if __name__ == "__main__":
         test.sptr_len,
         test.sptr_k,
         test.dema_len,
-        test.atr_f,
-        test.atr_s,
+        test.atr_len,
         test.harvest_ratio,
         test.retreat_ratio,
     )

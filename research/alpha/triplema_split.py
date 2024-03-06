@@ -10,40 +10,56 @@ import pandas_ta as ta
 import numpy as np
 import optuna
 
-sys.path.append("/Users/rivachol/Desktop/Elysium/research")
-from Elysium.research.strategy.cta_backtest import BacktestEngine
+sys.path.append("/Users/rivachol/Desktop/Rivachol_v2")
+from research.strategy.cta_base import BacktestEngine
 
 warnings.filterwarnings("ignore")
 
 
 class Indicators:
-    def engulfing(kdf, body_k):
-        kdf_sig = kdf[["open", "high", "low", "close"]]
-        kdf_sig["body"] = kdf_sig["close"] - kdf_sig["open"]
-        kdf_sig["wick"] = kdf_sig["high"] - kdf_sig["low"]
-        condition = abs(kdf_sig["body"]) > kdf_sig["wick"] * body_k
-        kdf_sig["engulf_signal"] = np.where(
-            condition
-            & (kdf_sig["low"] < kdf_sig["low"].shift(1))
-            & (kdf_sig["close"] > kdf_sig["high"].shift(1)),
-            1,
-            np.where(
-                condition
-                & (kdf_sig["high"] > kdf_sig["high"].shift(1))
-                & (kdf_sig["close"] < kdf_sig["low"].shift(1)),
-                -1,
-                0,
-            ),
+    def triple_ma(kdf, short, mid, long) -> pd.DataFrame:
+        '''this function aims to generate the signal of triple ma
+        Args:
+        kdf: pd.DataFrame
+        short: int
+        mid: int
+        long: int
+        Returns:
+        pd.DataFrame
+        '''
+        short_ema = ta.ema(kdf["close"], length=short)
+        mid_ema = ta.ema(kdf["close"], length=mid)
+        long_ema = ta.ema(kdf["close"], length=long)
+        trpl_ema = pd.concat([kdf, short_ema, mid_ema, long_ema], axis=1)
+        trpl_ema.columns = ["short_ema", "mid_ema", "long_ema"]
+        trpl_ema["trend"] = np.where(kdf["close"] > long_ema, 1, -1)
+        up_cross_short = (trpl_ema["close"] > trpl_ema["short_ema"]) & (   
+            trpl_ema["close"].shift(1) < trpl_ema["short_ema"].shift(1)
+        )
+        down_cross_short = (trpl_ema["close"] < trpl_ema["short_ema"]) & (
+            trpl_ema["close"].shift(1) > trpl_ema["short_ema"].shift(1)
+        )
+        up_cross_mid = (trpl_ema["close"] > trpl_ema["mid_ema"]) & (
+            trpl_ema["close"].shift(1) < trpl_ema["mid_ema"].shift(1)
+        )
+        down_cross_mid = (trpl_ema["close"] < trpl_ema["mid_ema"]) & (
+            trpl_ema["close"].shift(1) > trpl_ema["mid_ema"].shift(1)
+        )
+        up_cross_long = (trpl_ema["close"] > trpl_ema["long_ema"]) & (
+            trpl_ema["close"].shift(1) < trpl_ema["long_ema"].shift(1)
+        )
+        down_cross_long = (trpl_ema["close"] < trpl_ema["long_ema"]) & (
+            trpl_ema["close"].shift(1) > trpl_ema["long_ema"].shift(1)
         )
 
-        return kdf_sig
+ 
+        return trpl_ema
 
-
-class AlpEngulfingVol:
-    alpha_name = "engulfing_vol"
-    symbol = "ETHUSDT"
+class AlpTriplemaSplit:
+    alpha_name = "triplema_split"
+    symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 9, 24, 0, 0, 0)
+    start = datetime(2024, 11, 22, 0, 0, 0)
     window_days = 100
 
     vol_len = 16

@@ -5,7 +5,6 @@ from datetime import datetime
 
 import pandas as pd
 import pandas_ta as ta
-import numpy as np
 import optuna
 
 import warnings
@@ -23,43 +22,17 @@ class Indicators:
 
         return supertrend[["bound", "direction"]]
 
-    def double_atr(kdf, atr_f, atr_s):
-        atr_fast = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_f, mamode="ema"
-        )
-        atr_slow = ta.atr(
-            kdf["high"], kdf["low"], kdf["close"], length=atr_s, mamode="ema"
-        )
-        datr = pd.concat([atr_fast, atr_slow], axis=1)
-        datr.columns = ["atr_fast", "atr_slow"]
-        datr["Xvalue"] = np.where(
-            (datr["atr_fast"] > datr["atr_slow"])
-            & (datr["atr_fast"].shift(1) < datr["atr_slow"].shift(1)),
-            datr["atr_slow"],
-            np.where(
-                (datr["atr_fast"] < datr["atr_slow"])
-                & (datr["atr_fast"].shift(1) > datr["atr_slow"].shift(1)),
-                datr["atr_slow"],
-                0,
-            ),
-        )
-        # 如果datr["Xvalue"]为0，那么填充为前一行的值
-        datr["Xvalue"] = datr["Xvalue"].replace(0, method="ffill")
-        return datr
-
-
 class AlpSuperDemAtrMulti:
     alpha_name = "super_dematr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
-    start = datetime(2023, 11, 22, 0, 0, 0)
+    start = datetime(2023, 11, 26, 0, 0, 0)
     window_days = 100
 
     sptr_len = 14
     sptr_k = 2.5
     dema_len = 57
-    atr_f = 14
-    atr_s = 29
+    atr_len = 14
     atr_profit = 2
     atr_loss = 3
 
@@ -73,9 +46,8 @@ class AlpSuperDemAtrMulti:
         supertrend = Indicators.supertrend(kdf, self.sptr_len, self.sptr_k)
         kdf_sig = pd.concat([kdf, supertrend], axis=1)
         kdf_sig["dema"] = ta.dema(kdf_sig["close"], length=self.dema_len)
-        datr = Indicators.double_atr(kdf_sig, self.atr_f, self.atr_s)
-        kdf_sig["atr"] = datr["Xvalue"]
-        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_f)
+        kdf_sig["atr"] = ta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.atr_len)
+        kdf_sig["volume_ema"] = ta.ema(kdf_sig["volume_U"], length=self.atr_len)
         kdf_sig["signal"] = 0
 
         kdf_sig.loc[
@@ -97,13 +69,12 @@ class AlpSuperDemAtrMulti:
         return kdf_sig[["high", "low", "close", "atr", "signal", "dema"]]
 
     def get_backtest_result(
-        self, sptr_len, sptr_k, dema_len, atr_f, atr_s, atr_profit, atr_loss
+        self, sptr_len, sptr_k, dema_len, atr_len, atr_profit, atr_loss
     ) -> pd.DataFrame:
         self.sptr_len = sptr_len
         self.sptr_k = sptr_k
         self.dema_len = dema_len
-        self.atr_f = atr_f
-        self.atr_s = atr_s
+        self.atr_len = atr_len
         self.atr_profit = atr_profit
         self.atr_loss = atr_loss
 
@@ -125,13 +96,12 @@ class AlpSuperDemAtrMulti:
 
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len", 8, 30),
+            "sptr_len": trial.suggest_int("sptr_len",  6, 30, step=3),
             "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 12, 60),
-            "atr_f": trial.suggest_int("atr_f", 6, 15),
-            "atr_s": trial.suggest_int("atr_s", 15, 30),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
-            "atr_loss": trial.suggest_int("atr_loss", 1, 4),
+            "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
+            "atr_len": trial.suggest_int("atr_len", 12, 60, step=3),
+            "atr_profit": trial.suggest_int("atr_profit", 3, 6),
+            "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
         result = self.get_backtest_result(**kwargs)
         performance = self.evaluate_performance(result)
@@ -202,8 +172,7 @@ if __name__ == "__main__":
         test.sptr_len,
         test.sptr_k,
         test.dema_len,
-        test.atr_f,
-        test.atr_s,
+        test.atr_len,
         test.atr_profit,
         test.atr_loss,
     )

@@ -5,10 +5,9 @@ from retry import retry
 import okx.MarketData as MarketData
 from binance.um_futures import UMFutures
 import sys
-temp = "/Users/rivachol/Desktop/Rivachol_v2/Disco/"
+temp = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp)
 import contek_timbersaw as timbersaw
-timbersaw.setup()
 
 class BnOkxArbi:
     """
@@ -123,5 +122,6 @@ class BnOkxArbi:
             time.sleep(2)
 
 if __name__ == "__main__":
+    timbersaw.setup()
     arbi = BnOkxArbi()
     arbi.main()

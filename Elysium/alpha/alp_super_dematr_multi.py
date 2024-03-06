@@ -2,12 +2,12 @@ import logging
 import time
 import pandas as pd
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/Elysium"
+temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
-from market.market_bot import MarketEngine
-from alpha.idx_super_dema import IdxSuperDema
-from alpha.stgy_dematr_multi import StgyDematrMulti
-
+from Elysium.market.market_bot import MarketEngine
+from Elysium.alpha.idx_super_dema import IdxSuperDema
+from Elysium.alpha.stgy_dematr_multi import StgyDematrMulti
+import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -26,25 +26,25 @@ class AlpSuperDematr:
     index_name = "idx_super_dema"
     strategy_name = "stgy_dematr_multi"
 
-    sptr_len = 14
-    sptr_k = 2.5
-    dema_len = 53
-    atr_f = 10
-    atr_s = 28
-    atr_profit = 2
-    atr_loss = 4
-
     logger = logging.getLogger(alpha_name)
 
-    def __init__(self, money, leverage, sizer) -> None:
+    def __init__(self, money, leverage, sizer, params:dict) -> None:
         self.money = money
         self.leverage = leverage
         self.sizer = sizer
+        self._set_params(params)
+    
+    def _set_params(self, params:dict):
+        self.sptr_len = params["sptr_len"]
+        self.sptr_k = params["sptr_k"]
+        self.dema_len = params["dema_len"]
+        self.atr_len = params["atr_len"]
+        self.atr_profit = params["atr_profit"]
+        self.atr_loss = params["atr_loss"]
 
-
-    def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
+    def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
-            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_f, self.atr_s)
+            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len, self.atr_len)
             strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
@@ -70,9 +70,9 @@ class AlpSuperDematr:
 
 
 if __name__ == "__main__":
-    import contek_timbersaw as timbersaw
     timbersaw.setup()
-    alp = AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.2)
+    params = {'sptr_len': 12, 'sptr_k': 2.5, 'dema_len': 48, 'atr_len': 54, 'atr_profit': 3, 'atr_loss': 4}
+    alp = AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.2, params = params)
     market = MarketEngine('BTCUSDT', '5m')
     while True:
         market.update_CKlines()

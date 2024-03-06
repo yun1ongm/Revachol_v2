@@ -10,7 +10,6 @@ sys.path.append(temp_path)
 import contek_timbersaw as timbersaw
 from Elysium.market.market_bot import MarketEngine
 from Elysium.alpha.alp_super_dematr_multi import AlpSuperDematr
-from Elysium.alpha.alp_super_dema_bodyatr_multi import AlpSuperDemaBodyatr
 from Elysium.alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
 
 class ModelUrban:
@@ -30,9 +29,10 @@ class ModelUrban:
 
     def __init__(self, symbol, timeframe) -> None:
         self.alphas = [
-            AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.01),
-            AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.01),
-            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.02),
+            AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.01,
+                           params = {'sptr_len': 12, 'sptr_k': 2.5, 'dema_len': 48, 'atr_len': 54, 'atr_profit': 3, 'atr_loss': 4}),
+            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.02,
+                                 params = {'adx_len': 24, 'rsi_len': 21, 'kd': 5, 'dema_len': 33, 'atr_len': 27, 'atr_profit': 3, 'atr_loss': 4}),
         ]
         self.market = MarketEngine(symbol, timeframe)
         self.signal_position = None
