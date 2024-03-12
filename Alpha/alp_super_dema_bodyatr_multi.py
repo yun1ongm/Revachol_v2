@@ -16,7 +16,7 @@ import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
 
-class AlpSuperDemaBodyatr(BacktestFramework):
+class AlpSuperDemaBodyatrMulti(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -27,7 +27,7 @@ class AlpSuperDemaBodyatr(BacktestFramework):
             position and signal in portfolio: pd.DataFrame
         
     """
-    alpha_name = "alp_super_dema_bodyatr"
+    alpha_name = "alp_super_dema_bodyatr_multi"
     index_name = "idx_super_dema"
     strategy_name = "stgy_bodyatr_multi"
     symbol = "BTCUSDT"
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     params = {'sptr_len': 45, 'sptr_k': 3.0, 'dema_len': 60, 'atr_len': 36, 'harvest_ratio': 1.8, 'retreat_ratio': 1.2}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpSuperDemaBodyatrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpSuperDemaBodyatr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpSuperDemaBodyatrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")

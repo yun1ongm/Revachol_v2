@@ -1,0 +1,64 @@
+2024-03-12T17:24:16 INFO account_analysis.py:57 - PNL:-104.14519999999997 Commision:18.429432759999987 wins:18 losses:27
+2024-03-12T17:25:10 INFO account_analysis.py:57 - PNL:-2.7790000000000004 Commision:2.29762547 wins:3 losses:1
+2024-03-12T17:27:07 ERROR __init__.py:60 - Unhandled exception.
+Traceback (most recent call last):
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 73, in <module>
+    ta = TradeAnalyzer('binance', 'BTCUSDT')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 15, in __init__
+    self.trades = self._bn_fetch_trades()
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 33, in _bn_fetch_trades
+    self.logger.info('Fetched '+len(res_df)+' trades')
+                  ~~~~~~~~~~^~~~~~~~~~~~
+TypeError: can only concatenate str (not "int") to str
+2024-03-12T17:27:57 INFO account_analysis.py:33 - Fetched 115 trades
+2024-03-12T17:27:57 INFO account_analysis.py:57 - PNL:-104.14519999999997 Commision:18.429432759999987 wins:18 losses:27
+2024-03-12T17:35:59 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:35:59 ERROR __init__.py:60 - Unhandled exception.
+Traceback (most recent call last):
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 84, in <module>
+    ta = TradeAnalyzer('okx', 'BTCUSDT')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 21, in __init__
+    self.trades = self._okx_fetch_trades()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/account_analysis.py", line 49, in _okx_fetch_trades
+    res_df = pd.DataFrame(response)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/py311/lib/python3.11/site-packages/pandas/core/frame.py", line 733, in __init__
+    mgr = dict_to_mgr(data, index, columns, dtype=dtype, copy=copy, typ=manager)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/py311/lib/python3.11/site-packages/pandas/core/internals/construction.py", line 503, in dict_to_mgr
+    return arrays_to_mgr(arrays, columns, index, dtype=dtype, typ=typ, consolidate=copy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/py311/lib/python3.11/site-packages/pandas/core/internals/construction.py", line 114, in arrays_to_mgr
+    index = _extract_index(arrays)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rivachol/Desktop/Rivachol_v2/py311/lib/python3.11/site-packages/pandas/core/internals/construction.py", line 667, in _extract_index
+    raise ValueError("If using all scalar values, you must pass an index")
+ValueError: If using all scalar values, you must pass an index
+2024-03-12T17:39:18 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:39:18 ERROR account_analysis.py:65 - Error fetching trades: If using all scalar values, you must pass an index
+2024-03-12T17:39:18 INFO account_analysis.py:84 - PNL:0 Commision:0 wins:0 losses:0
+2024-03-12T17:42:13 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:42:13 ERROR <ipython-input-9-095574aba2bc>:65 - Error fetching trades: If using all scalar values, you must pass an index
+2024-03-12T17:43:08 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:46:54 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:53:44 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:53:44 ERROR <ipython-input-1-2b7117978e23>:67 - Error fetching trades: If using all scalar values, you must pass an index
+2024-03-12T17:54:02 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T17:55:18 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T18:00:05 ERROR account_analysis.py:67 - Error fetching trades: 'int' object has no attribute 'encode'
+2024-03-12T18:00:05 INFO account_analysis.py:86 - PNL:0 Commision:0 wins:0 losses:0
+2024-03-12T18:00:44 ERROR <ipython-input-1-8ea1cc28c7c1>:67 - Error fetching trades: 'int' object has no attribute 'encode'
+2024-03-12T18:01:21 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T18:01:21 ERROR account_analysis.py:67 - Error fetching trades: If using all scalar values, you must pass an index
+2024-03-12T18:01:21 INFO account_analysis.py:86 - PNL:0 Commision:0 wins:0 losses:0
+2024-03-12T18:02:30 INFO _client.py:1027 - HTTP Request: GET https://www.okx.com/api/v5/account/positions-history?instId=BTC-USDT-SWAP "HTTP/2 401 Unauthorized"
+2024-03-12T18:02:30 ERROR account_analysis.py:67 - Error fetching trades: If using all scalar values, you must pass an index
+2024-03-12T18:02:30 INFO account_analysis.py:86 - PNL:0 Commision:0 wins:0 losses:0
+2024-03-12T18:02:44 INFO account_analysis.py:48 - Fetched 114 trades
+2024-03-12T18:02:44 INFO account_analysis.py:86 - PNL:-97.09919999999998 Commision:18.164348359999988 wins:18 losses:26
+2024-03-12T18:08:50 INFO account_analysis.py:48 - Fetched 114 trades
+2024-03-12T18:08:50 INFO account_analysis.py:86 - PNL:-97.09919999999998 Commision:18.164348359999988 wins:18 losses:26

@@ -17,7 +17,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class AlpSuperDematr(BacktestFramework):
+class AlpSuperDematrMulti(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     params = {'sptr_len': 39, 'sptr_k': 2.5, 'dema_len': 15, 'atr_len': 45, 'atr_profit': 3, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpSuperDematr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpSuperDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -191,7 +191,7 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpSuperDematr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpSuperDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")

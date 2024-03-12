@@ -16,7 +16,7 @@ import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
 
-class AlpAdxStochrsiDematr(BacktestFramework):
+class AlpAdxStochrsiDematrMulti(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -27,7 +27,7 @@ class AlpAdxStochrsiDematr(BacktestFramework):
         Return:
             position and signal in portfolio: pd.DataFrame
     """
-    alpha_name = "alp_adx_stochrsi_dematr"
+    alpha_name = "alp_adx_stochrsi_dematr_multi"
     index_name = "idx_adx_stochrsi"
     strategy_name = "stgy_dematr_multi"
     symbol = "BTCUSDT"
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     params = {'adx_len': 26, 'rsi_len': 14, 'kd': 5, 'dema_len': 15, 'atr_len': 57, 'atr_profit': 3, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
