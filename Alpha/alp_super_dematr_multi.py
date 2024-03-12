@@ -76,8 +76,8 @@ class AlpSuperDematrMulti(BacktestFramework):
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_portfolio(idx_signal)
-            position = stgy_signal[f"position_{self.strategy_name}"][-1]
-            signal = stgy_signal[f"signal_{self.strategy_name}"][-1]
+            position = stgy_signal[f"position"][-1]
+            signal = stgy_signal[f"signal"][-1]
             entry_price = stgy_signal["entry_price"][-1]
             stop_loss = stgy_signal["stop_loss"][-1]
             stop_profit = stgy_signal["stop_profit"][-1]

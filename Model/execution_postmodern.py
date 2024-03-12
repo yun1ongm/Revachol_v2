@@ -2,13 +2,13 @@ import logging
 import warnings
 warnings.filterwarnings("ignore")
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
-sys.path.append(temp_path)
+main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+sys.path.append(main_path)
 from binance.um_futures import UMFutures
 from binance.error import ClientError
-from config.binance_api import bn_key, bn_secret
 import contek_timbersaw as timbersaw
 import pandas as pd
+import yaml
 from retry import retry
 
 class ExecPostmodern:
@@ -31,17 +31,27 @@ class ExecPostmodern:
     logger = logging.getLogger(executor)
 
     def __init__(self, symbol) -> None:
-        self.client = self._connect_api(key=bn_key, secret=bn_secret)
+        config = self._read_config()
+        self.client = self._connect_api(key=config["bn_api"]["key"], secret=config["bn_api"]["secret"])
         self.symbol = symbol
         self.slippage = self._determine_slippage(symbol)
 
     def _determine_slippage(self, symbol: str) -> int:
         if symbol == "BTCUSDT":
-            slippage = -5
+            slippage = -6
         elif symbol == "ETHUSDT":
-            slippage = -0.3
+            slippage = -0.4
 
         return slippage
+    
+    def _read_config(self, rel_path = "config.yaml") -> dict:
+        try:
+            with open(main_path + rel_path, 'r') as stream:
+                config = yaml.safe_load(stream)
+        except FileNotFoundError:
+            self.logger.error('Config file not found')
+            sys.exit(1)
+        return config
 
     @retry(ClientError, tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:

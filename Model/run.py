@@ -4,10 +4,10 @@ warnings.filterwarnings("ignore")
 import time
 import sys
 import threading
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
-sys.path.append(temp_path)
-from Elysium.model.model_urban import ModelUrban
-from Elysium.model.execution_postmodern import ExecPostmodern
+main_path = "/Users/rivachol/Desktop/Rivachol_v2"
+sys.path.append(main_path)
+from Model.Elysium.model_urban import ModelUrban
+from Model.execution_postmodern import ExecPostmodern
 import contek_timbersaw as timbersaw
 timbersaw.setup()
 
@@ -24,7 +24,7 @@ class AlgoTrade:
     def _calc_signal_position(self) -> None:
         while True:
             previous_signal_position = self.model.signal_position if self.model.signal_position is not None else 0
-            self.model.market.update_CKlines()
+            self.model.market.update_klines()
             self.model.merging_signal()
             if self.model.signal_position != previous_signal_position:
                 change = self.model.signal_position - previous_signal_position

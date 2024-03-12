@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-
+import yaml
 import logging
 import warnings
 warnings.filterwarnings("ignore")
 import time
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2"
-sys.path.append(temp_path)
+main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+sys.path.append(main_path)
 import contek_timbersaw as timbersaw
-from Elysium.market.market_bot import MarketEngine
-from Elysium.alpha.alp_super_dematr_multi import AlpSuperDematr
-from Elysium.alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematr
+from Market.kline import KlineGenerator
+from Alpha.alp_super_dematr_multi import AlpSuperDematrMulti
+from Alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematrMulti
 
 class ModelUrban:
     """
@@ -28,14 +28,24 @@ class ModelUrban:
     logger = logging.getLogger(model_name)
 
     def __init__(self, symbol, timeframe) -> None:
+        config = self._read_config()
         self.alphas = [
-            AlpSuperDematr(money = 1000, leverage = 5, sizer = 0.01,
-                           params = {'sptr_len': 12, 'sptr_k': 2.5, 'dema_len': 48, 'atr_len': 54, 'atr_profit': 3, 'atr_loss': 4}),
-            AlpAdxStochrsiDematr(money = 500, leverage = 5, sizer = 0.02,
-                                 params = {'adx_len': 24, 'rsi_len': 21, 'kd': 5, 'dema_len': 33, 'atr_len': 27, 'atr_profit': 3, 'atr_loss': 4}),
+            AlpSuperDematrMulti(money = 1000, leverage = 5, sizer = 0.01,
+                           params = config["alpha_params"]["alp_super_dematr_multi"], mode = 1),
+            AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.02,
+                                 params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"], mode = 1),
         ]
-        self.market = MarketEngine(symbol, timeframe)
+        self.market = KlineGenerator(symbol, timeframe)
         self.signal_position = None
+
+    def _read_config(self, rel_path = "config.yaml") -> dict:
+        try:
+            with open(main_path + rel_path, 'r') as stream:
+                config = yaml.safe_load(stream)
+        except FileNotFoundError:
+            self.logger.error('Config file not found')
+            sys.exit(1)
+        return config
 
     def merging_signal(self) -> None:
         """generate signals from each alpha and merge them into a single dataframe"""
@@ -59,7 +69,7 @@ if __name__ == "__main__":
         while True:
             try:
                 previous_signal_position = model.signal_position if model.signal_position is not None else 0
-                model.market.update_CKlines()
+                model.market.update_klines()
                 model.merging_signal()
                 if model.signal_position != previous_signal_position:
                     change = model.signal_position - previous_signal_position
