@@ -6,6 +6,10 @@ okx_api:
     secret: "1D34C6D0BAFD9CF88EF8B589720C92DC"
     passphrase: "Luckin8*"
 
+backpack_api:
+    key: "MvRvB3dAF+ObKSjrLbypJZ/Kd485RZ88ZrnqoLShCeI="
+    secret: "gM3WctyAMFbDLBtYC911nNH6lCM878ZDvKXI83gdV3Y="
+
 alpha_params:
     alp_adx_stochrsi_dematr_sing: {'adx_len': 20, 'rsi_len': 47, 'kd': 8, 'dema_len': 21, 'atr_len': 12, 'atr_profit': 3, 'atr_loss': 4}
     alp_adx_stochrsi_dematr_multi: {'adx_len': 26, 'rsi_len': 14, 'kd': 5, 'dema_len': 15, 'atr_len': 57, 'atr_profit': 3, 'atr_loss': 4}

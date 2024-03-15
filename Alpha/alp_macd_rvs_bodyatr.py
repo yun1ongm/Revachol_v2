@@ -10,13 +10,13 @@ temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
 from backtest import BacktestFramework
 from Market.kline import KlineGenerator
-from Index.idx_macd_trend import IdxMacdTrend
-from Strategy.stgy_dematr_multi import StgyDematrMulti
+from Index.idx_macd_rvs import IdxMacdRvs
+from Strategy.stgy_bodyatr_multi import StgyBodyatrMulti
 import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
 
-class AlpMacdDematrMulti(BacktestFramework):
+class AlpMacdRvsBodyatrMulti(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -27,9 +27,9 @@ class AlpMacdDematrMulti(BacktestFramework):
             position and signal in portfolio: pd.DataFrame
         
     """
-    alpha_name = "alp_macd_dematr"
-    index_name = "idx_macd_trend"
-    strategy_name = "stgy_dematr_multi"
+    alpha_name = "alp_macd_rvs_bodyatr_multi"
+    index_name = "idx_macd_rvs"
+    strategy_name = "stgy_bodyatr_multi"
     symbol = "BTCUSDT"
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
@@ -74,9 +74,9 @@ class AlpMacdDematrMulti(BacktestFramework):
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
-            index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
-            idx_signal = index.generate_dematr_signal()
+            index = IdxMacdRvs(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+            strategy = StgyBodyatrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+            idx_signal = index.generate_bodyatr_signal()
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
             position = portfolio[f"position"][-1]
@@ -97,14 +97,13 @@ class AlpMacdDematrMulti(BacktestFramework):
             return signal_position
         except Exception as e:
             self.logger.exception(e)
-
     def get_backtest_result(
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-        strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
-        idx_signal = index.generate_dematr_signal()
+        index = IdxMacdRvs(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+        strategy = StgyBodyatrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+        idx_signal = index.generate_bodyatr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         self.output_result(portfolio)
         return portfolio
@@ -188,7 +187,7 @@ if __name__ == "__main__":
     params = {'fast': 12, 'slow': 23, 'signaling': 9, 'threshold': 0.5, 'dema_len': 57, 'atr_profit': 3, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpMacdDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpMacdRvsBodyatrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -196,7 +195,7 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpMacdDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpMacdRvsBodyatrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
