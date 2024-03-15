@@ -49,6 +49,7 @@ class ModelUrban:
 
     def merging_signal(self) -> None:
         """generate signals from each alpha and merge them into a single dataframe"""
+        previous_signal_position = self.signal_position if self.signal_position is not None else 0
         merged_position = 0
         for alpha in self.alphas:
             signal_position = alpha.generate_signal_position(self.market.kdf)
@@ -57,27 +58,30 @@ class ModelUrban:
             else:
                 self.logger.info(f"Alpha:{alpha.alpha_name} did not generate a signal")
         self.signal_position = round(merged_position,3)
-        self.logger.info(
-            f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --"
-        )
-    
+        self._export_signal_position()
+        if self.signal_position != previous_signal_position:
+            change = self.signal_position - previous_signal_position
+            model.logger.warning(f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --")
+        self.logger.info(f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --")
+
+    def _export_signal_position(self):
+        """export signal position to a yaml file"""
+        self.update_time = self.market.kdf.index[-1]
+        with open(main_path + "signal_position.yaml", "w") as file:
+            yaml.dump({"signal_position": str(self.signal_position),
+                        "update_time":str(self.update_time)}, file)
+            
+    def run(self) -> None:
+        while True:
+            try:
+                self.market.update_klines()
+                self.merging_signal()
+                time.sleep(10)
+            except Exception as e:
+                self.logger.exception(e)
+                time.sleep(5)
 
 if __name__ == "__main__":
     timbersaw.setup()
     model = ModelUrban(symbol="BTCUSDT", timeframe="5m")
-    def calc_signal_position(model):
-        while True:
-            try:
-                previous_signal_position = model.signal_position if model.signal_position is not None else 0
-                model.market.update_klines()
-                model.merging_signal()
-                if model.signal_position != previous_signal_position:
-                    change = model.signal_position - previous_signal_position
-                    model.logger.warning(
-                        f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"
-                    )
-                time.sleep(10)
-            except Exception as e:
-                model.logger.exception(e)
-                time.sleep(5)
-    calc_signal_position(model)
+    model.run()
