@@ -1,5 +1,0 @@
-
-Rank 4:
-  Params: {'sptr_len': 39, 'sptr_k': 2.5, 'dema_len': 15, 'atr_len': 45, 'atr_profit': 3, 'atr_loss': 4}
-  Value: 29.312742711296202
-  Performance: {'final_value': 21501.423983999764, 'win_ratio': 0.4202126541987622, 'single_avg_wlr': 2.3484593985787643, 'total_trades': 376, 'return': 1.1501423983999763, 't_sharpe': 29.312742711296202, 'commission': 0.7909176016000001, 'score': 11350.20736924705}

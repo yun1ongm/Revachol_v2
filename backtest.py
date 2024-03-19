@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 class BacktestFramework:
+
     def initialize_portfolio_variables(self, kdf: pd.DataFrame) -> pd.DataFrame:
         """initialize portfolio dataframe
         
@@ -71,6 +72,7 @@ class BacktestFramework:
                 trades["cumulative_loss"] += pnl
 
         final_value = result["value"][-1] + result["unrealized_pnl"][-1]
+        max_drawdown = np.max(np.maximum.accumulate(result["value"]) - result["value"])
         avg_trade_pnl = (final_value - self.money) / (trades["total"] + 0.0001)
         win_ratio = trades["win"] / (trades["total"] + 0.0001)
         avg_winning = trades["cumulative_win"] / (trades["win"] + 0.0001)
@@ -78,7 +80,7 @@ class BacktestFramework:
         single_avg_wlr = -avg_winning / (avg_losing + 0.0001)
         ret = final_value / self.money - 1
         comm_ratio = result["commission"].sum() / self.money
-        score =  win_ratio * single_avg_wlr * (final_value - self.money) 
+        score =  win_ratio  * (final_value - self.money) / (max_drawdown + 0.0001)
 
         sigma_sum = np.sum(
             (pnl - avg_trade_pnl) ** 2 for pnl in result["realized_pnl"] if pnl != 0
@@ -92,6 +94,7 @@ class BacktestFramework:
             "single_avg_wlr": single_avg_wlr,
             "total_trades": trades["total"],
             "return": ret,
+            "max_drawdown": max_drawdown,
             "t_sharpe": t_sharpe,
             "commission": comm_ratio,
             "score": score,

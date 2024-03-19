@@ -30,9 +30,9 @@ class StgyDematrMulti(BacktestFramework):
 
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
+            money_thresh = (entry_price * position < self.money * self.leverage)
             stop_loss = dema - atr * self.atr_loss
             stop_profit = dema + atr * self.atr_profit
-            money_thresh = (entry_price * position < self.money * self.leverage)
             if low < stop_loss or high > stop_profit:
                 realized_pnl = unrealized_pnl
                 entry_price = 0
@@ -45,23 +45,17 @@ class StgyDematrMulti(BacktestFramework):
                 commission = self.comm * self.sizer * close
                 value -= commission
             elif signal == -1:
-                if position > self.sizer:
-                    entry_price =(entry_price * position - close * self.sizer)/(position - self.sizer)
-                    position += - self.sizer
-                    commission = self.comm * self.sizer * close
-                    value -= commission
-                else:
-                    realized_pnl = unrealized_pnl
-                    entry_price = 0
-                    position = 0
-                    commission = self.comm * position * close
-                    value += unrealized_pnl - commission
+                realized_pnl = unrealized_pnl
+                entry_price = 0
+                position = 0
+                commission = self.comm * position * close
+                value += unrealized_pnl - commission
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
+            money_thresh = (entry_price * -position < self.money * self.leverage)
             stop_loss = dema + atr * self.atr_loss
             stop_profit = dema - atr * self.atr_profit
-            money_thresh = (entry_price * -position < self.money * self.leverage)
             if high > stop_loss or low < stop_profit:
                 realized_pnl = unrealized_pnl
                 entry_price = 0
@@ -74,17 +68,11 @@ class StgyDematrMulti(BacktestFramework):
                 commission = self.comm * self.sizer * close
                 value -= commission
             elif signal == 1:
-                if position < -self.sizer:
-                    entry_price =(entry_price * position + close * self.sizer)/(position + self.sizer)
-                    position += self.sizer
-                    commission = self.comm * self.sizer * close
-                    value -= commission
-                else:
-                    realized_pnl = unrealized_pnl
-                    entry_price = 0
-                    position = 0
-                    commission = self.comm * -position * close
-                    value += unrealized_pnl - commission
+                realized_pnl = unrealized_pnl
+                entry_price = 0
+                position = 0
+                commission = self.comm * -position * close
+                value += unrealized_pnl - commission
 
         else:
             entry_price = 0

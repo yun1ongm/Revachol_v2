@@ -1,6 +1,0 @@
-2024-03-12 08:19:16,249, Start optimizing alp_adx_stochrsi_dematr for goal t_sharpe on BTCUSDT 5m from 2023-11-30 to 2024-03-09 based on goal of t_sharpe
-2024-03-12 08:30:08,047, Top 10 results:
-Rank 1:
-  Params: {'adx_len': 26, 'rsi_len': 14, 'kd': 5, 'dema_len': 15, 'atr_len': 57, 'atr_profit': 3, 'atr_loss': 4}
-  Value: 28.429349671410808
-  Performance: {'final_value': 13229.922655999962, 'win_ratio': 0.6507173920012478, 'single_avg_wlr': 0.9761649928976615, 'total_trades': 209, 'return': 0.32299226559999616, 't_sharpe': 28.429349671410808, 'commission': 0.07526473439999999, 'score': 2051.671219350474}

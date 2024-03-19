@@ -10,7 +10,7 @@ temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
 from backtest import BacktestFramework
 from Market.kline import KlineGenerator
-from Index.idx_adx_stochrsi import IdxAdxStochrsi
+from Index.idx_adxstochrsi import IdxAdxStochrsi
 from Strategy.stgy_dematr_sing import StgyDematrSing
 import contek_timbersaw as timbersaw
 import warnings

@@ -9,8 +9,8 @@ main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(main_path)
 import contek_timbersaw as timbersaw
 from Market.kline import KlineGenerator
-from Alpha.alp_super_dematr_multi import AlpSuperDematrMulti
-from Alpha.alp_adx_stochrsi_dematr_multi import AlpAdxStochrsiDematrMulti
+from Alpha.alp_super_dematr_sing import AlpSuperDematrSing
+from Alpha.alp_adxstochrsi_dematr_multi import AlpAdxStochrsiDematrMulti
 
 class ModelUrban:
     """
@@ -30,8 +30,8 @@ class ModelUrban:
     def __init__(self, symbol, timeframe) -> None:
         config = self._read_config()
         self.alphas = [
-            AlpSuperDematrMulti(money = 1000, leverage = 5, sizer = 0.01,
-                           params = config["alpha_params"]["alp_super_dematr_multi"], mode = 1),
+            AlpSuperDematrSing(money = 1000, leverage = 5, sizer = 0.01,
+                           params = config["alpha_params"]["alp_super_dematr_sing"], mode = 1),
             AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.02,
                                  params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"], mode = 1),
         ]

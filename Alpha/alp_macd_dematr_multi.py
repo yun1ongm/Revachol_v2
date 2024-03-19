@@ -46,9 +46,9 @@ class AlpMacdDematrMulti(BacktestFramework):
         self._set_params(params)
         if mode == 0:
             self.num_evals = 100
-            self.target = "t_sharpe"
+            self.target = "score"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 1, 0, 0, 0), 
+                                    start = datetime(2023, 12, 8, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -122,12 +122,12 @@ class AlpMacdDematrMulti(BacktestFramework):
 
     def objective(self, trial):
         kwargs = {
-            "fast": trial.suggest_int("fast", 6, 18),
+            "fast": trial.suggest_int("fast", 8, 16),
             "slow": trial.suggest_int("slow", 20, 32),
-            "signaling": trial.suggest_int("signaling", 4, 14),
-            "threshold": trial.suggest_float("threshold", 0.2, 2, step=0.2),
+            "signaling": trial.suggest_int("signaling", 6, 12),
+            "threshold": trial.suggest_float("threshold", 0.2, 1, step=0.2),
             "dema_len": trial.suggest_int("dema_len", 15, 60),
-            "atr_profit": trial.suggest_int("atr_profit", 3, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
 
