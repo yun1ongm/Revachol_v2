@@ -5,6 +5,7 @@ import operator
 import optuna
 from datetime import datetime
 import pandas as pd
+import matplotlib.pyplot as plt
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
@@ -46,9 +47,9 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         self._set_params(params)
         if mode == 0:
             self.num_evals = 100
-            self.target = "score"
+            self.target = "t_sharpe"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 8, 0, 0, 0), 
+                                    start = datetime(2023, 12, 10, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -102,14 +103,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
-        self.output_result(portfolio)
         return portfolio
-
-    def output_result(self, result:pd.DataFrame) -> None:
-        os.makedirs("result_book", exist_ok=True)
-        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
-        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
-        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.calculate_performance(result)
@@ -123,7 +117,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             "k": trial.suggest_int("k", 2, 5),
             "d": trial.suggest_int("d", 2, 5),           
             "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
-            "atr_profit": trial.suggest_int("atr_profit", 3, 8),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
 
@@ -168,17 +162,36 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
 
         return study.best_params, study.best_value
 
-    def _write_to_log(self, trials):
+    def _write_to_log(self, trials) -> None:
         log_message = "Top 10 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n"
             result = self.get_backtest_result(trial.params)
+            self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
-
         self._log(log_message)
+
+    def output_result(self, result:pd.DataFrame, number) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.csv")
+        self._save_curve(result, number)
+
+    def _save_curve(self, result:pd.DataFrame, number) -> None:
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        plt.figure(figsize=(12, 6))
+        plt.plot(result["value"], label="equity_curve")
+        plt.legend()
+        plt.grid()
+        plt.title(f"Equity Curve {self.alpha_name}")
+        plt.xlabel("Date")
+        plt.ylabel("Equity")
+        plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
     params = {'adx_len': 30, 'rsi_len': 12, 'k': 4, 'd': 2, 'dema_len': 21, 'atr_profit': 6, 'atr_loss': 4}

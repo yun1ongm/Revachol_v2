@@ -33,38 +33,38 @@ class IdxMacdRvs:
 
         return macd_df
     
-    def _bodyatr(self):
-        batr = self.kdf[["high", "low", "close"]]
-        batr["atr"] = ta.atr(batr["high"], batr["low"], batr["close"], self.dema_len)
-        batr['body'] = batr['high'] - batr['low']
-        batr['bodyatr'] = batr['body'] / batr['atr']
-        return batr[['bodyatr', 'atr']]
+    def _candle_pressure(self):
+        canp = self.kdf[["open", "high", "low", "close"]]
+        canp['body'] = (canp['close'] - canp['open'])/ canp['close']
+        canp['dump'] = (canp['high'] - canp['close']) / canp['close']
+        canp['pump'] = (canp['close'] - canp['low']) / canp['close']
+
+        return canp[["body", "dump", "pump"]]
     
-    def generate_bodyatr_signal(self) -> pd.DataFrame:
-            macd = self._macd()
-            bodyatr = self._bodyatr()
-            kdf_sig = pd.concat([self.kdf, macd, bodyatr], axis=1) 
-            kdf_sig["signal"] = 0
-            kdf_sig["stop_price"] = 0
-            # 零下金叉背离
-            last_gx = 0
-            last_price = 0      
-            for index, value in kdf_sig["GXvalue"].items():
-                price = kdf_sig["low"].at[index]
-                if value < last_gx and price > last_price:
-                    kdf_sig.at[index, "signal"] = 1
-                    kdf_sig["stop_price"] = kdf_sig["low"].at[index] - kdf_sig["atr"].at[index]
-                if value < -self.threshold:
-                    last_gx = value
-                    last_price = kdf_sig["close"].at[index]
-            # 零上死叉背离
-            last_dx = 0
-            last_price = 0
-            for index, value in kdf_sig["DXvalue"].items():
-                price = kdf_sig["high"].at[index]
-                if value > last_dx and price < last_price:
-                    kdf_sig.at[index, "signal"] = -1
-                if value > self.threshold:
-                    last_dx = value
-                    last_price = kdf_sig["close"].at[index]
-            return kdf_sig[["open", "volume_U", "high", "low", "close", "stop_price", "bodyatr", "signal"]]
+    def generate_cansure_signal(self) -> pd.DataFrame:
+        macd = self._macd()
+        canp = self._candle_pressure()
+        kdf_sig = pd.concat([self.kdf, macd, canp], axis=1) 
+        kdf_sig["signal"] = 0
+        # 零下金叉背离
+        last_gx = 0
+        last_price = 0      
+        for index, value in kdf_sig["GXvalue"].items():
+            price = kdf_sig["low"].at[index]
+            if value < last_gx and price > last_price:
+                kdf_sig.at[index, "signal"] = 1
+            if value < -self.threshold:
+                last_gx = value
+                last_price = kdf_sig["close"].at[index]
+        # 零上死叉背离
+        last_dx = 0
+        last_price = 0
+        for index, value in kdf_sig["DXvalue"].items():
+            price = kdf_sig["high"].at[index]
+            if value > last_dx and price < last_price:
+                kdf_sig.at[index, "signal"] = -1
+            if value > self.threshold:
+                last_dx = value
+                last_price = kdf_sig["close"].at[index]
+                
+        return kdf_sig[["open", "volume_U", "high", "low", "close", "pump", "dump", "signal"]]

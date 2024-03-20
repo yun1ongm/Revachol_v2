@@ -4,6 +4,7 @@ from retry import retry
 
 import okx.MarketData as MarketData
 from binance.um_futures import UMFutures
+import pandas as pd
 import sys
 temp = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp)
@@ -14,8 +15,8 @@ class BnOkxArbi:
     This class is used to track arbitrage opportunities between Binance and Okx
     """
     arbitrage_name = "binance_okx_arbitrage"
-    symbols_list = ["BTCUSD", "ETHUSD", "SOLUSD", "BCHUSD", "ORDIUSD", 
-                    "DOGEUSD", "XRPUSD"]
+    symbols_list = ["WLDUSD", "ORDIUSD", "AVAXUSD", "APTUSD", "OPUSD", "OMUSD", "FTMUSD", "JUPUSD"
+                    "SUIUSD", "ARBUSD", "FILUSD", "NEARUSD", "FRONTUSD"]
 
     bin_comm = 0.0005
     okx_comm = 0.0005
@@ -81,10 +82,10 @@ class BnOkxArbi:
                 }
         
         return order_book
-    
+
     def is_arbi_trade(self, order_book: dict) -> bool:
         for symbol, book in order_book.items():
-            offset = round(book['bin_bid'] * self.okx_comm*2,4)
+            offset = round(book['bin_bid'] * self.okx_comm*4,4)
             positive_gap = round((book['okx_bid'] - book['bin_ask']),4)
             negative_gap = round((book['bin_bid'] - book['okx_ask']),4)
             self.logger.info(f'{symbol}:positive gap: {positive_gap}, negative gap: {negative_gap}, offset: {offset}')
@@ -113,13 +114,16 @@ class BnOkxArbi:
             
     def main(self):
         while True:
+            start = time.time()
             tickers = self.fetch_tickers()
             if tickers:
                 orderbook = self.parse_orderbook(tickers)
                 flag = self.is_arbi_trade(orderbook)
                 if flag:
                     self.logger.warning('------------------trade to be made!----------------------')
-            time.sleep(2)
+            end = time.time()
+            self.logger.info(f'Time taken: {end - start}')
+            time.sleep(0.5)
 
 if __name__ == "__main__":
     timbersaw.setup()

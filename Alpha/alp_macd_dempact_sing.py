@@ -5,18 +5,19 @@ import operator
 import optuna
 from datetime import datetime
 import pandas as pd
+import matplotlib.pyplot as plt
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
 from backtest import BacktestFramework
 from Market.kline import KlineGenerator
 from Index.idx_macd_trend import IdxMacdTrend
-from Strategy.stgy_dematr_multi import StgyDematrMulti
+from Strategy.stgy_dempact_sing import StgyDempactSing
 import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
 
-class AlpMacdDematrMulti(BacktestFramework):
+class AlpMacdDempactSing(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -27,9 +28,9 @@ class AlpMacdDematrMulti(BacktestFramework):
             position and signal in portfolio: pd.DataFrame
         
     """
-    alpha_name = "alp_macd_dematr"
+    alpha_name = "alp_macd_dempact_sing"
     index_name = "idx_macd_trend"
-    strategy_name = "stgy_dematr_multi"
+    strategy_name = "stgy_dematr_sing"
     symbol = "BTCUSDT"
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
@@ -46,9 +47,9 @@ class AlpMacdDematrMulti(BacktestFramework):
         self._set_params(params)
         if mode == 0:
             self.num_evals = 100
-            self.target = "score"
+            self.target = "t_sharpe"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 8, 0, 0, 0), 
+                                    start = datetime(2023, 12, 10, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -69,13 +70,13 @@ class AlpMacdDematrMulti(BacktestFramework):
         self.signaling = params["signaling"]
         self.threshold = params["threshold"]
         self.dema_len = params["dema_len"]
-        self.atr_profit = params["atr_profit"]
-        self.atr_loss = params["atr_loss"]
+        self.pct_profit = params["pct_profit"]
+        self.pct_loss = params["pct_loss"]
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
             index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+            strategy = StgyDempactSing(self.pct_profit, self.pct_loss, self.money, self.leverage, self.sizer)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
@@ -103,17 +104,10 @@ class AlpMacdDematrMulti(BacktestFramework):
     ) -> pd.DataFrame:
         self._set_params(params)
         index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-        strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+        strategy = StgyDempactSing(self.pct_profit, self.pct_loss, self.money, self.leverage, self.sizer)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
-        self.output_result(portfolio)
         return portfolio
-
-    def output_result(self, result:pd.DataFrame) -> None:
-        os.makedirs("result_book", exist_ok=True)
-        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
-        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
-        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.calculate_performance(result)
@@ -125,10 +119,10 @@ class AlpMacdDematrMulti(BacktestFramework):
             "fast": trial.suggest_int("fast", 8, 16),
             "slow": trial.suggest_int("slow", 20, 32),
             "signaling": trial.suggest_int("signaling", 6, 12),
-            "threshold": trial.suggest_float("threshold", 0.2, 1, step=0.2),
-            "dema_len": trial.suggest_int("dema_len", 15, 60),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
-            "atr_loss": trial.suggest_int("atr_loss", 2, 4),
+            "threshold": trial.suggest_float("threshold", 0.2, 1, step=0.1),
+            "dema_len": trial.suggest_int("dema_len", 12, 60),
+            "pct_profit": trial.suggest_float("pct_profit", 0.002, 0.02, step=0.002),
+            "pct_loss": trial.suggest_float("pct_loss", 0.002, 0.02, step=0.002),
         }
 
         result = self.get_backtest_result(kwargs)
@@ -179,16 +173,36 @@ class AlpMacdDematrMulti(BacktestFramework):
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n"
             result = self.get_backtest_result(trial.params)
+            self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
 
+    def output_result(self, result:pd.DataFrame, number) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.csv")
+        self._save_curve(result, number)
+
+    def _save_curve(self, result:pd.DataFrame, number) -> None:
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        plt.figure(figsize=(12, 6))
+        plt.plot(result["value"], label="equity_curve")
+        plt.legend()
+        plt.grid()
+        plt.title(f"Equity Curve {self.alpha_name}")
+        plt.xlabel("Date")
+        plt.ylabel("Equity")
+        plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
+
 if __name__ == "__main__":
-    params = {'fast': 12, 'slow': 23, 'signaling': 9, 'threshold': 0.5, 'dema_len': 57, 'atr_profit': 3, 'atr_loss': 4}
+    params = {'fast': 12, 'slow': 23, 'signaling': 9, 'threshold': 0.5, 'dema_len': 57, 'pct_profit': 0.03, 'pct_loss': 0.04}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpMacdDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpMacdDempactSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -196,7 +210,7 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpMacdDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpMacdDempactSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")

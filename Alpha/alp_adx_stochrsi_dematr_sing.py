@@ -5,6 +5,7 @@ import operator
 import optuna
 from datetime import datetime
 import pandas as pd
+import matplotlib.pyplot as plt
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
@@ -47,7 +48,7 @@ class AlpAdxStochrsiDematrSing(BacktestFramework):
             self.num_evals = 100
             self.target = "t_sharpe"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 1, 0, 0, 0), 
+                                    start = datetime(2023, 12, 10, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -101,14 +102,7 @@ class AlpAdxStochrsiDematrSing(BacktestFramework):
         strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
-        self.output_result(portfolio)
         return portfolio
-
-    def output_result(self, result:pd.DataFrame) -> None:
-        os.makedirs("result_book", exist_ok=True)
-        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
-        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
-        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.calculate_performance(result)
@@ -174,10 +168,30 @@ class AlpAdxStochrsiDematrSing(BacktestFramework):
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n"
             result = self.get_backtest_result(trial.params)
+            self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
 
         self._log(log_message)
+
+    def output_result(self, result:pd.DataFrame, number) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.csv")
+        self._save_curve(result, number)
+
+    def _save_curve(self, result:pd.DataFrame, number) -> None:
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        plt.figure(figsize=(12, 6))
+        plt.plot(result["value"], label="equity_curve")
+        plt.legend()
+        plt.grid()
+        plt.title(f"Equity Curve {self.alpha_name}")
+        plt.xlabel("Date")
+        plt.ylabel("Equity")
+        plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
     params = {'adx_len': 20, 'rsi_len': 47, 'kd': 8, 'dema_len': 21, 'atr_len': 12, 'atr_profit': 3, 'atr_loss': 4}

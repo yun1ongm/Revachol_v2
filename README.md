@@ -9,4 +9,5 @@ pyyaml
 binance-futures-connector
 optuna
 pandas-ta
+matplotlib
 

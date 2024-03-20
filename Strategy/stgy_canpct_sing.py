@@ -3,7 +3,7 @@ import sys
 sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
 from backtest import BacktestFramework
 
-class StgyRtaMulti(BacktestFramework):
+class StgyCanpctSing(BacktestFramework):
     """
         Args:
             kdf_signal (pd.DataFrame): dataframe with klines and signal
@@ -24,25 +24,18 @@ class StgyRtaMulti(BacktestFramework):
         self.sizer = sizer
         self.comm = 0.0004
 
-    def _strategy_run(self, value, signal, position, close, pump, dump, stop_price, entry_price) -> tuple:
+    def _strategy_run(self, value, signal, position, close, pump, dump, entry_price) -> tuple:
         realized_pnl = 0
         commission = 0
 
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
-            money_thresh = (entry_price * position < self.money * self.leverage)
-            if close < stop_price or dump > self.retreat_ratio or pump > self.harvest_ratio:
+            if dump > self.retreat_ratio or pump > self.harvest_ratio:
                 realized_pnl = unrealized_pnl
                 entry_price = 0
                 position = 0
                 commission = self.comm * position * close
                 value += unrealized_pnl - commission
-
-            elif signal == 1 and money_thresh:
-                entry_price =(entry_price * position + close * self.sizer)/(position + self.sizer)
-                position += self.sizer
-                commission = self.comm * self.sizer * close
-                value -= commission
 
             elif signal == -1:
                 realized_pnl = unrealized_pnl
@@ -53,19 +46,12 @@ class StgyRtaMulti(BacktestFramework):
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
-            money_thresh = (entry_price * -position < self.money * self.leverage)
-            if close > stop_price or pump > self.retreat_ratio or dump > self.harvest_ratio:
+            if pump > self.retreat_ratio or dump > self.harvest_ratio:
                 realized_pnl = unrealized_pnl
                 entry_price = 0
                 position = 0
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
-
-            elif signal == -1 and money_thresh:
-                entry_price = (entry_price * position - close * self.sizer) / (position - self.sizer)
-                position += -self.sizer
-                commission = self.comm * self.sizer * close
-                value -= commission
 
             elif signal == 1:
                 realized_pnl = unrealized_pnl
@@ -90,7 +76,7 @@ class StgyRtaMulti(BacktestFramework):
                 commission = self.comm * self.sizer * close
                 value -= commission
 
-        return value, signal, position, entry_price, stop_price, unrealized_pnl, realized_pnl, commission
+        return value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission
 
     def generate_portfolio(self, index_signal: pd.DataFrame) -> pd.DataFrame:
         """
@@ -101,17 +87,15 @@ class StgyRtaMulti(BacktestFramework):
         value = self.money
         position = 0
         entry_price = 0
-        stop_price = 0
 
         for index, row in index_signal.iterrows():
             signal = row.signal
             close = row.close
-            stop_price = row.stop_price
             pump = row.pump
             dump = row.dump
 
-            value, signal, position, entry_price, stop_price, unrealized_pnl, realized_pnl, commission= self._strategy_run(
-                 value, signal, position, close, pump, dump, stop_price, entry_price
+            value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission= self._strategy_run(
+                 value, signal, position, close, pump, dump, entry_price
             )
-            portfolio = self.record_values_sp(portfolio, index, value, signal, position, entry_price, stop_price, unrealized_pnl, realized_pnl, commission)
+            portfolio = self.recored_values_canp(portfolio, index, value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission)
         return portfolio

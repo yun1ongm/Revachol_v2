@@ -51,6 +51,17 @@ class BacktestFramework:
         portfolio["commission"].at[index] = commission
 
         return portfolio
+    
+    def recored_values_canp(self, portfolio, index, value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
+        portfolio["value"].at[index] = value
+        portfolio["signal"].at[index] = signal
+        portfolio["position"].at[index] = position
+        portfolio["entry_price"].at[index] = entry_price
+        portfolio["unrealized_pnl"].at[index] = unrealized_pnl
+        portfolio["realized_pnl"].at[index] = realized_pnl
+        portfolio["commission"].at[index] = commission
+
+        return portfolio
 
     def calculate_performance(self, result) -> dict:
         trades = {
