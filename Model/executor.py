@@ -66,7 +66,7 @@ class ExecPostmodern:
             self.logger.error('Position is not read from the file.')
             return 0
 
-    @retry(ClientError, tries=3, delay=1)  
+    @retry(tries=3, delay=1)  
     def _connect_api(self, key, secret) -> UMFutures:
         """connect binance client with apikey and apisecret"""
         client = UMFutures(key=key, secret=secret, timeout=3)
@@ -81,7 +81,7 @@ class ExecPostmodern:
 
         return notionalAmt
 
-    @retry(ClientError, tries=3, delay=1)       
+    @retry(tries=3, delay=1)       
     def _maker_buy(self, amount, ticker) -> None:
         """send post-only buy order"""
         notionalAmt = self._fetch_notional()
@@ -106,7 +106,7 @@ class ExecPostmodern:
             except ClientError as error:
                 self.logger.error(error)
 
-    @retry(ClientError, tries=3, delay=1)  
+    @retry(tries=3, delay=1)  
     def _maker_sell(self, amount, ticker) -> None:
         """send post-only sell order"""
         notionalAmt = self._fetch_notional()
@@ -130,7 +130,7 @@ class ExecPostmodern:
             except ClientError as error:
                 self.logger.error(error)
             
-    @retry(ClientError, tries=3, delay=1)  
+    @retry(tries=3, delay=1)  
     def _cancel_open_orders(self) -> None:
         try:
             orders = pd.DataFrame(self.client.get_all_orders(symbol=self.symbol))
@@ -180,11 +180,17 @@ class ExecPostmodern:
         
     def run(self) -> None:
         while True:
-            complete = self.task()
-            if complete:
-                time.sleep(self.interval)
-            else:
-                time.sleep(self.interval / 5)
+            try:
+                complete = self.task()
+                if complete:
+                    time.sleep(self.interval)
+                else:
+                    time.sleep(self.interval / 5)
+            except Exception as e:
+                self.logger.critical(e)
+                self.logger.critical("Restarting the executor in 10 seconds...")
+                time.sleep(10)
+                continue
 
 if __name__ == "__main__":
     timbersaw.setup()

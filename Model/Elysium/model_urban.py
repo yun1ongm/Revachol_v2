@@ -30,9 +30,9 @@ class ModelUrban:
     def __init__(self, symbol, timeframe) -> None:
         config = self._read_config()
         self.alphas = [
-            AlpSuperDematrSing(money = 1000, leverage = 5, sizer = 0.01,
+            AlpSuperDematrSing(money = 1000, leverage = 5, sizer = 0.02,
                            params = config["alpha_params"]["alp_super_dematr_sing"], mode = 1),
-            AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.02,
+            AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5, sizer = 0.01,
                                  params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"], mode = 1),
         ]
         self.market = KlineGenerator(symbol, timeframe)
