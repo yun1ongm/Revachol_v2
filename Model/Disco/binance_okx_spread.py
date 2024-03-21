@@ -4,7 +4,6 @@ from retry import retry
 
 import okx.MarketData as MarketData
 from binance.um_futures import UMFutures
-import pandas as pd
 import sys
 temp = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp)
@@ -15,7 +14,7 @@ class BnOkxArbi:
     This class is used to track arbitrage opportunities between Binance and Okx
     """
     arbitrage_name = "binance_okx_arbitrage"
-    symbols_list = ["WLDUSD", "ORDIUSD", "AVAXUSD", "APTUSD", "OPUSD", "OMUSD", "FTMUSD", "JUPUSD"
+    symbols_list = ["WLDUSD", "ORDIUSD", "AVAXUSD", "APTUSD", "OPUSD", "OMUSD", "FTMUSD", "JUPUSD",
                     "SUIUSD", "ARBUSD", "FILUSD", "NEARUSD", "FRONTUSD"]
 
     bin_comm = 0.0005
