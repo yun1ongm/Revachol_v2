@@ -1,0 +1,28 @@
+2024-03-23 19:49:00,999, Start optimizing alp_super_dematr_sing for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 19:59:35,111, Top 5 results:
+Rank 1:
+  Params: {'sptr_len': 22, 'sptr_k': 3.0, 'dema_len': 21, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 37.87352055678729
+  Performance: {'final_value': 12554.834836, 'win_ratio': 0.6197180916485593, 'single_avg_wlr': 1.0951242826162368, 'total_trades': 284, 'return': 0.25548348359999995, 'max_drawdown': 609.8316160000013, 't_sharpe': 37.87352055678729, 'commission': 0.11257651639999999, 'score': 2.5962529128989686}
+
+Rank 2:
+  Params: {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 32.51311676909355
+  Performance: {'final_value': 12632.646248, 'win_ratio': 0.5914394585838683, 'single_avg_wlr': 1.0629522650609668, 'total_trades': 257, 'return': 0.2632646247999999, 'max_drawdown': 429.7258040000088, 't_sharpe': 32.51311676909355, 'commission': 0.10213737519999999, 'score': 3.623358184988401}
+
+Rank 3:
+  Params: {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 32.51311676909355
+  Performance: {'final_value': 12632.646248, 'win_ratio': 0.5914394585838683, 'single_avg_wlr': 1.0629522650609668, 'total_trades': 257, 'return': 0.2632646247999999, 'max_drawdown': 429.7258040000088, 't_sharpe': 32.51311676909355, 'commission': 0.10213737519999999, 'score': 3.623358184988401}
+
+Rank 4:
+  Params: {'sptr_len': 26, 'sptr_k': 3.0, 'dema_len': 21, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 29.101444642326673
+  Performance: {'final_value': 12090.011212000007, 'win_ratio': 0.5904434844902784, 'single_avg_wlr': 1.0563046433212837, 'total_trades': 293, 'return': 0.2090011212000007, 'max_drawdown': 729.5414399999936, 't_sharpe': 29.101444642326673, 'commission': 0.11663987880000001, 'score': 1.6915191733112893}
+
+Rank 5:
+  Params: {'sptr_len': 26, 'sptr_k': 3.0, 'dema_len': 21, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 29.101444642326673
+  Performance: {'final_value': 12090.011212000007, 'win_ratio': 0.5904434844902784, 'single_avg_wlr': 1.0563046433212837, 'total_trades': 293, 'return': 0.2090011212000007, 'max_drawdown': 729.5414399999936, 't_sharpe': 29.101444642326673, 'commission': 0.11663987880000001, 'score': 1.6915191733112893}
+
+

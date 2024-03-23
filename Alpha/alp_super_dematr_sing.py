@@ -3,6 +3,7 @@ import logging
 import time
 import operator
 import optuna
+import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
 import sys
@@ -50,7 +51,7 @@ class AlpSuperDematrSing(BacktestFramework):
             self.num_evals = 100
             self.target = "t_sharpe"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 8, 0, 0, 0), 
+                                    start = datetime(2023, 12, 14, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -102,14 +103,7 @@ class AlpSuperDematrSing(BacktestFramework):
         strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
-        self.output_result(portfolio)
         return portfolio
-
-    def output_result(self, result:pd.DataFrame) -> None:
-        os.makedirs("result_book", exist_ok=True)
-        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
-        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
-        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}.csv")
 
     def evaluate_performance(self, result):
         perf = self.calculate_performance(result)
@@ -118,7 +112,7 @@ class AlpSuperDematrSing(BacktestFramework):
     
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len",  12, 60, step=3),
+            "sptr_len": trial.suggest_int("sptr_len",  8, 48, step=2),
             "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
             "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
             "atr_profit": trial.suggest_int("atr_profit", 2, 6),
@@ -160,25 +154,44 @@ class AlpSuperDematrSing(BacktestFramework):
             key=operator.attrgetter("value"),
             reverse=True,
         )
-        top_10_trials = sorted_trials[:10]
-        self._write_to_log(top_10_trials)
+        top_5_trials = sorted_trials[:5]
+        self._write_to_log(top_5_trials)
 
         return study.best_params, study.best_value
 
-    def _write_to_log(self, trials):
-        log_message = "Top 10 results:\n"
+    def _write_to_log(self, trials) -> None:
+        log_message = "Top 5 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
             log_message += f"  Value: {trial.value}\n"
             result = self.get_backtest_result(trial.params)
+            self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
-
         self._log(log_message)
 
+    def output_result(self, result:pd.DataFrame, number) -> None:
+        os.makedirs("result_book", exist_ok=True)
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        result.to_csv(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.csv")
+        self._save_curve(result, number)
+
+    def _save_curve(self, result:pd.DataFrame, number) -> None:
+        start_date = self.kdf.index[0].strftime("%Y-%m-%d")
+        end_date = self.kdf.index[-1].strftime("%Y-%m-%d")
+        plt.figure(figsize=(12, 6))
+        plt.plot(result["value"], label="equity_curve")
+        plt.legend()
+        plt.grid()
+        plt.title(f"Equity Curve {self.alpha_name}")
+        plt.xlabel("Date")
+        plt.ylabel("Equity")
+        plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
+
 if __name__ == "__main__":
-    params = {'sptr_len': 36, 'sptr_k': 2.5, 'dema_len': 45, 'atr_profit': 4, 'atr_loss': 3}
+    params = {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
         alp = AlpSuperDematrSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)

@@ -1,5 +1,5 @@
 import pandas as pd
-import pandas_ta as ta
+import pandas_ta as pta
 import numpy as np
 
 class IdxMacdRvs:
@@ -22,7 +22,7 @@ class IdxMacdRvs:
         self.dema_len = dema_len
 
     def _macd(self):
-        macd_df = ta.macd(self.kdf["close"], fast=self.fast, slow=self.slow, signal=self.signaling)
+        macd_df = pta.macd(self.kdf["close"], fast=self.fast, slow=self.slow, signal=self.signaling)
         macd_df.columns = ["diff", "macd", "dea"]
         condition1 = macd_df["diff"] > macd_df["dea"]
         condition2 = macd_df["diff"].shift(1) <= macd_df["dea"].shift(1)

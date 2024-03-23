@@ -35,15 +35,6 @@ class IdxSuperDema:
 
         return canp[["body", "dump", "pump"]]
     
-    # def pivot_points(self, window) -> pd.DataFrame:
-    #     pivot_points = self.kdf
-    #     pivot_points["r1"] = self.kdf["high"].rolling(window=window).max()
-    #     pivot_points["s1"] = self.kdf["low"].rolling(window=window).min()
-    #     pivot_points["pivot"] = (pivot_points["r1"] + pivot_points["s1"]) / 2
-    #     pivot_points["r2"] = pivot_points["pivot"] + (pivot_points["r1"] - pivot_points["s1"])
-    #     pivot_points["s2"] = pivot_points["pivot"] - (pivot_points["r1"] - pivot_points["s1"])
-    #     return pivot_points
-    
     def generate_pressure_signal(self) -> pd.DataFrame:
         try:
             supertrend = self._supertrend()
@@ -78,22 +69,24 @@ class IdxSuperDema:
         try:
             supertrend = self._supertrend()
             kdf_sig = pd.concat([self.kdf, supertrend], axis=1)
-            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length=self.dema_len)
-            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.dema_len, fillna=True)
-            kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.dema_len)
+            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length =self.dema_len)
+            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.dema_len, mamode = 'EMA')
+            kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.sptr_len)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
-                (kdf_sig["direction"].shift(1) == -1)
+                (kdf_sig["low"]<=kdf_sig["stop_price"])
+                & (kdf_sig["close"]>kdf_sig["stop_price"])
                 & (kdf_sig["direction"] == 1)
-                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
                 "signal",
             ] = 1
 
             kdf_sig.loc[
-                (kdf_sig["direction"].shift(1) == 1)
+                (kdf_sig["high"]>=kdf_sig["stop_price"])
+                & (kdf_sig["close"]<kdf_sig["stop_price"])
                 & (kdf_sig["direction"] == -1)
-                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
                 "signal",
             ] = -1
 
@@ -106,8 +99,8 @@ class IdxSuperDema:
         try:
             supertrend = self._supertrend()
             kdf_sig = pd.concat([self.kdf, supertrend], axis=1)
-            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length=self.dema_len)
-            kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.dema_len)
+            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length =self.dema_len)
+            kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.sptr_len)
             kdf_sig["signal"] = 0
             # 上行区间内上穿均线开仓
             kdf_sig.loc[

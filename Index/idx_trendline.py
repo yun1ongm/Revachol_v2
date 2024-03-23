@@ -1,93 +1,76 @@
 import pandas as pd
-import pandas_ta as ta
-import math
+import pandas_ta as pta
+import numpy as np
+from datetime import timedelta
 
 class IdxTrendline:
-    """
-    Args:
-    """
+
     index_name = "idx_trendline"
 
-    def __init__(self, length=14, mult=1.0, calcMethod='Atr', backpaint=True, upCss='teal', dnCss='red', showExt=True):
-        self.length = length
-        self.mult = mult
-        self.calcMethod = calcMethod
-        self.backpaint = backpaint
-        self.upCss = upCss
-        self.dnCss = dnCss
-        self.showExt = showExt
-
-        self.n = 0
-        self.src = []
-
-        self.ph = []
-        self.pl = []
-
-        self.slope_ph = 0.0
-        self.slope_pl = 0.0
-
-        self.offset = length if backpaint else 0
-
+    def __init__(self, kdf, swing=14, reset = 100, slope=1.0, calcMethod='Atr'):
+        self.kdf_signal = kdf
+        self.timedelta = kdf.index[-1] - kdf.index[-2]
+        self.swing = swing
+        self.reset = reset
+        self.slope = slope
+        self.calcMethod = calcMethod # Atr, Stdev, Linreg
         # Placeholder variables
-        self.upper = 0.0
-        self.lower = 0.0
-        self.upos = 0
-        self.dnos = 0
+        self.rh = 0.0
+        self.rh_count = 0
+        self.rh_index = np.nan
+        self.rl = 0.0
+        self.rl_count = 0
+        self.rl_index = np.nan
+    
+    def _calculate_ralative_hl(self, delta_price:float):
+        self.kdf_signal["upper"] = np.nan
+        self.kdf_signal["lower"] = np.nan
+        # Calculate relative highs and lows
+        for index, row in self.kdf_signal.iterrows():
+            #更新最高点
+            if row['high'] > self.rh:
+                self.rh = row['high']
+                self.rh_index = index
+                self.rh_count = 0
+            #未出现高点，且周期在swing和reset之间，更新上轨，周期数加1
+            elif self.rh_count >= self.swing and self.rh_count < self.reset:
+                self.rh_count += 1
+                self.kdf_signal["upper"] = self.rh - self.rh_count * delta_price
+            #未出现高点的周期超过reset，更新最高点并重新计算swing周期内上轨
+            elif self.rh_count >= self.reset:
+                self.rh = self.kdf_signal['high'].loc[(index-self.timedelta*self.swing):index].max()
+                self.rh_count = self.swing /2
+                self.kdf_signal["upper"] = self.rh - self.rh_count * delta_price
+            #未出现高点且周期数小于swing,当周期数加1
+            else:
+                self.rh_count += 1
 
-    def calculate_trendlines(self):
-        while self.n < len(self.src):
-            self.calculate_pivot()
-            self.calculate_slope()
-            self.calculate_trendline_values()
-            self.calculate_extended_lines()
-            self.calculate_plots()
-            self.calculate_breakouts()
-            self.n += 1
+            if row['low'] < self.rl:
+                self.rl = row['low']
+                self.rl_index = index
+                self.rl_count = 0
+            elif self.rl_count >= self.swing and self.rl_count < self.reset:
+                self.rl_count += 1
+                self.kdf_signal["lower"] = self.rl + self.rl_count * delta_price
+            elif self.rl_count >= self.reset:
+                self.rl = self.kdf_signal['low'].loc[(index-self.timedelta*self.swing):index].min()
+                self.rl_count = self.swing /2
+                self.kdf_signal["lower"] = self.rl + self.rl_count * delta_price
+            else:
+                self.rl_count += 1
 
-        self.check_alerts()
-
-    def calculate_pivot(self):
-        self.ph.append(ta.pivothigh(self.src, self.length, self.length))
-        self.pl.append(ta.pivotlow(self.src, self.length, self.length))
-
-    def calculate_slope(self):
+    def _calculate_delta_price(self) -> float:
+        kdf = self.kdf_signal
         if self.calcMethod == 'Atr':
-            slope = ta.ATR(self.length) / self.length * self.mult
+            delta_price = pta.atr(kdf["high"], kdf["low"], kdf["close"], length=self.swing, mamode = 'EMA').mean()/self.swing * self.slope
         elif self.calcMethod == 'Stdev':
-            slope = ta.STDDEV(self.src, self.length) / self.length * self.mult
-        elif self.calcMethod == 'Linreg':
-            slope = math.fabs(ta.SMA(self.src * self.n, self.length) - ta.SMA(self.src, self.length) * ta.SMA(self.n, self.length)) / ta.VAR(self.n, self.length) / 2 * self.mult
-
-        self.slope_ph = slope if self.ph[self.n] else self.slope_ph
-        self.slope_pl = slope if self.pl[self.n] else self.slope_pl
-
-    def calculate_trendline_values(self):
-        self.upper = self.ph[self.n] if self.ph[self.n] else self.upper - self.slope_ph
-        self.lower = self.pl[self.n] if self.pl[self.n] else self.lower + self.slope_pl
-
-        self.upos = 0 if self.ph[self.n] else 1 if self.src[self.n] > self.upper - self.slope_ph * self.length else self.upos
-        self.dnos = 0 if self.pl[self.n] else 1 if self.src[self.n] < self.lower + self.slope_pl * self.length else self.dnos
-
-    def calculate_extended_lines(self):
-        if self.ph[self.n] and self.showExt:
-            self.uptl = [(self.n - self.offset, self.ph[self.n] if self.backpaint else self.upper - self.slope_ph * self.length), (self.n - self.offset + 1, self.ph[self.n] - self.slope)]
-        if self.pl[self.n] and self.showExt:
-            self.dntl = [(self.n - self.offset, self.pl[self.n] if self.backpaint else self.lower + self.slope_pl * self.length), (self.n - self.offset + 1, self.pl[self.n] + self.slope)]
-
-    def calculate_plots(self):
-        self.upper_plot = self.upper if self.backpaint else self.upper - self.slope_ph * self.length
-        self.lower_plot = self.lower if self.backpaint else self.lower + self.slope_pl * self.length
-
-    def calculate_breakouts(self):
-        if self.upos > self.upos[-1]:
-            self.upper_breakout = self.low
-        if self.dnos > self.dnos[-1]:
-            self.lower_breakout = self.high
-
-    def check_alerts(self):
-        if self.upos > self.upos[-1]:
-            print("Upward Breakout: Price broke the down-trendline upward")
-        if self.dnos > self.dnos[-1]:
-            print("Downward Breakout: Price broke the up-trendline downward")
-
+            delta_price = pta.stdev(kdf["close"], length=self.swing).mean()/self.swing * self.slope
+        # elif self.calcMethod == 'Linreg':
+        #     slope = math.fabs(ta.SMA(self.src * self.n, self.length) - ta.SMA(self.src, self.length) * ta.SMA(self.n, self.length)) / ta.VAR(self.n, self.length) / 2 * self.mult
+        return delta_price
+    
+    def trendline(self):
+        delta_price = self._calculate_delta_price()
+        self._calculate_ralative_hl(delta_price)
+        return self.kdf_signal[["upper", "lower"]]
 

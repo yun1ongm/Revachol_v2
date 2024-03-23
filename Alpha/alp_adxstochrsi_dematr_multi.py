@@ -49,7 +49,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             self.num_evals = 100
             self.target = "t_sharpe"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 10, 0, 0, 0), 
+                                    start = datetime(2023, 12, 14, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -62,16 +62,16 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     
     def _set_params(self, params:dict):
         self.adx_len = params["adx_len"]
+        self.stoch_len = params["stoch_len"]
         self.rsi_len = params["rsi_len"]
-        self.k = params["k"]
-        self.d = params["d"]
+        self.kd = params["kd"]
         self.dema_len = params["dema_len"]
         self.atr_profit = params["atr_profit"]
         self.atr_loss = params["atr_loss"]
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
-            index = IdxAdxStochrsi(kdf, self.adx_len, self.rsi_len, self.k, self.d, self.dema_len)
+            index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
             strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
@@ -99,7 +99,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.rsi_len, self.k, self.d, self.dema_len)
+        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
         strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
@@ -112,11 +112,11 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
 
     def objective(self, trial):
         kwargs = {
-            "adx_len": trial.suggest_int("adx_len", 8, 40,step=2),
-            "rsi_len": trial.suggest_int("rsi_len", 8, 40,step=2),
-            "k": trial.suggest_int("k", 2, 5),
-            "d": trial.suggest_int("d", 2, 5),           
-            "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
+            "adx_len": trial.suggest_int("adx_len", 7, 56),
+            "rsi_len": trial.suggest_int("rsi_len", 7, 56),
+            "stoch_len": trial.suggest_int("stoch_len", 7, 56),
+            "kd": trial.suggest_int("kd", 2, 4),#cant be 1        
+            "dema_len": trial.suggest_int("dema_len", 7, 56),
             "atr_profit": trial.suggest_int("atr_profit", 2, 6),
             "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
@@ -157,13 +157,13 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             key=operator.attrgetter("value"),
             reverse=True,
         )
-        top_10_trials = sorted_trials[:10]
-        self._write_to_log(top_10_trials)
+        top_5_trials = sorted_trials[:5]
+        self._write_to_log(top_5_trials)
 
         return study.best_params, study.best_value
 
     def _write_to_log(self, trials) -> None:
-        log_message = "Top 10 results:\n"
+        log_message = "Top 5 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
@@ -194,7 +194,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'adx_len': 30, 'rsi_len': 12, 'k': 4, 'd': 2, 'dema_len': 21, 'atr_profit': 6, 'atr_loss': 4}
+    params = {'adx_len': 10, 'rsi_len': 50, 'stoch_len': 42, 'kd': 4, 'dema_len': 56, 'atr_profit': 2, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
         alp = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)

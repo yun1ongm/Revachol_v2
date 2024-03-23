@@ -1,0 +1,109 @@
+2024-03-23 18:34:46,895, Start optimizing alp_adxstochrsi_dematr_multi for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 18:36:48,419, Start optimizing alp_adxstochrsi_dematr_multi for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 18:37:35,466, Start optimizing alp_adxstochrsi_dematr_multi for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 18:47:21,369, Top 10 results:
+Rank 1:
+  Params: {'adx_len': 30, 'rsi_len': 38, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 57, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 9.972679882598566
+  Performance: {'final_value': 10920.83878799995, 'win_ratio': 0.5071769526033568, 'single_avg_wlr': 1.1739754920653538, 'total_trades': 627, 'return': 0.09208387879999491, 'max_drawdown': 1782.9081720000177, 't_sharpe': 9.972679882598566, 'commission': 0.1891051212, 'score': 0.26194741348801065}
+
+Rank 2:
+  Params: {'adx_len': 32, 'rsi_len': 38, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 57, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 9.972679882598566
+  Performance: {'final_value': 10920.83878799995, 'win_ratio': 0.5071769526033568, 'single_avg_wlr': 1.1739754920653538, 'total_trades': 627, 'return': 0.09208387879999491, 'max_drawdown': 1782.9081720000177, 't_sharpe': 9.972679882598566, 'commission': 0.1891051212, 'score': 0.26194741348801065}
+
+Rank 3:
+  Params: {'adx_len': 34, 'rsi_len': 38, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 57, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 9.972679882598566
+  Performance: {'final_value': 10920.83878799995, 'win_ratio': 0.5071769526033568, 'single_avg_wlr': 1.1739754920653538, 'total_trades': 627, 'return': 0.09208387879999491, 'max_drawdown': 1782.9081720000177, 't_sharpe': 9.972679882598566, 'commission': 0.1891051212, 'score': 0.26194741348801065}
+
+Rank 4:
+  Params: {'adx_len': 32, 'rsi_len': 36, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 60, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 8.874514655650483
+  Performance: {'final_value': 10811.128879999946, 'win_ratio': 0.49606291400584035, 'single_avg_wlr': 1.2195620985285198, 'total_trades': 635, 'return': 0.0811128879999945, 'max_drawdown': 1608.8004080000119, 't_sharpe': 8.874514655650483, 'commission': 0.190176112, 'score': 0.25010618398379053}
+
+Rank 5:
+  Params: {'adx_len': 34, 'rsi_len': 36, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 60, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 8.874514655650483
+  Performance: {'final_value': 10811.128879999946, 'win_ratio': 0.49606291400584035, 'single_avg_wlr': 1.2195620985285198, 'total_trades': 635, 'return': 0.0811128879999945, 'max_drawdown': 1608.8004080000119, 't_sharpe': 8.874514655650483, 'commission': 0.190176112, 'score': 0.25010618398379053}
+
+Rank 6:
+  Params: {'adx_len': 34, 'rsi_len': 36, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 60, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 8.874514655650483
+  Performance: {'final_value': 10811.128879999946, 'win_ratio': 0.49606291400584035, 'single_avg_wlr': 1.2195620985285198, 'total_trades': 635, 'return': 0.0811128879999945, 'max_drawdown': 1608.8004080000119, 't_sharpe': 8.874514655650483, 'commission': 0.190176112, 'score': 0.25010618398379053}
+
+Rank 7:
+  Params: {'adx_len': 28, 'rsi_len': 38, 'stoch_len': 22, 'k': 4, 'd': 3, 'dema_len': 57, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 8.80253933724591
+  Performance: {'final_value': 10770.430471999965, 'win_ratio': 0.5173673642838457, 'single_avg_wlr': 1.116091023304446, 'total_trades': 547, 'return': 0.07704304719999655, 'max_drawdown': 2335.131844000013, 't_sharpe': 8.80253933724591, 'commission': 0.1675999528, 'score': 0.17069510084290937}
+
+Rank 8:
+  Params: {'adx_len': 26, 'rsi_len': 40, 'stoch_len': 14, 'k': 4, 'd': 3, 'dema_len': 60, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 8.047289125407788
+  Performance: {'final_value': 10694.293867999988, 'win_ratio': 0.5243505642288045, 'single_avg_wlr': 1.0783067728451394, 'total_trades': 616, 'return': 0.06942938679999888, 'max_drawdown': 2116.010476000016, 't_sharpe': 8.047289125407788, 'commission': 0.18105161320000002, 'score': 0.1720470519171876}
+
+Rank 9:
+  Params: {'adx_len': 32, 'rsi_len': 38, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 51, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 6.568707159099972
+  Performance: {'final_value': 10628.559975999959, 'win_ratio': 0.5123557640270571, 'single_avg_wlr': 1.123991845276459, 'total_trades': 607, 'return': 0.06285599759999583, 'max_drawdown': 1696.8750560000117, 't_sharpe': 6.568707159099972, 'commission': 0.1861090024, 'score': 0.18978787308044318}
+
+Rank 10:
+  Params: {'adx_len': 32, 'rsi_len': 38, 'stoch_len': 12, 'k': 4, 'd': 3, 'dema_len': 51, 'atr_profit': 6, 'atr_loss': 4}
+  Value: 6.568707159099972
+  Performance: {'final_value': 10628.559975999959, 'win_ratio': 0.5123557640270571, 'single_avg_wlr': 1.123991845276459, 'total_trades': 607, 'return': 0.06285599759999583, 'max_drawdown': 1696.8750560000117, 't_sharpe': 6.568707159099972, 'commission': 0.1861090024, 'score': 0.18978787308044318}
+
+
+2024-03-23 19:02:05,551, Start optimizing alp_adxstochrsi_dematr_multi for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 19:14:00,906, Start optimizing alp_adxstochrsi_dematr_multi for goal t_sharpe on BTCUSDT 5m from 2023-12-13 to 2024-03-22 based on goal of t_sharpe
+2024-03-23 19:23:54,348, Top 10 results:
+Rank 1:
+  Params: {'adx_len': 30, 'rsi_len': 20, 'stoch_len': 15, 'kd': 4, 'dema_len': 10, 'atr_profit': 2, 'atr_loss': 4}
+  Value: 28.69359353871947
+  Performance: {'final_value': 12748.093531999955, 'win_ratio': 0.6064071838885163, 'single_avg_wlr': 0.9253744674338735, 'total_trades': 437, 'return': 0.27480935319999555, 'max_drawdown': 918.035756000032, 't_sharpe': 28.69359353871947, 'commission': 0.14607664680000002, 'score': 1.8152489893622206}
+
+Rank 2:
+  Params: {'adx_len': 22, 'rsi_len': 12, 'stoch_len': 15, 'kd': 4, 'dema_len': 15, 'atr_profit': 4, 'atr_loss': 4}
+  Value: 28.560780502418297
+  Performance: {'final_value': 12895.941095999964, 'win_ratio': 0.5964910785736646, 'single_avg_wlr': 0.9588985450708887, 'total_trades': 399, 'return': 0.2895941095999963, 'max_drawdown': 993.175132000024, 't_sharpe': 28.560780502418297, 'commission': 0.13223389040000003, 'score': 1.7392731636694472}
+
+Rank 3:
+  Params: {'adx_len': 26, 'rsi_len': 20, 'stoch_len': 17, 'kd': 4, 'dema_len': 11, 'atr_profit': 2, 'atr_loss': 4}
+  Value: 27.849119572370338
+  Performance: {'final_value': 12489.699699999988, 'win_ratio': 0.6449436752935561, 'single_avg_wlr': 0.7797007202570897, 'total_trades': 445, 'return': 0.24896996999999876, 'max_drawdown': 869.3130600000131, 't_sharpe': 27.849119572370338, 'commission': 0.14823503000000002, 'score': 1.847108900197982}
+
+Rank 4:
+  Params: {'adx_len': 20, 'rsi_len': 23, 'stoch_len': 15, 'kd': 4, 'dema_len': 7, 'atr_profit': 2, 'atr_loss': 4}
+  Value: 24.741373470542786
+  Performance: {'final_value': 12655.298627999986, 'win_ratio': 0.6174998456250387, 'single_avg_wlr': 0.8692213005509603, 'total_trades': 400, 'return': 0.2655298627999987, 'max_drawdown': 1414.0615760000019, 't_sharpe': 24.741373470542786, 'commission': 0.14101413720000003, 'score': 1.1595296872173815}
+
+Rank 5:
+  Params: {'adx_len': 18, 'rsi_len': 21, 'stoch_len': 15, 'kd': 4, 'dema_len': 16, 'atr_profit': 4, 'atr_loss': 4}
+  Value: 24.311998289241085
+  Performance: {'final_value': 12438.937231999966, 'win_ratio': 0.6065161387177598, 'single_avg_wlr': 0.900693365053781, 'total_trades': 399, 'return': 0.24389372319999647, 'max_drawdown': 1288.9138800000146, 't_sharpe': 24.311998289241085, 'commission': 0.13702327680000004, 'score': 1.1476753417847043}
+
+Rank 6:
+  Params: {'adx_len': 26, 'rsi_len': 22, 'stoch_len': 17, 'kd': 4, 'dema_len': 11, 'atr_profit': 2, 'atr_loss': 4}
+  Value: 23.788162419940335
+  Performance: {'final_value': 12248.420095999982, 'win_ratio': 0.6390803128551006, 'single_avg_wlr': 0.7801530450249419, 'total_trades': 435, 'return': 0.22484200959999812, 'max_drawdown': 1089.5723440000074, 't_sharpe': 23.788162419940335, 'commission': 0.14837999040000002, 'score': 1.318793464623775}
+
+Rank 7:
+  Params: {'adx_len': 20, 'rsi_len': 16, 'stoch_len': 15, 'kd': 4, 'dema_len': 11, 'atr_profit': 2, 'atr_loss': 4}
+  Value: 23.333446250133044
+  Performance: {'final_value': 12248.058587999934, 'win_ratio': 0.6280086153154015, 'single_avg_wlr': 0.8037893352560219, 'total_trades': 457, 'return': 0.22480585879999349, 'max_drawdown': 1169.6838960000368, 't_sharpe': 23.333446250133044, 'commission': 0.14803614120000003, 'score': 1.206992799615676}
+
+Rank 8:
+  Params: {'adx_len': 21, 'rsi_len': 20, 'stoch_len': 17, 'kd': 4, 'dema_len': 11, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 21.473519520360817
+  Performance: {'final_value': 12063.058115999984, 'win_ratio': 0.6122447417743007, 'single_avg_wlr': 0.8516509388974612, 'total_trades': 392, 'return': 0.20630581159999828, 'max_drawdown': 1113.8155039999947, 't_sharpe': 21.473519520360817, 'commission': 0.1370621884, 'score': 1.1340265650433385}
+
+Rank 9:
+  Params: {'adx_len': 27, 'rsi_len': 20, 'stoch_len': 17, 'kd': 4, 'dema_len': 11, 'atr_profit': 3, 'atr_loss': 4}
+  Value: 21.473519520360817
+  Performance: {'final_value': 12063.058115999984, 'win_ratio': 0.6122447417743007, 'single_avg_wlr': 0.8516509388974612, 'total_trades': 392, 'return': 0.20630581159999828, 'max_drawdown': 1113.8155039999947, 't_sharpe': 21.473519520360817, 'commission': 0.1370621884, 'score': 1.1340265650433385}
+
+Rank 10:
+  Params: {'adx_len': 23, 'rsi_len': 21, 'stoch_len': 14, 'kd': 4, 'dema_len': 15, 'atr_profit': 4, 'atr_loss': 4}
+  Value: 20.589787685556082
+  Performance: {'final_value': 11974.608831999998, 'win_ratio': 0.6009850736489967, 'single_avg_wlr': 0.8868183584349357, 'total_trades': 406, 'return': 0.19746088319999977, 'max_drawdown': 1063.8141600000017, 't_sharpe': 20.589787685556082, 'commission': 0.13999811680000002, 'score': 1.115524090011236}
+
+
