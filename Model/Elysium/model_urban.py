@@ -35,7 +35,7 @@ class ModelUrban:
             AlpAdxStochrsiDematrMulti(money = 500, leverage = 5,
                                  params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"], mode = 1),
         ]
-        self.market = KlineGenerator(symbol, timeframe)
+        self.market = KlineGenerator(symbol, timeframe, mode = 1)
         self.signal_position = self.calculate_alpha()
         self._export_signal_position()
 

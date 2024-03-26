@@ -78,16 +78,15 @@ class KlineGenerator:
     def _get_klines_df(self) -> pd.DataFrame:
         try:
             ohlcv = self.client.continuous_klines(
-                self.symbol, "PERPETUAL", self.timeframe, limit=1500
+                self.symbol, "PERPETUAL", self.timeframe, limit=100
             )
-            # remove unfinished candle
-            ohlcv.pop()
+            unfin_candle = ohlcv.pop() # remove unfinished candle
+            self.logger.info(f"Market bot initiate with candle of {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)}.\n------------------")
             kdf = pd.DataFrame(
                 ohlcv,
                 columns=self.kdf_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
-            self.logger.info(f"Market bot started with candle {kdf.closetime[-1]}.")
 
             return kdf
         except Exception as e:
@@ -119,7 +118,7 @@ class KlineGenerator:
         latest_ohlcv = self.client.continuous_klines(
             self.symbol, "PERPETUAL", self.timeframe, limit=2
         )
-        latest_ohlcv.pop(0)
+        unfin_candle = latest_ohlcv.pop()
         latest_kdf = pd.DataFrame(
             latest_ohlcv,
             columns=self.kdf_columns,
@@ -127,14 +126,15 @@ class KlineGenerator:
         latest_kdf = self._convert_kdf_datatype(latest_kdf)
 
         if latest_kdf.index[-1] == self.kdf.index[-1]:
-            pass
+             self.logger.info(f"Candle price: {float(unfin_candle[4])}.")
 
         else:
             self.kdf = pd.concat([self.kdf, latest_kdf])
             if len(self.kdf) > 7*24*12:
-                self.kdf = self.kdf.iloc[1:]
+                self.kdf = self._get_klines_df()
+                self.logger.warning(f"Market bot refresh candle data.")
             self.logger.info(
-                f"Candle close time: {self.kdf.closetime[-1]} Updated Close: {self.kdf.close[-1]} Volume(U): {self.kdf.volume_U[-1]}\n-----------"
+                f"Candle close time: {self.kdf.closetime[-1]} Updated Close: {self.kdf.close[-1]} Volume(U): {round(float(self.kdf.volume_U[-1])/1000000,2)}mil\n------------------"
             )
 
 if __name__ == "__main__":
