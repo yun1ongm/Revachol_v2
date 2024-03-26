@@ -11,7 +11,6 @@ class StgyDematrSing(BacktestFramework):
             atr_loss (float): atr loss
             money (float): initial money
             leverage (float): leverage
-            sizer (float): sizer
 
         Return:
             position (float)
@@ -19,17 +18,17 @@ class StgyDematrSing(BacktestFramework):
     strategy_name = "stgy_dematr_sing"
 
 
-    def __init__(self, atr_profit, atr_loss, money, leverage, sizer) -> None:
+    def __init__(self, atr_profit, atr_loss, money, leverage) -> None:
         self.atr_profit = atr_profit
         self.atr_loss = atr_loss
         self.money = money
         self.leverage = leverage
-        self.sizer = sizer
         self.comm = 0.0004
 
     def _strategy_run(self, value, signal, position, close, high, low, atr, dema, entry_price) -> tuple:
         realized_pnl = 0
         commission = 0
+        sizer = round(self.money * self.leverage/close, 3)
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
             stop_loss = dema - atr * self.atr_loss
@@ -42,8 +41,8 @@ class StgyDematrSing(BacktestFramework):
             elif signal == -1:
                 realized_pnl = unrealized_pnl
                 entry_price = close
-                position = -self.sizer
-                commission = 2 * self.comm * self.sizer * close
+                position = -sizer
+                commission = 2 * self.comm * sizer * close
                 value -= commission
 
         elif position < 0:
@@ -58,8 +57,8 @@ class StgyDematrSing(BacktestFramework):
             elif signal == 1:
                 realized_pnl = unrealized_pnl
                 entry_price = close
-                position = self.sizer
-                commission = 2 * self.comm * self.sizer * close
+                position = sizer
+                commission = 2 * self.comm * sizer * close
                 value -= commission
 
         else:
@@ -70,14 +69,14 @@ class StgyDematrSing(BacktestFramework):
 
             if signal == 1:
                 entry_price = close
-                position += self.sizer
-                commission = self.comm * self.sizer * close
+                position += sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
             elif signal == -1:
                 entry_price = close
-                position += -self.sizer
-                commission = self.comm * self.sizer * close
+                position += -sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
         return value, signal, position, entry_price, stop_profit, stop_loss, unrealized_pnl, realized_pnl, commission

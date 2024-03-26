@@ -5,7 +5,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import time
 import sys
-main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
 import contek_timbersaw as timbersaw
 from Market.kline import KlineGenerator
@@ -30,15 +30,16 @@ class ModelUrban:
     def __init__(self, symbol, timeframe) -> None:
         config = self._read_config()
         self.alphas = [
-            AlpSuperDematrSing(money = 1000, leverage = 5, sizer = 0.02,
+            AlpSuperDematrSing(money = 500, leverage = 5,
                            params = config["alpha_params"]["alp_super_dematr_sing"], mode = 1),
-            AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5, sizer = 0.01,
+            AlpAdxStochrsiDematrMulti(money = 500, leverage = 5,
                                  params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"], mode = 1),
         ]
         self.market = KlineGenerator(symbol, timeframe)
-        self.signal_position = None
+        self.signal_position = self.calculate_alpha()
+        self._export_signal_position()
 
-    def _read_config(self, rel_path = "config.yaml") -> dict:
+    def _read_config(self, rel_path = "/config.yaml") -> dict:
         try:
             with open(main_path + rel_path, 'r') as stream:
                 config = yaml.safe_load(stream)
@@ -46,10 +47,8 @@ class ModelUrban:
             self.logger.error('Config file not found')
             sys.exit(1)
         return config
-
-    def merging_signal(self) -> None:
-        """generate signals from each alpha and merge them into a single dataframe"""
-        previous_signal_position = self.signal_position if self.signal_position is not None else 0
+    
+    def calculate_alpha(self) -> float:
         merged_position = 0
         for alpha in self.alphas:
             signal_position = alpha.generate_signal_position(self.market.kdf)
@@ -57,17 +56,22 @@ class ModelUrban:
                 merged_position += signal_position["position"]
             else:
                 self.logger.info(f"Alpha:{alpha.alpha_name} did not generate a signal")
-        self.signal_position = round(merged_position,3)
-        self._export_signal_position()
+        return round(merged_position,3)
+
+    def merging_signal(self) -> None:
+        """generate signals from each alpha and merge them into a single dataframe"""
+        previous_signal_position = self.signal_position if self.signal_position is not None else 0
+        self.signal_position = self.calculate_alpha()
         if self.signal_position != previous_signal_position:
             change = self.signal_position - previous_signal_position
             model.logger.warning(f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --")
+            self._export_signal_position()
         self.logger.info(f"Combined Signal Position:{self.signal_position}\n-- -- -- -- -- -- -- -- --")
 
     def _export_signal_position(self):
         """export signal position to a yaml file"""
         self.update_time = self.market.kdf.index[-1]
-        with open(main_path + "signal_position.yaml", "w") as file:
+        with open(main_path + "/signal_position.yaml", "w") as file:
             yaml.dump({"signal_position": str(self.signal_position),
                         "update_time":str(self.update_time)}, file)
             

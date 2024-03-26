@@ -23,7 +23,6 @@ class AlpSuperDematrSing(BacktestFramework):
         Args:
             money (float): initial money
             leverage (float): leverage
-            sizer (float): sizer
         
         Return:
             position and signal in portfolio: pd.DataFrame
@@ -35,17 +34,15 @@ class AlpSuperDematrSing(BacktestFramework):
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
 
-    def __init__(self, money, leverage, sizer, params:dict, mode = 0) -> None:
+    def __init__(self, money, leverage, params:dict, mode = 0) -> None:
         '''initialize the parameters
         Args:
         money: float
         leverage: float 
-        sizer: float
         params: dict
         '''
         self.money = money
         self.leverage = leverage
-        self.sizer = sizer
         self._set_params(params)
         if mode == 0:
             self.num_evals = 100
@@ -56,11 +53,9 @@ class AlpSuperDematrSing(BacktestFramework):
             self.kdf = market.kdf
             self.money = 10000
             self.leverage = 5
-            self.sizer = 0.1 if self.symbol == "BTCUSDT" else 2
         else:
             self.money = money
             self.leverage = leverage
-            self.sizer = sizer
     
     def _set_params(self, params:dict):
         self.sptr_len = params["sptr_len"]
@@ -72,7 +67,7 @@ class AlpSuperDematrSing(BacktestFramework):
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
             index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len)
-            strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+            strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_portfolio(idx_signal)
@@ -100,7 +95,7 @@ class AlpSuperDematrSing(BacktestFramework):
     ) -> pd.DataFrame:
         self._set_params(params)
         index = IdxSuperDema(self.kdf, self.sptr_len, self.sptr_k, self.dema_len)
-        strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+        strategy = StgyDematrSing(self.atr_profit, self.atr_loss, self.money, self.leverage)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
@@ -194,7 +189,7 @@ if __name__ == "__main__":
     params = {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpSuperDematrSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpSuperDematrSing(money = 500, leverage = 5, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -202,12 +197,12 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpSuperDematrSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpSuperDematrSing(money = 500, leverage = 5, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
 
-    #live_trading(params)
-    backtest(params)
+    live_trading(params)
+    # backtest(params)
 
     

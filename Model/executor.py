@@ -3,7 +3,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import time
 import sys
-main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
 from binance.um_futures import UMFutures
 from binance.error import ClientError
@@ -46,7 +46,7 @@ class ExecPostmodern:
 
         return slippage
     
-    def _read_config(self, rel_path = "config.yaml") -> dict:
+    def _read_config(self, rel_path = "/config.yaml") -> dict:
         try:
             with open(main_path + rel_path, 'r') as stream:
                 config = yaml.safe_load(stream)
@@ -56,7 +56,7 @@ class ExecPostmodern:
         return config
     
     @retry(tries=3, delay=1)  
-    def _read_position(self, rel_path = "signal_position.yaml") -> float:
+    def _read_position(self, rel_path = "/signal_position.yaml") -> float:
         try:
             with open(main_path + rel_path, 'r') as stream:
                 signal_position_dict = yaml.safe_load(stream)

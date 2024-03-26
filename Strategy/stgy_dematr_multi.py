@@ -16,17 +16,17 @@ class StgyDematrMulti(BacktestFramework):
     """
     strategy_name = "stgy_dematr_multi"
 
-    def __init__(self, atr_profit, atr_loss, money, leverage, sizer) -> None:
+    def __init__(self, atr_profit, atr_loss, money, leverage) -> None:
         self.atr_profit = atr_profit
         self.atr_loss = atr_loss
         self.money = money
         self.leverage = leverage
-        self.sizer = sizer
         self.comm = 0.0004
 
     def _strategy_run(self, value, signal, position, close, high, low, atr, dema, entry_price) -> tuple:
         realized_pnl = 0
         commission = 0
+        sizer = round(self.money/close, 3)
 
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
@@ -40,9 +40,9 @@ class StgyDematrMulti(BacktestFramework):
                 commission = self.comm * position * close
                 value += unrealized_pnl - commission
             elif signal == 1 and money_thresh:
-                entry_price =(entry_price * position + close * self.sizer)/(position + self.sizer)
-                position += self.sizer
-                commission = self.comm * self.sizer * close
+                entry_price =(entry_price * position + close * sizer)/(position + sizer)
+                position += sizer
+                commission = self.comm * sizer * close
                 value -= commission
             elif signal == -1:
                 realized_pnl = unrealized_pnl
@@ -63,9 +63,9 @@ class StgyDematrMulti(BacktestFramework):
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
             elif signal == -1 and money_thresh:
-                entry_price = (entry_price * position - close * self.sizer) / (position - self.sizer)
-                position += -self.sizer
-                commission = self.comm * self.sizer * close
+                entry_price = (entry_price * position - close * sizer) / (position - sizer)
+                position += -sizer
+                commission = self.comm * sizer * close
                 value -= commission
             elif signal == 1:
                 realized_pnl = unrealized_pnl
@@ -82,14 +82,14 @@ class StgyDematrMulti(BacktestFramework):
 
             if signal == 1:
                 entry_price = close
-                position += self.sizer
-                commission = self.comm * self.sizer * close
+                position += sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
             elif signal == -1:
                 entry_price = close
-                position += -self.sizer
-                commission = self.comm * self.sizer * close
+                position += -sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
         return value, signal, position, entry_price, stop_profit, stop_loss, unrealized_pnl, realized_pnl, commission

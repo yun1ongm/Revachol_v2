@@ -35,7 +35,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
 
-    def __init__(self, money, leverage, sizer, params:dict, mode = 0) -> None:
+    def __init__(self, money, leverage, params:dict, mode = 0) -> None:
         '''initialize the parameters
         Args:
         money: float
@@ -54,11 +54,9 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             self.kdf = market.kdf
             self.money = 10000
             self.leverage = 5
-            self.sizer = 0.1 if self.symbol == "BTCUSDT" else 2
         else:
             self.money = money
             self.leverage = leverage
-            self.sizer = sizer
     
     def _set_params(self, params:dict):
         self.adx_len = params["adx_len"]
@@ -72,7 +70,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
             index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
-            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
@@ -100,7 +98,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     ) -> pd.DataFrame:
         self._set_params(params)
         index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
-        strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage, self.sizer)
+        strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
@@ -197,7 +195,7 @@ if __name__ == "__main__":
     params = {'adx_len': 10, 'rsi_len': 50, 'stoch_len': 42, 'kd': 4, 'dema_len': 56, 'atr_profit': 2, 'atr_loss': 4}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
+        alp = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, params = params, mode = 1)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()
@@ -205,10 +203,10 @@ if __name__ == "__main__":
             time.sleep(10)
 
     def backtest(params):
-        alp_backtest = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpAdxStochrsiDematrMulti(money = 500, leverage = 5, params = params, mode = 0)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
 
-    #live_trading(params)
-    backtest(params)
+    live_trading(params)
+    # backtest(params)
