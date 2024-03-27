@@ -1,0 +1,96 @@
+2024-03-27T04:05:06 INFO kline.py:84 - Market bot initiate with candle of 2024-03-26 20:05:00.
+------------------
+2024-03-27T04:05:06 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70554.40089498449, 'stop_profit': 69091.50751157168, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:06 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:06 INFO kline.py:136 - Candle close time: 2024-03-26 19:59:59.999000 Updated Close: 69523.3 Volume(U): 128.28mil
+------------------
+2024-03-27T04:05:06 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70533.41336299301, 'stop_profit': 69000.88620514105, 'update_time': Timestamp('2024-03-26 19:55:00')}
+2024-03-27T04:05:06 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 19:55:00')}
+2024-03-27T04:05:06 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:05:16 INFO kline.py:136 - Candle close time: 2024-03-26 20:04:59.999000 Updated Close: 69694.2 Volume(U): 119.5mil
+------------------
+2024-03-27T04:05:16 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:16 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:16 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:05:27 INFO kline.py:129 - Candle price: 69708.9.
+2024-03-27T04:05:27 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:27 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:27 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:05:37 INFO kline.py:129 - Candle price: 69661.9.
+2024-03-27T04:05:37 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:37 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:37 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:05:47 INFO kline.py:129 - Candle price: 69674.5.
+2024-03-27T04:05:47 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:47 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:47 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:05:57 INFO kline.py:129 - Candle price: 69713.4.
+2024-03-27T04:05:57 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:57 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:05:57 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:07 INFO kline.py:129 - Candle price: 69709.4.
+2024-03-27T04:06:07 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:07 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:07 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:18 INFO kline.py:129 - Candle price: 69693.2.
+2024-03-27T04:06:18 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:18 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:18 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:28 INFO kline.py:129 - Candle price: 69661.2.
+2024-03-27T04:06:28 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:28 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:28 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:38 INFO kline.py:129 - Candle price: 69670.9.
+2024-03-27T04:06:38 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:38 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:38 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:48 INFO kline.py:129 - Candle price: 69681.5.
+2024-03-27T04:06:48 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:48 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:48 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:06:58 INFO kline.py:129 - Candle price: 69694.6.
+2024-03-27T04:06:58 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:58 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:06:58 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:08 INFO kline.py:129 - Candle price: 69718.2.
+2024-03-27T04:07:08 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:08 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:08 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:18 INFO kline.py:129 - Candle price: 69741.1.
+2024-03-27T04:07:18 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:18 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:18 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:29 INFO kline.py:129 - Candle price: 69709.4.
+2024-03-27T04:07:29 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:29 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:29 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:39 INFO kline.py:129 - Candle price: 69694.9.
+2024-03-27T04:07:39 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:39 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:39 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:49 INFO kline.py:129 - Candle price: 69683.9.
+2024-03-27T04:07:49 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:49 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:49 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --
+2024-03-27T04:07:59 INFO kline.py:129 - Candle price: 69672.2.
+2024-03-27T04:07:59 INFO alp_super_dematr_sing.py:87 - {'position': -0.036, 'signal': 0.0, 'entry_price': 70323.6, 'stop_loss': 70539.57296492749, 'stop_profit': 68981.25428426565, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:59 INFO alp_adxstochrsi_dematr_multi.py:90 - {'position': 0.0, 'signal': 0.0, 'entry_price': 0.0, 'stop_profit': 0.0, 'stop_loss': 0.0, 'update_time': Timestamp('2024-03-26 20:00:00')}
+2024-03-27T04:07:59 INFO model_urban.py:69 - Combined Signal Position:-0.036
+-- -- -- -- -- -- -- -- --

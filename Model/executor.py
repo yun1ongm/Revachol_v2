@@ -36,7 +36,7 @@ class ExecPostmodern:
         self.client = self._connect_api(key=config["bn_api"]["key"], secret=config["bn_api"]["secret"])
         self.symbol = symbol
         self.slippage = self._determine_slippage(symbol)
-        self.interval = 15
+        self.interval = 60
 
     def _determine_slippage(self, symbol: str) -> int:
         if symbol == "BTCUSDT":
@@ -185,12 +185,11 @@ class ExecPostmodern:
                 if complete:
                     time.sleep(self.interval)
                 else:
-                    time.sleep(self.interval / 5)
+                    time.sleep(self.interval / 10)
             except Exception as e:
                 self.logger.critical(e)
                 self.logger.critical("Restarting the executor in 10 seconds...")
-                time.sleep(10)
-                continue
+                time.sleep(self.interval / 6)    
 
 if __name__ == "__main__":
     timbersaw.setup()

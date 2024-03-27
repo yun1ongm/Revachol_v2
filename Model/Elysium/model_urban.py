@@ -80,10 +80,10 @@ class ModelUrban:
             try:
                 self.market.update_klines()
                 self.merging_signal()
-                time.sleep(10)
+                time.sleep(30)
             except Exception as e:
                 self.logger.exception(e)
-                time.sleep(5)
+                time.sleep(10)
 
 if __name__ == "__main__":
     timbersaw.setup()
