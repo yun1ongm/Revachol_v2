@@ -46,9 +46,9 @@ class AlpSuperDematrSing(BacktestFramework):
         self._set_params(params)
         if mode == 0:
             self.num_evals = 100
-            self.target = "t_sharpe"
+            self.target = "score"
             market = KlineGenerator('BTCUSDT', '5m', mode = 0, 
-                                    start = datetime(2023, 12, 14, 0, 0, 0), 
+                                    start = datetime(2023, 12, 24, 0, 0, 0), 
                                     window_days=100)
             self.kdf = market.kdf
             self.money = 10000
@@ -107,10 +107,10 @@ class AlpSuperDematrSing(BacktestFramework):
     
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len",  8, 48, step=2),
+            "sptr_len": trial.suggest_int("sptr_len",  9, 60, step=3),
             "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 12, 60, step=3),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 6),
+            "dema_len": trial.suggest_int("dema_len", 9, 60, step=3),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 8),
             "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
         result = self.get_backtest_result(kwargs)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
 
-    live_trading(params)
-    # backtest(params)
+    # live_trading(params)
+    backtest(params)
 
     

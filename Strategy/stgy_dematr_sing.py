@@ -33,33 +33,33 @@ class StgyDematrSing(BacktestFramework):
             unrealized_pnl = (close - entry_price) * position
             stop_loss = dema - atr * self.atr_loss
             stop_profit = dema + atr * self.atr_profit
-            if low < stop_loss or high > stop_profit:
+            if low < stop_loss or high > stop_profit or signal == -1:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * position * close
                 value += unrealized_pnl - commission
                 position = 0
-            elif signal == -1:
-                realized_pnl = unrealized_pnl
-                entry_price = close
-                position = -sizer
-                commission = 2 * self.comm * sizer * close
-                value -= commission
+            # elif signal == -1:
+            #     realized_pnl = unrealized_pnl
+            #     entry_price = close
+            #     position = -sizer
+            #     commission = 2 * self.comm * sizer * close
+            #     value -= commission
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
             stop_loss = dema + atr * self.atr_loss
             stop_profit = dema - atr * self.atr_profit
-            if high > stop_loss or low < stop_profit:
+            if high > stop_loss or low < stop_profit or signal == 1:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
                 position = 0
-            elif signal == 1:
-                realized_pnl = unrealized_pnl
-                entry_price = close
-                position = sizer
-                commission = 2 * self.comm * sizer * close
-                value -= commission
+            # elif signal == 1:
+            #     realized_pnl = unrealized_pnl
+            #     entry_price = close
+            #     position = sizer
+            #     commission = 2 * self.comm * sizer * close
+            #     value -= commission
 
         else:
             entry_price = 0

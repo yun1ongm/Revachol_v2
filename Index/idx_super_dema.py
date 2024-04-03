@@ -70,27 +70,28 @@ class IdxSuperDema:
             supertrend = self._supertrend()
             kdf_sig = pd.concat([self.kdf, supertrend], axis=1)
             kdf_sig["dema"] = pta.dema(kdf_sig["close"], length =self.dema_len)
+            kdf_sig['sma'] = pta.sma(kdf_sig["close"], length = self.sptr_len)
             kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.dema_len, mamode = 'EMA')
             kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.sptr_len)
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
-                (kdf_sig["low"]<=kdf_sig["stop_price"])
-                & (kdf_sig["close"]>kdf_sig["stop_price"])
+                (kdf_sig["close"] > kdf_sig["sma"])
+                & (kdf_sig["low"] < kdf_sig["sma"])
                 & (kdf_sig["direction"] == 1)
-                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = 1
 
             kdf_sig.loc[
-                (kdf_sig["high"]>=kdf_sig["stop_price"])
-                & (kdf_sig["close"]<kdf_sig["stop_price"])
+                (kdf_sig["close"] < kdf_sig["sma"])
+                & (kdf_sig["high"] > kdf_sig["sma"])
                 & (kdf_sig["direction"] == -1)
-                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] < kdf_sig["volume_ema"]),
                 "signal",
             ] = -1
 
-            return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "dema"]]
+            return kdf_sig[["open", "high", "low", "close", "volume_U", "atr", "signal", "dema"]]
         except Exception as e:
             print(e)
             return None

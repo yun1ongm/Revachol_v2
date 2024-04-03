@@ -83,24 +83,25 @@ class BacktestFramework:
                 trades["cumulative_loss"] += pnl
 
         final_value = result["value"][-1] + result["unrealized_pnl"][-1]
+        net_value = final_value - self.money
         max_drawdown = np.max(np.maximum.accumulate(result["value"]) - result["value"])
-        avg_trade_pnl = (final_value - self.money) / (trades["total"] + 0.0001)
+        avg_trade_pnl = net_value / (trades["total"] + 0.0001)
         win_ratio = trades["win"] / (trades["total"] + 0.0001)
         avg_winning = trades["cumulative_win"] / (trades["win"] + 0.0001)
         avg_losing = trades["cumulative_loss"] / (trades["loss"] + 0.0001)
         single_avg_wlr = -avg_winning / (avg_losing + 0.0001)
-        ret = final_value / self.money - 1
+        ret = net_value / self.money
         comm_ratio = result["commission"].sum() / self.money
-        score =  win_ratio  * (final_value - self.money) / (max_drawdown + 0.0001)
+        score =  win_ratio  * net_value / (max_drawdown + 0.0001)
 
         sigma_sum = np.sum(
             (pnl - avg_trade_pnl) ** 2 for pnl in result["realized_pnl"] if pnl != 0
         )
         sigma = np.sqrt(sigma_sum / (trades["total"] + 0.0001))
-        t_sharpe = (final_value - self.money) / sigma
+        t_sharpe = net_value / sigma
 
         performances = {
-            "final_value": final_value,
+            "net_value": net_value,
             "win_ratio": win_ratio,
             "single_avg_wlr": single_avg_wlr,
             "total_trades": trades["total"],
