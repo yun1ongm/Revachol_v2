@@ -20,7 +20,7 @@ def get_kdf() -> pd.DataFrame:
 
     client = UMFutures(timeout=3)
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     klines = client.continuous_klines(symbol, "PERPETUAL", timeframe, limit=1000)
     kdf = pd.DataFrame(klines, columns=columns)
     kdf.opentime = [
