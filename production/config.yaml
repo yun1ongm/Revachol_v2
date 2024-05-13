@@ -13,3 +13,4 @@ backpack_api:
 alpha_params:
     alp_adx_stochrsi_dematr_multi: {'adx_len': 30, 'rsi_len': 20, 'stoch_len': 15, 'kd': 4, 'dema_len': 10, 'atr_profit': 2, 'atr_loss': 4}
     alp_super_dematr_sing: {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
+    alp_macd_dema: {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100}

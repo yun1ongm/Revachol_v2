@@ -1,0 +1,33 @@
+2024-04-19 20:46:44,093, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 20:50:00,308, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 20:50:45,446, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 20:51:48,070, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 20:54:36,856, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 20:55:26,472, Start optimizing alp_tredline_bo for goal t_sharpe on BTCUSDT 5m from 2023-12-31 to 2024-04-09 based on goal of t_sharpe
+2024-04-19 21:06:09,174, Top 5 results:
+Rank 1:
+  Params: {'swing': 82, 'reset': 276, 'slope': 0.8, 'profit_pct': 0.060000000000000005}
+  Value: 10.831225637479667
+  Performance: {'net_value': 243.12383972000043, 'win_ratio': 0.2994348590763508, 'single_avg_wlr': 4.445214772125247, 'total_trades': 177, 'return': 0.12156191986000021, 'max_drawdown': 196.5456272399997, 't_sharpe': 10.831225637479667, 'commission': 0.14161293013999998, 'score': 0.3703960076209884}
+
+Rank 2:
+  Params: {'swing': 83, 'reset': 276, 'slope': 0.8, 'profit_pct': 0.060000000000000005}
+  Value: 10.657819264409264
+  Performance: {'net_value': 236.45411975999923, 'win_ratio': 0.3016758091196597, 'single_avg_wlr': 4.4237258815952805, 'total_trades': 179, 'return': 0.11822705987999961, 'max_drawdown': 216.91504560000067, 't_sharpe': 10.657819264409264, 'commission': 0.14323754012, 'score': 0.3288497338485269}
+
+Rank 3:
+  Params: {'swing': 83, 'reset': 276, 'slope': 0.8, 'profit_pct': 0.060000000000000005}
+  Value: 10.657819264409264
+  Performance: {'net_value': 236.45411975999923, 'win_ratio': 0.3016758091196597, 'single_avg_wlr': 4.4237258815952805, 'total_trades': 179, 'return': 0.11822705987999961, 'max_drawdown': 216.91504560000067, 't_sharpe': 10.657819264409264, 'commission': 0.14323754012, 'score': 0.3288497338485269}
+
+Rank 4:
+  Params: {'swing': 81, 'reset': 280, 'slope': 0.6000000000000001, 'profit_pct': 0.09}
+  Value: 8.8404886208245
+  Performance: {'net_value': 206.18833291999954, 'win_ratio': 0.3228343914689831, 'single_avg_wlr': 4.277439071137188, 'total_trades': 127, 'return': 0.10309416645999978, 'max_drawdown': 169.38486448000094, 't_sharpe': 8.8404886208245, 'commission': 0.10166038354, 'score': 0.392978710894327}
+
+Rank 5:
+  Params: {'swing': 100, 'reset': 246, 'slope': 0.6000000000000001, 'profit_pct': 0.06999999999999999}
+  Value: 8.77133845466455
+  Performance: {'net_value': 243.22195851999822, 'win_ratio': 0.30864159426963667, 'single_avg_wlr': 5.291938238828977, 'total_trades': 81, 'return': 0.12161097925999911, 'max_drawdown': 105.31174824000118, 't_sharpe': 8.77133845466455, 'commission': 0.06488877074000002, 'score': 0.7128202029834098}
+
+

@@ -6,7 +6,7 @@ class IdxTrendline:
 
     index_name = "idx_trendline"
 
-    def __init__(self, kdf, swing=14, reset = 50, slope=1.0, calcMethod='Atr'):
+    def __init__(self, kdf, swing, reset, slope, calcMethod='Atr'):
         self.kdf_signal = kdf
         self.timedelta = kdf.index[-1] - kdf.index[-2]
         self.swing = swing
@@ -42,7 +42,7 @@ class IdxTrendline:
             elif self.rh_count >= self.reset:
                 self.rh = self.kdf_signal['high'].loc[(index-self.timedelta*self.swing):index].max()
                 self.kdf_signal.loc[index,"rh"] = self.rh
-                self.rh_count = self.swing
+                self.rh_count = self.swing / 2
                 self.kdf_signal.loc[index, "upper"] = self.rh - self.rh_count * delta_price
             #未出现高点且周期数小于swing,当周期数加1
             else:
@@ -59,7 +59,7 @@ class IdxTrendline:
             elif self.rl_count >= self.reset:
                 self.rl = self.kdf_signal['low'].loc[(index-self.timedelta*self.swing):index].min()
                 self.kdf_signal.loc[index,"rl"] = self.rl
-                self.rl_count = self.swing
+                self.rl_count = self.swing / 2
                 self.kdf_signal.loc[index, "lower"] = self.rl + self.rl_count * delta_price
             else:
                 self.rl_count += 1
@@ -74,8 +74,24 @@ class IdxTrendline:
         #     slope = math.fabs(ta.SMA(self.src * self.n, self.length) - ta.SMA(self.src, self.length) * ta.SMA(self.n, self.length)) / ta.VAR(self.n, self.length) / 2 * self.mult
         return delta_price
     
-    def trendline(self):
+    def trendline(self) -> pd.DataFrame:
         delta_price = self._calculate_delta_price()
         self._calculate_ralative_hl(delta_price)
-        return self.kdf_signal[["upper", "lower", "rh", "rl"]]
+        return self.kdf_signal[["open", "high", "low", "close", "volume_U", "upper", "lower", "rh", "rl"]]
+    
+    def generate_dema_signal(self) -> pd.DataFrame:
+        index_signal = self.trendline()
+        index_signal["signal"] = 0
+        index_signal['dema'] = pta.dema(index_signal["close"], length=self.swing)
+        index_signal.loc[
+                (index_signal["close"] > index_signal["upper"]) &
+                 (index_signal["close"].shift(1) <= index_signal["upper"].shift(1)),
+                "signal",
+            ] = 1
+        index_signal.loc[
+                (index_signal["close"] < index_signal["lower"]) & 
+                 (index_signal["close"].shift(1) >= index_signal["lower"].shift(1)),
+                "signal",
+            ] = -1
+        return index_signal[["open", "high", "low", "close", "volume_U", "dema", "signal", "upper", "lower", "rh", "rl"]]
 

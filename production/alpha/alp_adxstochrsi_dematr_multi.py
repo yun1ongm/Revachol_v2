@@ -5,10 +5,10 @@ import pandas as pd
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
-from Research.backtest import BacktestFramework
-from Market.kline import KlineGenerator
+from research.backtest import BacktestFramework
+from production.kline import KlineGenerator
 from Index.idx_adxstochrsi import IdxAdxStochrsi
-from Strategy.stgy_dematr_multi import StgyDematrMulti
+from production.strategy.stgy_dematr_multi import StgyDematrMulti
 import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")

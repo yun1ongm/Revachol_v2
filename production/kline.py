@@ -27,21 +27,22 @@ class KlineGenerator:
     ]
     logger = logging.getLogger(__name__)
 
-    def __init__(self, symbol_list, timeframe, mode = 1, start = None, window_days = None) -> None:
+    def __init__(self, symbol, timeframe) -> None:
         """
         Args:
             symbol (str): symbol
             timeframe (str): timeframe
-            mode (int): 0 for backtest, 1 for live trading
-            start (datetime): start time for backtest
-            window_days (int): window days for backtest
         """
-        self.symbols = symbol_list
+        self.symbol = symbol
         self.timeframe = timeframe
-        self.window_days = window_days
-        self.start = start
         self.client = UMFutures(timeout=3)
         self.kdf = self._get_klines_df()
+        self.timeframe_int = {
+            '1m': 1,
+            '5m': 5,
+            '15m': 15,
+            '1h': 60
+        }.get(self.timeframe, 1)
     
     @retry(tries=2, delay=1)
     def _get_klines_df(self) -> pd.DataFrame:
@@ -83,7 +84,7 @@ class KlineGenerator:
         return kdf
     
     @retry(tries=1, delay=1)
-    def update_klines(self, timeframe = 5) -> bool:
+    def update_klines(self) -> bool:
         try:
             latest_ohlcv = self.client.continuous_klines(
                 self.symbol, "PERPETUAL", self.timeframe, limit=2
@@ -94,19 +95,22 @@ class KlineGenerator:
                 columns=self.kdf_columns,
             )
             unfin_kdf = pd.DataFrame(
-                unfin_ohlcv,
+                [unfin_ohlcv],
                 columns=self.kdf_columns,
             )
             latest_kdf = self._convert_kdf_datatype(latest_kdf)
             unfin_kdf = self._convert_kdf_datatype(unfin_kdf)
-            self.kdf = pd.concat([self.kdf, latest_kdf])
-            if len(self.kdf) > 7*24*60/timeframe:
-                self.kdf = self._get_klines_df()
-                self.logger.warning(f"Market bot refresh candle data.")
-            self.logger.info(
-                f"Candle close time: {self.kdf.closetime[-1]} Updated price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"
-            )
-            return True
+            if latest_kdf.closetime[-1] == self.kdf.closetime[-1]:
+                return False
+            else:
+                self.kdf = pd.concat([self.kdf, latest_kdf])
+                self.logger.info(
+                    f"Candle close time: {self.kdf.closetime[-1]} Latest price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"
+                )
+                if len(self.kdf) > 7*24*60/self.timeframe_int:
+                    self.kdf = self._get_klines_df()
+                    self.logger.warning(f"Market bot reboot candle data.")
+                return True
         
         except Exception as e:
             self.logger.exception(e)

@@ -4,10 +4,10 @@ import pandas as pd
 import sys
 temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(temp_path)
-from Research.backtest import BacktestFramework
-from Market.kline import KlineGenerator
+from research.backtest import BacktestFramework
+from production.kline import KlineGenerator
 from Index.idx_macd_trend import IdxMacdTrend
-from Strategy.stgy_dema import StgyDema
+from production.strategy.stgy_dema import StgyDema
 import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")
@@ -30,20 +30,17 @@ class AlpMacdDema(BacktestFramework):
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
 
-    def __init__(self, money, leverage, sizer, params:dict) -> None:
+    def __init__(self, money, leverage, params:dict) -> None:
         '''initialize the parameters
         Args:
         money: float
         leverage: float
-        sizer: float
         params: dict
-        mode: int (0 for backtest, 1 for live trading)
         '''
         self._set_params(params)
 
         self.money = money
         self.leverage = leverage
-        self.sizer = sizer
 
     def _set_params(self, params:dict) -> None:
         '''set the parameters
@@ -59,7 +56,7 @@ class AlpMacdDema(BacktestFramework):
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
             index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-            strategy = StgyDema(self.money, self.leverage, self.sizer)
+            strategy = StgyDema(self.money, self.leverage)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
@@ -83,7 +80,7 @@ if __name__ == "__main__":
     params = {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100}
     def live_trading(params):
         timbersaw.setup()
-        alp = AlpMacdDema(money = 1000, leverage = 5, sizer = 0.1, params = params)
+        alp = AlpMacdDema(money = 1000, leverage = 5, params = params)
         market = KlineGenerator('BTCUSDT', '5m')
         while True:
             market.update_klines()

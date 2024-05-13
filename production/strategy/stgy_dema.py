@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
-from Research.backtest import BacktestFramework
+from research.backtest import BacktestFramework
 
 class StgyDema(BacktestFramework):
     """
@@ -9,7 +9,6 @@ class StgyDema(BacktestFramework):
             kdf_signal (pd.DataFrame): dataframe with klines and signal
             money (float): initial money
             leverage (float): leverage
-            sizer (float): sizer
 
         Return:
             position (float)
@@ -17,15 +16,15 @@ class StgyDema(BacktestFramework):
     strategy_name = "stgy_dema"
 
 
-    def __init__(self, money, leverage, sizer) -> None:
+    def __init__(self, money, leverage) -> None:
         self.money = money
         self.leverage = leverage
-        self.sizer = sizer
         self.comm = 0.0004
 
     def _strategy_run(self, value, signal, position, close, dema, entry_price) -> tuple:
         realized_pnl = 0
         commission = 0
+        sizer = round(self.money/close, 3)
         
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
@@ -37,7 +36,7 @@ class StgyDema(BacktestFramework):
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
-            if close >=dema or signal == 1:
+            if close >= dema or signal == 1:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
@@ -49,14 +48,14 @@ class StgyDema(BacktestFramework):
 
             if signal == 1:
                 entry_price = close
-                position += self.sizer
-                commission = self.comm * self.sizer * close
+                position += sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
             elif signal == -1:
                 entry_price = close
-                position += -self.sizer
-                commission = self.comm * self.sizer * close
+                position += -sizer
+                commission = self.comm * sizer * close
                 value -= commission
 
         return value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission

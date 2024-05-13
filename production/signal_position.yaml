@@ -1,2 +1,7 @@
-signal_position: '0'
-update_time: '2024-03-26 20:00:00'
+
+model_urban:
+  model_position: '0'
+  update_time: '2024-05-10 00:19:00'
+model_urban:
+  model_position: '0'
+  update_time: '2024-05-10 17:56:00'

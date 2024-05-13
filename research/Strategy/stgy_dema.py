@@ -7,6 +7,7 @@ class StgyDema(BacktestFramework):
     """
         Args:
             kdf_signal (pd.DataFrame): dataframe with klines and signal
+            profit_pct (float): profit percentage
             money (float): initial money
             leverage (float): leverage
 
@@ -16,7 +17,8 @@ class StgyDema(BacktestFramework):
     strategy_name = "stgy_dema"
 
 
-    def __init__(self, money, leverage) -> None:
+    def __init__(self, profit_pct, money, leverage) -> None:
+        self.profit_pct = profit_pct
         self.money = money
         self.leverage = leverage
         self.comm = 0.0004
@@ -26,10 +28,10 @@ class StgyDema(BacktestFramework):
         commission = 0
         sizer = round(self.money/close, 3)
 
-        
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
-            if close < dema or signal == -1:
+            unrealized_pct = (close - entry_price)/ entry_price 
+            if close < dema or signal == -1 or unrealized_pct > self.profit_pct:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * position * close
                 value += unrealized_pnl - commission
@@ -37,7 +39,8 @@ class StgyDema(BacktestFramework):
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
-            if close >=dema or signal == 1:
+            unrealized_pct = (entry_price - close)/ entry_price 
+            if close >=dema or signal == 1 or unrealized_pct > self.profit_pct:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission

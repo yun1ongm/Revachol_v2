@@ -2,6 +2,7 @@ import logging
 import warnings
 warnings.filterwarnings("ignore")
 import time
+from datetime import datetime, timedelta
 import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
@@ -24,7 +25,8 @@ class ExecPostmodern(Traders):
         leverage: int: leverage of the trading account
         logger: logger for the class
     """
-    executor = "exec_postmodern"
+    executor = "postmodern"
+    model_name = "model_urban"
     equity = 1000
     leverage = 5
     
@@ -33,17 +35,29 @@ class ExecPostmodern(Traders):
     def __init__(self, symbol) -> None:
         super().__init__(symbol)
         self.interval = 10
+        self.update_time = datetime.utcnow() - timedelta(days=1)
     
     @retry(tries=3, delay=1)  
     def _read_position(self, rel_path = "/production/signal_position.yaml") -> float:
         try:
             with open(main_path + rel_path, 'r') as stream:
                 signal_position_dict = yaml.safe_load(stream)
-                signal_position = float(signal_position_dict["signal_position"])
+                signal_position = float(signal_position_dict["model_position"])
+                self.update_time = datetime.strptime(signal_position_dict["update_time"], "%Y-%m-%d %H:%M:%S")
             return signal_position
         except FileNotFoundError:
             self.logger.error('Position is not read from the file.')
             return 0
+        
+    @retry(tries=2, delay=3)
+    def check_update_position(self) -> bool:
+        """check if the signal position is updated"""
+        signal_position = self._read_position()
+        if datetime.utcnow() - self.update_time < timedelta(minutes=5):
+            return True
+        else:
+            return False
+
 
     def check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""

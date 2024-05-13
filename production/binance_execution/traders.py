@@ -5,19 +5,34 @@ import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
 from binance.um_futures import UMFutures
+from datetime import datetime
 import pandas as pd
 import yaml
 from retry import retry
 
 class Traders:
+    columns = [
+        "opentime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "closetime",
+        "volume_U",
+        "num_trade",
+        "taker_buy",
+        "taker_buy_volume_U",
+        "ignore",
+        ]
 
-    logger = logging.getLogger('account')
+    logger = logging.getLogger(__name__)
 
-    def __init__(self, symbol) -> None:
+    def __init__(self, market) -> None:
         config = self._read_config()
         self.client = self._connect_api(key=config["bn_api"]["key"], secret=config["bn_api"]["secret"])
-        self.symbol = symbol
-        self.slippage  = self._determine_slippage(symbol)
+        self.market= market
+        self.slippage  = self._determine_slippage(market)
 
     def _read_config(self) -> dict:
         rel_path = "/production/config.yaml"
@@ -36,27 +51,28 @@ class Traders:
 
         return client
     
-    def _determine_slippage(self, symbol: str) -> float:
-        if symbol == "BTCUSDT" or "BTCUSDC":
+    def _determine_slippage(self, market: str) -> float:
+        self.threshold = 100
+        if market == "BTCUSDT" or "BTCUSDC":
             slippage = -7
             self.digit = 1
-        elif symbol == "ETHUSDT" or "ETHUSDC":
+        elif market == "ETHUSDT" or "ETHUSDC":
             slippage = -0.35
             self.digit = 2
-        elif symbol == "SOLUSDT" or "SOLUSDC":
+        elif market == "SOLUSDT" or "SOLUSDC":
             slippage = -0.07
             self.digit = 3
         return slippage
     
     @retry(tries=2, delay=1)       
-    def _maker_buy(self, amount, ticker) -> None:
+    def _maker_buy(self, amount, ticker) -> dict:
         """send post-only buy order"""
         price = round((ticker + self.slippage), self.digit)
         amount = round(amount, 3)
         self.logger.info(f"Ticker: {ticker} Executing buy price:{price}")
         try:
-            self.orderId = self.client.new_order(
-                symbol=self.symbol,
+            response = self.client.new_order(
+                symbol=self.market,
                 side="BUY",
                 type="LIMIT",
                 quantity=amount,
@@ -64,83 +80,85 @@ class Traders:
                 price=price,
             )
             self.logger.info(f"Executing buy price:{price}")
+            return response
 
         except Exception as error:
             self.logger.error(error)
 
     @retry(tries=3, delay=1)  
-    def _maker_sell(self, amount, ticker) -> None:
+    def _maker_sell(self, amount, ticker) -> dict:
         """send post-only sell order"""
         price = round((ticker - self.slippage), self.digit)
         amount = round(amount, 3)
         self.logger.info(f"Ticker: {ticker} Executing sell price:{price}")
         try:
-            self.orderId = self.client.new_order(
-                symbol=self.symbol,
+            response = self.client.new_order(
+                symbol=self.market,
                 side="SELL",
                 type="LIMIT",
                 quantity=amount,
                 timeInForce="GTX",
                 price=price,
             )
+            return response
 
         except Exception as error:
             self.logger.error(error)
     
     @retry(tries=1, delay=1)       
-    def send_batch_order(self, order_df:pd.DataFrame) -> list:
+    def send_batch_order(self, orders_df:pd.DataFrame) -> list:
         """send buy and sell orders based on the maker price dataframe
         Args:
             order_df (pd.DataFrame): dataframe with symbol, lot, buy1, sell1, buy2, sell2
             response (list): response from binance api
             """
-        symbol =order_df["symbol"][-1]
-        lot =   order_df["lot"][-1]
-        buy1 =  round(order_df["buy1"][-1], self.digit)
-        sell1 =  round(order_df["sell1"][-1], self.digit)
-        buy2 =  round(order_df["buy2"][-1], self.digit)
-        sell2 =  round(order_df["sell2"][-1], self.digit)
-        self.logger.info(f"close: {order_df.close[-1]} buy1: {buy1} sell1: {sell1} buy2: {buy2} sell2: {sell2}")
+        market = orders_df.index[-1]
+        lot = orders_df["lot"][-1]
+        buy1 =  round(orders_df["buy1"][-1], self.digit)
+        sell1 =  round(orders_df["sell1"][-1], self.digit)
+        buy2 =  round(orders_df["buy2"][-1], self.digit)
+        sell2 =  round(orders_df["sell2"][-1], self.digit)
         try:
             batchOrders = [
                 {
-                    "symbol":symbol,
+                    "symbol":market,
                     "side": "SELL",
                     "type": "LIMIT",
                     "quantity": f"{lot}",
-                    "timeInForce": "GTX",
+                    "timeInForce": "GTC",
                     "reduceOnly": "false",
                     "price": f"{sell1}"
                 },
                 {
-                    "symbol":symbol,
+                    "symbol":market,
                     "side": "SELL",
                     "type": "LIMIT",
                     "quantity": f"{lot*2}",
-                    "timeInForce": "GTX",
+                    "timeInForce": "GTC",
                     "reduceOnly": "false",
                     "price": f"{sell2}"
                 },
                 {
-                    "symbol":symbol,
+                    "symbol":market,
                     "side": "BUY",
                     "type": "LIMIT",
                     "quantity": f"{lot}",
-                    "timeInForce": "GTX",
+                    "timeInForce": "GTC",
                     "reduceOnly": "false",
                     "price": f"{buy1}"
                 },
                 {
-                    "symbol":symbol,
+                    "symbol":market,
                     "side": "BUY",
                     "type": "LIMIT",
                     "quantity": f"{lot*2}",
-                    "timeInForce": "GTX",
+                    "timeInForce": "GTC",
                     "reduceOnly": "false",
                     "price": f"{buy2}"
                 },
                 ]
             response = self.client.new_batch_order(batchOrders)
+            self.logger.info(f"batch order sent-- buy1: {buy1} sell1: {sell1} buy2: {buy2} sell2: {sell2}")
             return response
         except Exception as error:
             self.logger.error(error)
@@ -148,63 +166,69 @@ class Traders:
     @retry(tries=1, delay=1)  
     def cancel_open_orders(self) -> None:
         try:
-            orders = pd.DataFrame(self.client.get_all_orders(symbol= self.symbol))
+            orders = pd.DataFrame(self.client.get_all_orders(symbol= self.market))
             orders_unfin = 0
             if not orders.empty:
                 open_orders = orders.query('status == ["NEW", "PARTIALLY_FILLED"]')
                 for orderId in open_orders["orderId"]:
                     orders_unfin += 1
-                    self.client.cancel_order(symbol= self.symbol, orderId=orderId)
+                    self.client.cancel_order(symbol= self.market, orderId=orderId)
         except Exception as error:
-            self.logger.error(error)
+            self.logger.warning(f"Failed to cancel order because of {error}")  
         self.logger.info(f"Cancelled {orders_unfin} open orders.")
+    
+    def cancel_order_by_id(self, orderId) -> None:
+        try:
+            response = self.client.cancel_order(symbol= self.market, orderId=orderId)
+            self.logger.info(f"Cancelled order {orderId}")
+            return response
+        except Exception as error:
+            self.logger.warning(f"Failed to cancel order {orderId} because of {error}")  
 
     def fetch_positions(self) -> tuple:
         try:
             positions = pd.DataFrame(self.client.get_position_risk(recvWindow=6000))
-            unpnl = positions.query("symbol == @self.symbol").loc[:, "unRealizedProfit"]
+            unpnl = positions.query("symbol == @self.market").loc[:, "unRealizedProfit"]
             unpnl_float = float(unpnl)
-            notional = positions.query("symbol == @self.symbol").loc[:, "notional"]
-            notional_float = float(notional)
-            return unpnl_float, notional_float
+            notional = positions.query("symbol == @self.market").loc[:, "notional"]
+            abs_notional = abs(float(notional))
+            return unpnl_float, abs_notional
         except Exception as error:
             self.logger.error(error)
-    
-    def check_threshold(self, threshold) -> bool:
-        """ check if the position is over the threshold"""
-        try:
-            unpnl_float, notional_float= self.fetch_positions()
-            if unpnl_float < -threshold or notional_float > 5000:
-                self.logger.critical(f"*** unrealizedPnl or notional is over the threshold. Close the position ***")
-                return True
-            elif unpnl_float >  threshold or notional_float > 5000:
-                self.logger.critical(f"*** unrealizedPnl or notional is over the threshold. Close the position ***")
-                return True
-            else:
-                return False
-        except Exception as error:
-            self.logger.error(error)
-            return False
     
     def close_position(self) -> None:
         try:
             positions = pd.DataFrame(self.client.get_position_risk(recvWindow=6000))
-            positionAmt = positions.query("symbol == @self.symbol").loc[:, "positionAmt"]
+            positionAmt = positions.query("symbol == @self.market").loc[:, "positionAmt"]
             position = float(positionAmt)
             if position > 0:
-                self.client.new_order(
-                    symbol=self.symbol,
+                response = self.client.new_order(
+                    symbol=self.market,
                     side="SELL",
                     type="MARKET",
                     quantity=abs(position),
                 )
+                return response
             elif position < 0:
-                self.client.new_order(
-                    symbol=self.symbol,
+                response = self.client.new_order(
+                    symbol=self.market,
                     side="BUY",
                     type="MARKET",
                     quantity=abs(position),
                 )
+                return response
+            else:
+                self.logger.info("No position to close")
         except Exception as error:
             self.logger.error(error)
 
+    def get_order_info(self, orderId) -> dict:
+        try:
+            response = self.client.query_order(
+        symbol=self.market, orderId=orderId, recvWindow=2000
+    )
+            return response
+        except Exception as error:
+            self.logger.error(error)
+
+ 
