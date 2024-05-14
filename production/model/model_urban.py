@@ -73,7 +73,7 @@ class ModelUrban:
     def _export_signal_position(self):
         """export signal position to a yaml file"""
         export_path = "/production/signal_position.yaml"
-        with open(main_path + export_path, "a") as file:
+        with open(main_path + export_path, "w") as file:
             model_signal = {
                 self.model_name:
                     {"update_time":str(self.market.kdf.index[-1]),

@@ -21,7 +21,7 @@ class ExecFishnet(Traders):
     equity = 2000
     leverage = 5 
 
-    params = {'atr_len': 9, 'thd': 0.8}
+    params = {'atr_len': 21, 'thd': 0.8}
     logger = logging.getLogger(executor)
 
     def __init__(self, market, timeframe) -> None:
@@ -29,12 +29,11 @@ class ExecFishnet(Traders):
         self._init_from_market()
         
         self.timeframe = timeframe
-        self.interval = 5
+        self.interval = 15
         self.max_position = self.params['thd'] * self.equity * self.leverage
+        self.latest_kdf = self.get_newest_candle(50)
         self.levels = self.calc_levels()
-        self.latest_kdf = self.get_newest_candle()
         self.put_orders_to_market()
-        self.restart = False
 
     def _init_from_market(self) -> None:
         if self.market in ["BTCUSDT", "BTCUSDC"]:
@@ -51,10 +50,10 @@ class ExecFishnet(Traders):
             min_sizer = 0.005
         self.lot = min_sizer
        
-    @retry(tries=2, delay=3)
+    @retry(tries=2, delay=1)
     def get_candle(self) -> pd.DataFrame:  
         try:
-            klines = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=240)
+            klines = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=1440)
             klines.pop() # remove unfinished candle
             kdf = pd.DataFrame(
                 klines,
@@ -65,10 +64,10 @@ class ExecFishnet(Traders):
         except Exception as error:
             self.logger.error(error)
 
-    @retry(tries=2, delay=3)
-    def get_newest_candle(self) -> pd.DataFrame | None:
+    @retry(tries=3, delay=1)
+    def get_newest_candle(self, candle_number:int) -> pd.DataFrame | None:
         try:
-            latest_ohlcv = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=2)
+            latest_ohlcv = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=candle_number+1)
             unfin_ohlcv = latest_ohlcv.pop()
             latest_kdf = pd.DataFrame(
                 latest_ohlcv,
@@ -81,7 +80,7 @@ class ExecFishnet(Traders):
             latest_kdf = self._convert_kdf_datatype(latest_kdf)
             unfin_kdf = self._convert_kdf_datatype(unfin_kdf)
 
-            self.logger.info(f"Newest price:{unfin_kdf.close[-1]} time:{unfin_kdf.closetime[-1]}")
+            self.logger.info(f"Newest price:{unfin_kdf.close[-1]} time:{unfin_kdf.index[-1]}")
             return latest_kdf
         except Exception as error:
             self.logger.error(error)
@@ -107,7 +106,7 @@ class ExecFishnet(Traders):
 
         return kdf
     
-    @retry(tries=3, delay=3)
+    @retry(tries=3, delay=1)
     def check_candle_refresh(self) -> bool:
         timeframe_int = {
             '1m': 1,
@@ -118,25 +117,25 @@ class ExecFishnet(Traders):
         if datetime.utcnow() - self.latest_kdf.closetime[-1] < pd.Timedelta(minutes=timeframe_int):
             return False
         else:
-            self.latest_kdf = self.get_newest_candle()
+            self.latest_kdf = self.get_newest_candle(50)
             if len(self.latest_kdf) == 0:
-                self.restart = True
                 return False
             elif datetime.utcnow() - self.latest_kdf.closetime[-1] > pd.Timedelta(minutes=timeframe_int):
                 return False
             else:
                 self.logger.info(f"New candle data is refreshed.")
+                if self.over_boundary():
+                    self.restart_program()
                 return True
 
     def calc_levels(self) -> dict:
         kdf = self.get_candle()
-        atr = pta.atr(kdf["high"], kdf["low"], kdf["close"], length = self.params['atr_len'], mamode = "EMA")
-        highest = kdf["high"].max()
-        lowest = kdf["low"].min()
-        self.grid = 2 * atr.mean()
-        mid_pivot = (highest + lowest) / 2
+        self.highest = kdf["high"].max()
+        self.lowest = kdf["low"].min()
+        mid_pivot = (self.highest + self.lowest) / 2
         current_price = kdf["close"][-1]
-        self.logger.info(f"highst: {highest}, lowest: {lowest}, mid_pivot:{mid_pivot}, grid: {self.grid}")
+        self.grid = self.calc_grid()
+        self.logger.info(f"highst: {self.highest}, lowest: {self.lowest}, mid_pivot:{mid_pivot}, grid: {self.grid}")
         if current_price > mid_pivot:
             self.curr_level = mid_pivot + ((current_price - mid_pivot) // self.grid + 1) * self.grid
             upper_level1 = self.curr_level + self.grid
@@ -164,6 +163,7 @@ class ExecFishnet(Traders):
             low = self.latest_kdf.low[-1]
             close = self.latest_kdf.close[-1]
             if high >= self.levels["upper_level1"]:
+                self.grid = self.calc_grid()
                 if high >= self.levels["upper_level2"]:
                     # if the upper level2 is penetrated, refresh the curr_level based on the current price
                     self.levels["curr_level"] = close
@@ -182,6 +182,7 @@ class ExecFishnet(Traders):
                 return True
                 
             elif low <= self.levels["lower_level1"]:
+                self.grid = self.calc_grid()
                 if low <= self.levels["lower_level2"]:
                     self.levels["curr_level"] = close
                     self.levels['upper_level1'] = self.levels["curr_level"] + 3 * self.grid
@@ -204,15 +205,35 @@ class ExecFishnet(Traders):
             self.logger.error(error)
             return False
         
+    @retry(tries=3, delay=1)
+    def calc_grid(self) -> float:
+        kdf = self.latest_kdf   
+        atr = pta.atr(kdf["high"], kdf["low"], kdf["close"], length = self.params['atr_len'], mamode = "EMA")
+        grid = atr.mean()
+        return grid
+        
+    def over_boundary(self) -> bool:
+        """ check if the price is outside the boundary"""
+        try:
+            current_price = self.latest_kdf.close[-1]
+            if current_price > self.highest or current_price < self.lowest:
+                self.logger.critical(f"*** The price is over the boundary.restart the bot ***")
+                return True
+            else:
+                return False
+        except Exception as error:
+            self.logger.error(error)
+            return False
+        
     def over_threshold(self) -> bool:
         """ check if the position is over the threshold"""
         try:
             unpnl_float, abs_notional = self.fetch_positions()
-            if unpnl_float < -100 or abs_notional > self.max_position:
-                self.logger.critical(f"*** unrealizedPnl or notional is over the threshold. Close the position ***")
+            if abs_notional > self.max_position:
+                self.logger.critical(f"*** notional is over the threshold. restart the bot ***")
                 return True
-            elif unpnl_float > 100 or abs_notional > self.max_position:
-                self.logger.critical(f"*** unrealizedPnl or notional is over the threshold. Close the position ***")
+            elif abs(unpnl_float) > 100:
+                self.logger.critical(f"*** unrealizedPnl is over the threshold. restart the bot ***")
                 return True
             else:
                 return False
@@ -234,22 +255,29 @@ class ExecFishnet(Traders):
     
     def check_if_last_order_filled(self) -> bool:
         """this function is to check if the order is filled."""
-        filled_orders = []
-        for _, row in self.last_order.iterrows():
-            orderid = row['orderId']
-            order_info = self.get_order_info(orderid)
-            if order_info['status'] == "FILLED":
-                self._put_harvest_maker_order(order_info)
-                self.last_order = self.last_order[self.last_order.orderId != orderid]
-                filled_orders.append(order_info)
-
-        if len(filled_orders) == 0:
+        if self.last_order is None:
             return False
         else:
-            self.cancel_rest_orders()
-            return True
-
-    
+            filled = False
+            for _, row in self.last_order.iterrows():
+                orderid = row['orderId']
+                order_info = self.get_order_info(orderid)
+                if not order_info:
+                    self.logger.error(f"Order {orderid} is not found.")
+                    continue
+                elif order_info['status'] == "FILLED":
+                    direction = order_info["side"]
+                    self.logger.info(f"{direction} order {orderid} is filled.")
+                    self._put_harvest_maker_order(order_info)
+                    self.last_order = self.last_order[self.last_order.orderId != orderid]
+                    filled = True
+            if filled:
+                self.cancel_rest_orders()
+                self.last_order = None
+                return filled
+            else:
+                return filled
+        
     def cancel_rest_orders(self) -> None:
         """this function is to cancel the rest of the orders."""
         for _, row in self.last_order.iterrows():
@@ -294,31 +322,34 @@ class ExecFishnet(Traders):
             except Exception as error:
                 self.logger.error(error)
 
-    def recycle_orders_from_market(self) -> None:
+    def recycle_level_order(self) -> None:
         """this function is to recycle orders from the market based on the response."""
-        self.check_if_last_order_filled()
-        level_flag = self.update_levels()
         if self.over_threshold():
-            self.cancel_open_orders()
-            self.close_position()
-        elif level_flag:
-            self.put_orders_to_market()
+            self.restart_program()
+        elif self.last_order is None:
+            if self.update_levels():
+                self.put_orders_to_market()
+
+    def restart_program(self) -> None:
+        self.cancel_open_orders()
+        self.close_position()
+        time.sleep(4*60*60)
+
+        self.levels = self.calc_levels()
+        self.latest_kdf = self.get_newest_candle(50)
+        self.put_orders_to_market()
         
     def run(self) -> None: 
         while True:
+            self.check_if_last_order_filled()
             if self.check_candle_refresh():
-                self.recycle_orders_from_market()
+                self.recycle_level_order()
                 self.logger.info(f"Task completed.\n------------------")
+                time.sleep(self.interval)
             else:
-                if self.restart:
-                    self.logger.critical(f"Restart the program.\n------------------")
-                    self.restart = False  # Reset restart flag
-                    time.sleep(self.interval) 
-                    self.latest_kdf = self.get_newest_candle()
-                    continue  # Restart the loop
-            time.sleep(self.interval) 
-
+                time.sleep(self.interval/3) 
+ 
 if __name__ == "__main__":
     timbersaw.setup()
-    executor = ExecFishnet(market = "BTCUSDC", timeframe = "1m")
+    executor = ExecFishnet(market = "BTCUSDC", timeframe = "5m")
     executor.run()
