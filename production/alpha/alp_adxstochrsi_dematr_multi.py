@@ -18,7 +18,6 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         Args:
             money (float): initial money
             leverage (float): leverage
-            sizer (float): sizer
             params (dict): parameters for the alpha
 
         Return:
@@ -32,14 +31,6 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
-        '''initialize the parameters
-        Args:
-        money: float
-        leverage: float
-        sizer: float
-        params: dict
-        mode: int (0 for backtest, 1 for live trading)
-        '''
         self._set_params(params)
         self.money = money
         self.leverage = leverage
@@ -59,12 +50,12 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
-            portfolio = strategy.generate_portfolio(idx_signal)
-            position = portfolio[f"position"][-1]
-            signal = portfolio[f"signal"][-1]
-            entry_price = portfolio["entry_price"][-1]
-            stop_profit = portfolio["stop_profit"][-1]
-            stop_loss = portfolio["stop_loss"][-1]
+            stgy_signal = strategy.generate_portfolio(idx_signal)
+            position = stgy_signal["position"][-1]
+            signal =  stgy_signal["signal"][-1]
+            entry_price =  stgy_signal["entry_price"][-1]
+            stop_profit = stgy_signal["stop_profit"][-1]
+            stop_loss =  stgy_signal["stop_loss"][-1]
             signal_position ={
                 "position": position,
                 "signal": signal,
@@ -80,7 +71,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             self.logger.exception(e)
 
 if __name__ == "__main__":
-    params = {'adx_len': 75, 'rsi_len': 51, 'stoch_len': 21, 'kd': 4, 'dema_len': 27, 'atr_profit': 2, 'atr_loss': 5}
+    params ={'adx_len': 57, 'rsi_len': 33, 'stoch_len': 27, 'kd': 3, 'dema_len': 21, 'atr_profit': 5, 'atr_loss': 5}
     def live_trading(params):
         timbersaw.setup()
         alp = AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5, params = params)

@@ -5,6 +5,7 @@ import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
 from production.binance_execution.traders import Traders
+from production.kline import KlineGenerator
 import contek_timbersaw as timbersaw
 import time 
 import pandas as pd
@@ -12,28 +13,25 @@ import pandas_ta as pta
 from datetime import datetime
 from retry import retry
 
-class ExecFishnet(Traders):
+class ExecPopinjay(Traders):
     """
     Executor 
 
     """
-    executor = "exec_Fishnet"
+    executor = "exec_Popinjay"
     equity = 2000
     leverage = 5 
 
-    params = {'atr_len': 21, 'thd': 0.8}
+    params = {'sptr_len':90, 'sptr_k': 3.5, 'atr_len': 21, 'thd': 0.8}
     logger = logging.getLogger(executor)
 
     def __init__(self, market, timeframe) -> None:
         super().__init__(market)
         self._init_from_market()
-        
+        self.candle = KlineGenerator(self.symbol, timeframe)
         self.timeframe = timeframe
         self.interval = 15
         self.max_position = self.params['thd'] * self.equity * self.leverage
-        self.latest_kdf = self.get_newest_candle(50)
-        self.levels = self.calc_levels()
-        self.put_orders_to_market()
 
     def _init_from_market(self) -> None:
         if self.market in ["BTCUSDT", "BTCUSDC"]:
@@ -49,62 +47,15 @@ class ExecFishnet(Traders):
             self.digit = 3
             min_sizer = 0.005
         self.lot = min_sizer
-       
-    @retry(tries=2, delay=1)
-    def get_candle(self) -> pd.DataFrame:  
-        try:
-            klines = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=1440)
-            klines.pop() # remove unfinished candle
-            kdf = pd.DataFrame(
-                klines,
-                columns=self.columns,
-            )
-            kdf = self._convert_kdf_datatype(kdf)
-            return kdf
-        except Exception as error:
-            self.logger.error(error)
 
-    @retry(tries=3, delay=1)
-    def get_newest_candle(self, candle_number:int) -> pd.DataFrame | None:
-        try:
-            latest_ohlcv = self.client.continuous_klines(self.market, "PERPETUAL", self.timeframe, limit=candle_number+1)
-            unfin_ohlcv = latest_ohlcv.pop()
-            latest_kdf = pd.DataFrame(
-                latest_ohlcv,
-                columns=self.columns,
-            )
-            unfin_kdf = pd.DataFrame(
-                [unfin_ohlcv],
-                columns=self.columns,
-            )
-            latest_kdf = self._convert_kdf_datatype(latest_kdf)
-            unfin_kdf = self._convert_kdf_datatype(unfin_kdf)
+    def _supertrend(self) -> pd.DataFrame:
+        kdf = self.candle.kdf
+        supertrend = pta.supertrend(
+            kdf["high"], kdf["low"], kdf["close"],  self.params['sptr_len'],  self.params['sptr_k']
+        )
+        supertrend.columns = ["stop_price", "direction", "lbound", "ubound"]
 
-            self.logger.info(f"Newest price:{unfin_kdf.close[-1]} time:{unfin_kdf.index[-1]}")
-            return latest_kdf
-        except Exception as error:
-            self.logger.error(error)
-    
-    def _convert_kdf_datatype(self, kdf) -> pd.DataFrame:
-        kdf.opentime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.opentime
-        ]
-        kdf.open = kdf.open.astype("float")
-        kdf.high = kdf.high.astype("float")
-        kdf.low = kdf.low.astype("float")
-        kdf.close = kdf.close.astype("float")
-        kdf.volume = kdf.volume.astype("float")
-        kdf.closetime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.closetime
-        ]
-        kdf.volume_U = kdf.volume_U.astype("float")
-        kdf.num_trade = kdf.num_trade.astype("int")
-        kdf.taker_buy = kdf.taker_buy.astype("float")
-        kdf.taker_buy_volume_U = kdf.taker_buy_volume_U.astype("float")
-        kdf.ignore = kdf.ignore.astype("float")
-        kdf.set_index("opentime", inplace=True)
-
-        return kdf
+        return supertrend[["stop_price", "direction"]]
     
     @retry(tries=3, delay=1)
     def check_candle_refresh(self) -> bool:
@@ -114,47 +65,42 @@ class ExecFishnet(Traders):
             '15m': 15,
             '1h': 60
         }.get(self.timeframe, 1)
-        if datetime.utcnow() - self.latest_kdf.closetime[-1] < pd.Timedelta(minutes=timeframe_int):
+        if datetime.utcnow() - self.candle.kdf.closetime[-1] < pd.Timedelta(minutes=timeframe_int):
             return False
         else:
-            self.latest_kdf = self.get_newest_candle(50)
-            if len(self.latest_kdf) == 0:
-                return False
-            elif datetime.utcnow() - self.latest_kdf.closetime[-1] > pd.Timedelta(minutes=timeframe_int):
+            self.candle.update_klines()
+            if datetime.utcnow() -  self.candle.kdf.closetime[-1] > pd.Timedelta(minutes=timeframe_int):
                 return False
             else:
-                self.logger.info(f"New candle data is refreshed.")
+                self.logger.info(f"New candle data is refreshed.")吧  
                 if self.over_boundary():
                     self.restart_program()
                 return True
 
     def calc_levels(self) -> dict:
-        kdf = self.get_candle()
-        self.highest = kdf["high"].max()
-        self.lowest = kdf["low"].min()
-        mid_pivot = (self.highest + self.lowest) / 2
+        kdf = self.candle.kdf
+        supertrend = self._supertrend()
+        kdf['atr'] = pta.atr(kdf["high"], kdf["low"], kdf["close"], length = self.params['atr_len'], mamode = "EMA")
+        kdf = pd.concat([kdf, supertrend], axis=1)
+
         current_price = kdf["close"][-1]
+        trend = kdf["direction"][-1]
+        stop_price = kdf["stop_price"][-1]
         self.grid = self.calc_grid()
-        self.logger.info(f"highst: {self.highest}, lowest: {self.lowest}, mid_pivot:{mid_pivot}, grid: {self.grid}")
-        if current_price > mid_pivot:
-            self.curr_level = mid_pivot + ((current_price - mid_pivot) // self.grid + 1) * self.grid
-            upper_level1 = self.curr_level + self.grid
-            lower_level1 = self.curr_level - self.grid
-            upper_level2 = upper_level1 + self.grid
-            lower_level2 = lower_level1 - self.grid
-        
+        self.logger.info(f"trend: {trend}, stop price: {stop_price}, grid: {self.grid}")
+
+        if kdf["direction"][-1] == 1:
+            level1 = current_price + 2 * self.grid
+            level2 = current_price + 4 * self.grid
+            side = "SELL"
         else:
-            self.curr_level = mid_pivot - ((mid_pivot - current_price) // self.grid + 1) * self.grid
-            upper_level1 = self.curr_level + self.grid
-            lower_level1 = self.curr_level - self.grid
-            upper_level2 = upper_level1 + self.grid
-            lower_level2 = lower_level1 - self.grid
+            level1 = current_price - 2 * self.grid
+            level2 = current_price - 4 * self.grid
+            side = "BUY"
         return {
-            "curr_level": self.curr_level,
-            "upper_level1": upper_level1,
-            "lower_level1": lower_level1,
-            "upper_level2": upper_level2,
-            "lower_level2": lower_level2
+            "side": side,
+            "level1": level1,
+            "level2": level2,
         }
 
     def update_levels(self) -> bool:

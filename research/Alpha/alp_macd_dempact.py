@@ -8,25 +8,25 @@ import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(main_path)
 from research.backtest import BacktestFramework
-from Index.idx_super_dema import IdxSuperDema
-from research.Strategy.stgy_dematr_multi import StgyDematrMulti
+from Index.idx_macd_trend import IdxMacdTrend
+from research.Strategy.stgy_dempact import StgyDempact
 import warnings
 warnings.filterwarnings("ignore")
 
-
-class AlpSuperDematrSing(BacktestFramework):
+class AlpMacdDema(BacktestFramework):
     """
         Args:
             money (float): initial money
             leverage (float): leverage
             params (dict): parameters for the alpha
-        
+
         Return:
             position and signal in portfolio: pd.DataFrame
+        
     """
-    alpha_name = "alp_super_dematr_multi"
-    index_name = "idx_super_dema"
-    strategy_name = "stgy_dematr_multi"
+    alpha_name = "alp_macd_dempct"
+    index_name = "idx_macd_trend"
+    strategy_name = "stgy_dempct"
     symbol = "BTCUSDT"
     timeframe = "5m"
     logger = logging.getLogger(alpha_name)
@@ -43,36 +43,34 @@ class AlpSuperDematrSing(BacktestFramework):
         kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
         kdf.index = pd.to_datetime(kdf.index)
         return kdf
-    
-    def _set_params(self, params:dict):
-        self.sptr_len = params["sptr_len"]
-        self.sptr_k = params["sptr_k"]
-        self.dema_len = params["dema_len"]
-        self.atr_profit = params["atr_profit"]
-        self.atr_loss = params["atr_loss"]
 
-    def generate_signal_position(self, kdf:pd.DataFrame) -> float:
+    def _set_params(self, params:dict) -> None:
+        self.fast = params["fast"]
+        self.slow = params["slow"]
+        self.signaling = params["signaling"]
+        self.threshold = params["threshold"]
+        self.dema_len = params["dema_len"]
+        self.profit_pct = params["profit_pct"]
+        self.loss_pct = params['loss_pct']
+
+    def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
-            index = IdxSuperDema(kdf, self.sptr_len, self.sptr_k, self.dema_len)
-            strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
+            index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+            strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
             idx_signal = index.generate_dematr_signal()
             update_time = idx_signal.index[-1]
-            stgy_signal = strategy.generate_portfolio(idx_signal)
-            position = stgy_signal[f"position"][-1]
-            signal = stgy_signal[f"signal"][-1]
-            entry_price = stgy_signal["entry_price"][-1]
-            stop_loss = stgy_signal["stop_loss"][-1]
-            stop_profit = stgy_signal["stop_profit"][-1]
+            portfolio = strategy.generate_portfolio(idx_signal)
+            position = portfolio[f"position"][-1]
+            signal = portfolio[f"signal"][-1]
+            entry_price = portfolio["entry_price"][-1]
             signal_position ={
                 "position": position,
                 "signal": signal,
                 "entry_price": entry_price,
-                "stop_loss": stop_loss,
-                "stop_profit": stop_profit,
                 "update_time": update_time
             }
             self.logger.info(f"{signal_position}")
-                
+
             return signal_position
         except Exception as e:
             self.logger.exception(e)
@@ -81,8 +79,8 @@ class AlpSuperDematrSing(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxSuperDema(self.kdf, self.sptr_len, self.sptr_k, self.dema_len)
-        strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
+        index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+        strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
@@ -91,15 +89,18 @@ class AlpSuperDematrSing(BacktestFramework):
         perf = self.calculate_performance(result)
 
         return perf
-    
+
     def objective(self, trial):
         kwargs = {
-            "sptr_len": trial.suggest_int("sptr_len",   9, 99, step=3),
-            "sptr_k": trial.suggest_float("sptr_k", 2.5, 4, step=0.5),
-            "dema_len": trial.suggest_int("dema_len", 9, 99, step=3),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 10),
-            "atr_loss": trial.suggest_int("atr_loss", 2, 5),
+            "fast": trial.suggest_int("fast", 8, 16),
+            "slow": trial.suggest_int("slow", 20, 32),
+            "signaling": trial.suggest_int("signaling", 6, 12),
+            "threshold": trial.suggest_float("threshold", 0.1, 1, step=0.1),
+            "dema_len": trial.suggest_int("dema_len", 10, 100),
+            "profit_pct": trial.suggest_float("profit_pct", 0.002, 0.04, step=0.002),
+            "loss_pct": trial.suggest_float("loss_pct", 0.002, 0.02, step=0.002)
         }
+
         result = self.get_backtest_result(kwargs)
         performance = self.evaluate_performance(result)
 
@@ -141,7 +142,7 @@ class AlpSuperDematrSing(BacktestFramework):
 
         return study.best_params, study.best_value
 
-    def _write_to_log(self, trials) -> None:
+    def _write_to_log(self, trials):
         log_message = "Top 5 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
@@ -151,6 +152,7 @@ class AlpSuperDematrSing(BacktestFramework):
             self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
+
         self._log(log_message)
 
     def output_result(self, result:pd.DataFrame, number) -> None:
@@ -173,13 +175,12 @@ class AlpSuperDematrSing(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
+    params = {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100, 'profit_pct': 0.04, 'loss_pct': 0.01}
     def backtest(params):
-        alp_backtest = AlpSuperDematrSing(money = 2000, leverage = 5, params = params)
+        alp_backtest = AlpMacdDema(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
 
     backtest(params)
 
-    

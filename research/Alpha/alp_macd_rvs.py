@@ -12,7 +12,7 @@ sys.path.append(temp_path)
 from Research.backtest import BacktestFramework
 from Market.kline import KlineGenerator
 from Index.idx_macd_rvs import IdxMacdRvs
-from Strategy.stgy_canpct_sing import StgyCanpctSing
+from research.Strategy.stgy_openatr import StgyCanpctSing
 import contek_timbersaw as timbersaw
 import warnings
 warnings.filterwarnings("ignore")

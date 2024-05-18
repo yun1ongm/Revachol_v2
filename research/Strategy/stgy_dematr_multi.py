@@ -4,15 +4,12 @@ sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
 from research.backtest import BacktestFramework
 
 class StgyDematrMulti(BacktestFramework):
-
     """
         Args:
-            kdf_signal (pd.DataFrame): dataframe with klines and signal
             atr_profit (float): atr profit
             atr_loss (float): atr loss
             money (float): initial money
             leverage (float): leverage
-            sizer (float): sizer
     """
     strategy_name = "stgy_dematr_multi"
 
@@ -33,46 +30,38 @@ class StgyDematrMulti(BacktestFramework):
             money_thresh = (entry_price * position < self.money * self.leverage)
             stop_loss = dema - atr * self.atr_loss
             stop_profit = dema + atr * self.atr_profit
-            if low < stop_loss or high > stop_profit:
+
+            if low < stop_loss or high > stop_profit or signal == -1:
                 realized_pnl = unrealized_pnl
-                entry_price = 0
-                position = 0
                 commission = self.comm * position * close
                 value += unrealized_pnl - commission
+                entry_price = 0
+                position = 0
+
             elif signal == 1 and money_thresh:
                 entry_price =(entry_price * position + close * sizer)/(position + sizer)
                 position += sizer
                 commission = self.comm * sizer * close
                 value -= commission
-            elif signal == -1:
-                realized_pnl = unrealized_pnl
-                entry_price = 0
-                position = 0
-                commission = self.comm * position * close
-                value += unrealized_pnl - commission
 
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
             money_thresh = (entry_price * -position < self.money * self.leverage)
             stop_loss = dema + atr * self.atr_loss
             stop_profit = dema - atr * self.atr_profit
-            if high > stop_loss or low < stop_profit:
+
+            if high > stop_loss or low < stop_profit or signal == 1:
                 realized_pnl = unrealized_pnl
-                entry_price = 0
-                position = 0
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
+                entry_price = 0
+                position = 0
+
             elif signal == -1 and money_thresh:
                 entry_price = (entry_price * position - close * sizer) / (position - sizer)
                 position += -sizer
                 commission = self.comm * sizer * close
                 value -= commission
-            elif signal == 1:
-                realized_pnl = unrealized_pnl
-                entry_price = 0
-                position = 0
-                commission = self.comm * -position * close
-                value += unrealized_pnl - commission
 
         else:
             entry_price = 0
@@ -104,8 +93,6 @@ class StgyDematrMulti(BacktestFramework):
         value = self.money
         position = 0
         entry_price = 0
-        stop_profit = 0
-        stop_loss = 0
 
         for index, row in index_signal.iterrows():
             signal = row.signal

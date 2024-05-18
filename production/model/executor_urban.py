@@ -27,7 +27,7 @@ class ExecPostmodern(Traders):
     """
     executor = "postmodern"
     model_name = "model_urban"
-    equity = 1000
+    equity = 2000
     leverage = 5
     
     logger = logging.getLogger(executor)
@@ -98,5 +98,5 @@ class ExecPostmodern(Traders):
 
 if __name__ == "__main__":
     timbersaw.setup()
-    executor = ExecPostmodern(market = "BTCUSDT")
+    executor = ExecPostmodern(market = "BTCUSDC")
     executor.run()

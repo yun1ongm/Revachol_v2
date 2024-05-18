@@ -1,80 +1,70 @@
 import os
 import logging
-import time
 import operator
 import optuna
-from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
-sys.path.append(temp_path)
-from Research.backtest import BacktestFramework
-from Market.kline import KlineGenerator
-import contek_timbersaw as timbersaw
+main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+sys.path.append(main_path)
+from research.backtest import BacktestFramework
+from Index.idx_trendline import IdxTrendline
+from research.Strategy.stgy_dempact import StgyDempact
 import warnings
 warnings.filterwarnings("ignore")
 
-class BotFishnet(BacktestFramework):
+class AlpLinboDempct(BacktestFramework):
     """
-    Args:
-        money (float): initial money
-        leverage (float): leverage
-        sizer (float): sizer
+        Args:
+            money (float): initial money
+            leverage (float): leverage
+            params (dict): parameters for the alpha
 
-    Return:
-        position and signal in portfolio: pd.DataFrame
+        Return:
+            position and signal in portfolio: pd.DataFrame
         
     """
-    alpha_name = "bot_fishnet"
-    strategy_name = "stgy_fishnet"
-    symbol = "ETHUSDC"
-    timeframe = "1m"
+    alpha_name = "alp_linbo_dempact"  
+    index_name = "idx_trendline"
+    strategy_name = "stgy_dempct"
+    symbol = "BTCUSDT"
+    timeframe = "5m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
-        '''initialize the parameters
-        Args:
-        money: float
-        leverage: float
-        sizer: float
-        params: dict
-        '''
         self._set_params(params)
         self.num_evals = 100
         self.target = "t_sharpe"
-        market = KlineGenerator('BTCUSDC', '1m', mode = 0, 
-                                start = datetime(2023, 12, 10, 0, 0, 0), 
-                                window_days=100)
-        self.kdf = market.kdf
+        self.kdf = self._read_kdf_from_csv()
         self.money = money
-        self.leverage = leverage        
-        self.sizer = 0.07
+        self.leverage = leverage
 
-
-
-    def _set_params(self, params:dict) -> None:
-        '''set the parameters
-        Args:
-        params: dict
-        '''
+    def _read_kdf_from_csv(self) -> pd.DataFrame:
+        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+        kdf.index = pd.to_datetime(kdf.index)
+        return kdf
+    
+    def _set_params(self, params:dict):
+        self.swing = params["swing"]
+        self.reset = params["reset"]
+        self.slope = params["slope"]    
+        self.profit_pct = params["profit_pct"]
+        self.loss_pct = params['loss_pct']
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
-            strategy = StgyDempactSing(self.pct_profit, self.pct_loss, self.money, self.leverage, self.sizer)
+            index = IdxTrendline(kdf, self.swing, self.reset, self.slope)
+            strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
+            idx_signal = index.generate_dema_signal()
             update_time = idx_signal.index[-1]
-            portfolio = strategy.generate_portfolio(idx_signal)
-            position = portfolio[f"position"][-1]
-            signal = portfolio[f"signal"][-1]
-            entry_price = portfolio["entry_price"][-1]
-            stop_profit = portfolio["stop_profit"][-1]
-            stop_loss = portfolio["stop_loss"][-1]
+            stgy_signal = strategy.generate_portfolio(idx_signal)
+            position = stgy_signal[f"position_{self.strategy_name}"][-1]
+            signal = stgy_signal[f"signal_{self.strategy_name}"][-1]
+            entry_price = stgy_signal["entry_price"][-1]
             signal_position ={
                 "position": position,
                 "signal": signal,
                 "entry_price": entry_price,
-                "stop_profit": stop_profit,
-                "stop_loss": stop_loss,
                 "update_time": update_time
             }
             self.logger.info(f"{signal_position}")
@@ -87,9 +77,9 @@ class BotFishnet(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
-        strategy = StgyDempactSing(self.pct_profit, self.pct_loss, self.money, self.leverage, self.sizer)
-        idx_signal = index.generate_dematr_signal()
+        index = IdxTrendline(self.kdf, self.swing, self.reset, self.slope)
+        strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
+        idx_signal = index.generate_dema_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
 
@@ -97,18 +87,15 @@ class BotFishnet(BacktestFramework):
         perf = self.calculate_performance(result)
 
         return perf
-
+    
     def objective(self, trial):
         kwargs = {
-            "fast": trial.suggest_int("fast", 8, 16),
-            "slow": trial.suggest_int("slow", 20, 32),
-            "signaling": trial.suggest_int("signaling", 6, 12),
-            "threshold": trial.suggest_float("threshold", 0.2, 1, step=0.1),
-            "dema_len": trial.suggest_int("dema_len", 12, 60),
-            "pct_profit": trial.suggest_float("pct_profit", 0.002, 0.02, step=0.002),
-            "pct_loss": trial.suggest_float("pct_loss", 0.002, 0.02, step=0.002),
+            "swing": trial.suggest_int("swing", 10, 100),
+            "reset": trial.suggest_int("reset", 100, 300),
+            "slope": trial.suggest_float("slope", 0.2, 1.5, step=0.1),
+            "profit_pct": trial.suggest_float("profit_pct", 0.002, 0.04, step=0.002),
+            "loss_pct": trial.suggest_float("loss_pct", 0.002, 0.02, step=0.002)
         }
-
         result = self.get_backtest_result(kwargs)
         performance = self.evaluate_performance(result)
 
@@ -145,13 +132,13 @@ class BotFishnet(BacktestFramework):
             key=operator.attrgetter("value"),
             reverse=True,
         )
-        top_10_trials = sorted_trials[:10]
-        self._write_to_log(top_10_trials)
+        top_5_trials = sorted_trials[:5]
+        self._write_to_log(top_5_trials)
 
         return study.best_params, study.best_value
 
-    def _write_to_log(self, trials):
-        log_message = "Top 10 results:\n"
+    def _write_to_log(self, trials) -> None:
+        log_message = "Top 5 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
@@ -160,7 +147,6 @@ class BotFishnet(BacktestFramework):
             self.output_result(result,i+1)
             performance = self.evaluate_performance(result)
             log_message += f"  Performance: {performance}\n\n"
-
         self._log(log_message)
 
     def output_result(self, result:pd.DataFrame, number) -> None:
@@ -183,22 +169,12 @@ class BotFishnet(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'fast': 12, 'slow': 23, 'signaling': 9, 'threshold': 0.5, 'dema_len': 57, 'pct_profit': 0.03, 'pct_loss': 0.04}
-    def live_trading(params):
-        timbersaw.setup()
-        alp = AlpMacdDempactSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 1)
-        market = KlineGenerator('BTCUSDT', '5m')
-        while True:
-            market.update_klines()
-            alp.generate_signal_position(market.kdf)
-            time.sleep(10)
+    params = { "swing": 100, "reset": 200, "slope": 0.4, "profit_pct": 0.02, "loss_pct": 0.02}
 
     def backtest(params):
-        alp_backtest = AlpMacdDempactSing(money = 500, leverage = 5, sizer = 0.1, params = params, mode = 0)
+        alp_backtest = AlpLinboDempct(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
 
-    #live_trading(params)
     backtest(params)
-

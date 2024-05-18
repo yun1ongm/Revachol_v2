@@ -10,8 +10,9 @@ main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
 import contek_timbersaw as timbersaw
 from production.kline import KlineGenerator
-from production.alpha.alp_macd_dema import AlpMacdDema
 from production.alpha.alp_adxstochrsi_dematr_multi import AlpAdxStochrsiDematrMulti
+from production.alpha.alp_super_openatr  import AlpSuperOpenatr
+from production.alpha.alp_linbo_dempact import AlpLinboDempact
 
 class ModelUrban:
     """
@@ -31,10 +32,12 @@ class ModelUrban:
     def __init__(self, symbol:list, timeframe) -> None:
         config = self._read_config()
         self.alphas = [
-            AlpMacdDema(money = 500, leverage = 5,
-                           params = config["alpha_params"]["alp_macd_dema"]),
-            AlpAdxStochrsiDematrMulti(money = 500, leverage = 5,
+            AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5,
                                  params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"]),
+            AlpSuperOpenatr(money = 1000, leverage = 5,
+                            params = config["alpha_params"]["alp_super_openatr"]),
+            AlpLinboDempact(money = 1000, leverage = 5,
+                            params = config["alpha_params"]["alp_linbo_dempact"])       
         ]
         self.market = KlineGenerator(symbol, timeframe)
         self.previous_model_position = 0

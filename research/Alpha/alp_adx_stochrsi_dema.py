@@ -52,6 +52,7 @@ class AlpAdxStochrsiDema(BacktestFramework):
         self.rsi_len = params["rsi_len"]
         self.kd = params["kd"]
         self.dema_len = params["dema_len"]
+        self.profit_pct = params["profit_pct"]
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
@@ -84,7 +85,7 @@ class AlpAdxStochrsiDema(BacktestFramework):
     ) -> pd.DataFrame:
         self._set_params(params)
         index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
-        strategy = StgyDema(self.money, self.leverage)
+        strategy = StgyDema(self.profit_pct ,self.money, self.leverage)
         idx_signal = index.generate_dematr_signal()
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
@@ -101,6 +102,7 @@ class AlpAdxStochrsiDema(BacktestFramework):
             "stoch_len": trial.suggest_int("stoch_len",  9, 99, step=3),
             "kd": trial.suggest_int("kd", 2, 4),#cant be 1        
             "dema_len": trial.suggest_int("dema_len",   9, 99, step=3),
+            "profit_pct": trial.suggest_float("profit_pct", 0.01, 0.15, step=0.01)
         }
 
         result = self.get_backtest_result(kwargs)
@@ -177,7 +179,7 @@ class AlpAdxStochrsiDema(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'adx_len': 20, 'rsi_len': 47, 'stoch_len': 21, 'kd': 8, 'dema_len': 21}
+    params = {'adx_len': 20, 'rsi_len': 47, 'stoch_len': 21, 'kd': 8, 'dema_len': 21, 'profit_pct': 0.05}
 
     def backtest(params):
         alp_backtest = AlpAdxStochrsiDema(money = 2000, leverage = 5, params = params)

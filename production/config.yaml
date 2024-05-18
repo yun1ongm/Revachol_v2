@@ -11,6 +11,6 @@ backpack_api:
     secret: "gM3WctyAMFbDLBtYC911nNH6lCM878ZDvKXI83gdV3Y="
 
 alpha_params:
-    alp_adx_stochrsi_dematr_multi: {'adx_len': 30, 'rsi_len': 20, 'stoch_len': 15, 'kd': 4, 'dema_len': 10, 'atr_profit': 2, 'atr_loss': 4}
-    alp_super_dematr_sing: {'sptr_len': 24, 'sptr_k': 3.0, 'dema_len': 15, 'atr_profit': 3, 'atr_loss': 4}
-    alp_macd_dema: {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100}
+    alp_adx_stochrsi_dematr_multi: {'adx_len': 57, 'rsi_len': 33, 'stoch_len': 27, 'kd': 3, 'dema_len': 21, 'atr_profit': 5, 'atr_loss': 5}
+    alp_linbo_dempact: {'swing': 90, 'reset': 281, 'slope': 1.0, 'profit_pct': 0.038, 'loss_pct': 0.002}
+    alp_super_openatr: {'sptr_len': 90, 'sptr_k': 4.0, 'atr_profit': 16, 'atr_loss': 5}

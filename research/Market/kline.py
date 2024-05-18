@@ -98,5 +98,5 @@ class KlineGenerator:
 
 
 if __name__ == "__main__":
-    test = KlineGenerator(['BTCUSDT', 'ETHUSDT', 'SOLUSDT'], "5m", start = datetime(2024, 1, 1, 0, 0, 0), window_days=100)
+    test = KlineGenerator(['BTCUSDT', 'ETHUSDT', 'SOLUSDT'], "5m", start = datetime(2024, 2, 4, 0, 0, 0), window_days=100)
     test.generate_testdata()

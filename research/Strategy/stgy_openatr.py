@@ -3,15 +3,16 @@ import sys
 sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
 from research.backtest import BacktestFramework
 
-class StgyDematrMulti(BacktestFramework):
+class StgyOpenAtr(BacktestFramework):
     """
         Args:
             atr_profit (float): atr profit
             atr_loss (float): atr loss
             money (float): initial money
             leverage (float): leverage
+
     """
-    strategy_name = "stgy_dematr_multi"
+    strategy_name = "stgy_open_atr"
 
     def __init__(self, atr_profit, atr_loss, money, leverage) -> None:
         self.atr_profit = atr_profit
@@ -20,16 +21,15 @@ class StgyDematrMulti(BacktestFramework):
         self.leverage = leverage
         self.comm = 0.0004
 
-    def _strategy_run(self, value, signal, position, close, high, low, atr, dema, entry_price) -> tuple:
+    def _strategy_run(self, value, signal, position, close, high, low, atr, entry_price) -> tuple:
         realized_pnl = 0
         commission = 0
         sizer = round(self.money/close, 3)
 
         if position > 0:
             unrealized_pnl = (close - entry_price) * position
-            money_thresh = (entry_price * position < self.money * self.leverage)
-            stop_loss = dema - atr * self.atr_loss
-            stop_profit = dema + atr * self.atr_profit
+            stop_loss = entry_price - atr * self.atr_loss
+            stop_profit = entry_price + atr * self.atr_profit
 
             if low < stop_loss or high > stop_profit or signal == -1:
                 realized_pnl = unrealized_pnl
@@ -38,30 +38,17 @@ class StgyDematrMulti(BacktestFramework):
                 entry_price = 0
                 position = 0
 
-            elif signal == 1 and money_thresh:
-                entry_price =(entry_price * position + close * sizer)/(position + sizer)
-                position += sizer
-                commission = self.comm * sizer * close
-                value -= commission
-
         elif position < 0:
             unrealized_pnl = (close - entry_price) * position
-            money_thresh = (entry_price * -position < self.money * self.leverage)
-            stop_loss = dema + atr * self.atr_loss
-            stop_profit = dema - atr * self.atr_profit
+            stop_loss = entry_price + atr * self.atr_loss
+            stop_profit = entry_price - atr * self.atr_profit
 
-            if high > stop_loss or low < stop_profit or signal == 1:
+            if low < stop_profit or high > stop_loss or signal == 1:
                 realized_pnl = unrealized_pnl
                 commission = self.comm * -position * close
                 value += unrealized_pnl - commission
                 entry_price = 0
                 position = 0
-
-            elif signal == -1 and money_thresh:
-                entry_price = (entry_price * position - close * sizer) / (position - sizer)
-                position += -sizer
-                commission = self.comm * sizer * close
-                value -= commission
 
         else:
             entry_price = 0
@@ -83,11 +70,10 @@ class StgyDematrMulti(BacktestFramework):
 
         return value, signal, position, entry_price, stop_profit, stop_loss, unrealized_pnl, realized_pnl, commission
 
-
     def generate_portfolio(self, index_signal: pd.DataFrame) -> pd.DataFrame:
         """
         Args:
-            index_signal (pd.DataFrame): dataframe with columns high, low, close, signal, atr, dema
+            index_signal (pd.DataFrame): dataframe with columns 
         """
         portfolio = self.initialize_portfolio_variables(index_signal)
         value = self.money
@@ -100,11 +86,10 @@ class StgyDematrMulti(BacktestFramework):
             high = row.high
             low = row.low
             atr = row.atr
-            dema = row.dema
 
             value, signal, position, entry_price, stop_profit, stop_loss, unrealized_pnl, realized_pnl, commission= self._strategy_run(
-                value, signal, position, close, high, low, atr, dema, entry_price
+                value, signal, position, close, high, low, atr, entry_price
             )
-
+            
             portfolio = self.record_values_slsp(portfolio, index, value, signal, position, entry_price, stop_loss, stop_profit, unrealized_pnl, realized_pnl, commission)
         return portfolio

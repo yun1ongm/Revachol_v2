@@ -179,7 +179,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
 if __name__ == "__main__":
     params = {'adx_len': 75, 'rsi_len': 51, 'stoch_len': 21, 'kd': 4, 'dema_len': 27, 'atr_profit': 2, 'atr_loss': 5}
     def backtest(params):
-        alp_backtest = AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5, params = params)
+        alp_backtest = AlpAdxStochrsiDematrMulti(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")
