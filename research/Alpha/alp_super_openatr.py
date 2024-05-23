@@ -28,25 +28,26 @@ class AlpSuperOpenatr(BacktestFramework):
     index_name = "idx_super_dema"
     strategy_name = "stgy_openatr"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
         self._set_params(params)
         self.num_evals = 100
-        self.target = "score"
+        self.target = "t_sharpe"
         self.kdf = self._read_kdf_from_csv()
         self.money = money
         self.leverage = leverage
 
     def _read_kdf_from_csv(self) -> pd.DataFrame:
-        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_{self.timeframe}.csv", index_col=0)
         kdf.index = pd.to_datetime(kdf.index)
         return kdf
     
     def _set_params(self, params:dict):
         self.sptr_len = params["sptr_len"]
         self.sptr_k = params["sptr_k"]
+        self.vol_len = params['vol_len']
         self.atr_profit = params["atr_profit"]
         self.atr_loss = params["atr_loss"]
 
@@ -54,7 +55,7 @@ class AlpSuperOpenatr(BacktestFramework):
         try:
             index = IdxSupertrend(kdf, self.sptr_len, self.sptr_k)
             strategy = StgyOpenAtr(self.atr_profit, self.atr_loss, self.money, self.leverage)
-            idx_signal = index.generate_atr_signal()
+            idx_signal = index.generate_atr_signal(self.vol_len)
             update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_portfolio(idx_signal)
             position = stgy_signal[f"position"][-1]
@@ -80,9 +81,9 @@ class AlpSuperOpenatr(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxSuperDema(self.kdf, self.sptr_len, self.sptr_k)
+        index = IdxSupertrend(self.kdf, self.sptr_len, self.sptr_k)
         strategy = StgyOpenAtr(self.atr_profit, self.atr_loss, self.money, self.leverage)
-        idx_signal = index.generate_atr_signal()
+        idx_signal = index.generate_atr_signal(self.vol_len)
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
 
@@ -95,6 +96,7 @@ class AlpSuperOpenatr(BacktestFramework):
         kwargs = {
             "sptr_len": trial.suggest_int("sptr_len", 9 , 99, step=3),
             "sptr_k": trial.suggest_float("sptr_k", 2, 4, step=0.5),
+            "vol_len": trial.suggest_int("vol_len", 8, 64, step = 2), 
             "atr_profit": trial.suggest_int("atr_profit", 2, 16),
             "atr_loss": trial.suggest_int("atr_loss", 2, 8),
         }
@@ -171,7 +173,7 @@ class AlpSuperOpenatr(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'sptr_len': 24, 'sptr_k': 3.0, 'atr_profit': 3, 'atr_loss': 4}
+    params = {'sptr_len': 24, 'sptr_k': 3.0, "vol_len": 10, 'atr_profit': 3, 'atr_loss': 4}
     def backtest(params):
         alp_backtest = AlpSuperOpenatr(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()

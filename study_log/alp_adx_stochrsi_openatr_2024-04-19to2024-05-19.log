@@ -1,0 +1,56 @@
+2024-05-23 15:39:01,008, Start optimizing alp_adx_stochrsi_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-23 15:43:54,831, Top 5 results:
+Rank 1:
+  Params: {'adx_len': 84, 'rsi_len': 99, 'stoch_len': 99, 'kd': 2, 'vol_len': 62, 'atr_profit': 10, 'atr_loss': 8}
+  Value: 1.3182318593505202
+  Performance: {'net_value': 343.7487017999988, 'win_ratio': 0.6470584006154244, 'single_avg_wlr': 0.9541444524988121, 'total_trades': 153, 'return': 0.1718743508999994, 'max_drawdown': 168.7300695999993, 't_sharpe': 15.208943262930863, 'commission': 0.12250649910000001, 'score': 1.3182318593505202}
+
+Rank 2:
+  Params: {'adx_len': 90, 'rsi_len': 99, 'stoch_len': 90, 'kd': 2, 'vol_len': 48, 'atr_profit': 13, 'atr_loss': 8}
+  Value: 1.317047047808262
+  Performance: {'net_value': 307.10206491999907, 'win_ratio': 0.6486482103728308, 'single_avg_wlr': 0.9332346095408427, 'total_trades': 148, 'return': 0.15355103245999954, 'max_drawdown': 151.24825908000025, 't_sharpe': 13.83190789292535, 'commission': 0.11889761754, 'score': 1.317047047808262}
+
+Rank 3:
+  Params: {'adx_len': 99, 'rsi_len': 99, 'stoch_len': 93, 'kd': 2, 'vol_len': 50, 'atr_profit': 10, 'atr_loss': 8}
+  Value: 1.248605412079013
+  Performance: {'net_value': 321.2757851599995, 'win_ratio': 0.6451608740897586, 'single_avg_wlr': 0.9565832390071234, 'total_trades': 155, 'return': 0.16063789257999975, 'max_drawdown': 166.00475980000078, 't_sharpe': 14.701200312525252, 'commission': 0.12409895742, 'score': 1.248605412079013}
+
+Rank 4:
+  Params: {'adx_len': 87, 'rsi_len': 99, 'stoch_len': 99, 'kd': 2, 'vol_len': 52, 'atr_profit': 11, 'atr_loss': 8}
+  Value: 1.1836781454634202
+  Performance: {'net_value': 308.8489907999983, 'win_ratio': 0.6466662355558429, 'single_avg_wlr': 0.9284369325402694, 'total_trades': 150, 'return': 0.15442449539999917, 'max_drawdown': 168.73006959999975, 't_sharpe': 13.565513247048818, 'commission': 0.12008410459999999, 'score': 1.1836781454634202}
+
+Rank 5:
+  Params: {'adx_len': 84, 'rsi_len': 87, 'stoch_len': 99, 'kd': 4, 'vol_len': 50, 'atr_profit': 10, 'atr_loss': 8}
+  Value: 1.118600670148121
+  Performance: {'net_value': 292.2746166000006, 'win_ratio': 0.6564880484824057, 'single_avg_wlr': 0.9116697162551274, 'total_trades': 131, 'return': 0.14613730830000032, 'max_drawdown': 171.53099039999984, 't_sharpe': 12.891222044849252, 'commission': 0.10484534170000001, 'score': 1.118600670148121}
+
+
+2024-05-23 16:03:59,934, Start optimizing alp_adx_stochrsi_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-23 16:08:53,082, Top 5 results:
+Rank 1:
+  Params: {'adx_len': 69, 'rsi_len': 90, 'stoch_len': 102, 'kd': 5, 'vol_len': 56, 'atr_profit': 8, 'atr_loss': 8}
+  Value: 1.80140443829872
+  Performance: {'net_value': 252.98757535999812, 'win_ratio': 0.6390972638366437, 'single_avg_wlr': 0.9670503392720008, 'total_trades': 133, 'return': 0.12649378767999905, 'max_drawdown': 89.75412940000001, 't_sharpe': 12.413918763393164, 'commission': 0.10648051232, 'score': 1.80140443829872}
+
+Rank 2:
+  Params: {'adx_len': 69, 'rsi_len': 93, 'stoch_len': 102, 'kd': 5, 'vol_len': 54, 'atr_profit': 8, 'atr_loss': 8}
+  Value: 1.2698673420781403
+  Performance: {'net_value': 171.74978035999766, 'win_ratio': 0.6466160551758984, 'single_avg_wlr': 0.8731371999433073, 'total_trades': 133, 'return': 0.08587489017999883, 'max_drawdown': 87.45483467999975, 't_sharpe': 9.291086708978787, 'commission': 0.10645795982000002, 'score': 1.2698673420781403}
+
+Rank 3:
+  Params: {'adx_len': 69, 'rsi_len': 96, 'stoch_len': 108, 'kd': 5, 'vol_len': 62, 'atr_profit': 8, 'atr_loss': 8}
+  Value: 1.2563693516789614
+  Performance: {'net_value': 184.37285843999962, 'win_ratio': 0.6370365651580999, 'single_avg_wlr': 0.920886072043945, 'total_trades': 135, 'return': 0.09218642921999981, 'max_drawdown': 93.48534859999927, 't_sharpe': 10.017887175427452, 'commission': 0.10846822078, 'score': 1.2563693516789614}
+
+Rank 4:
+  Params: {'adx_len': 69, 'rsi_len': 96, 'stoch_len': 108, 'kd': 5, 'vol_len': 60, 'atr_profit': 8, 'atr_loss': 8}
+  Value: 1.2028326173378268
+  Performance: {'net_value': 175.77988979999827, 'win_ratio': 0.6397054119813147, 'single_avg_wlr': 0.897477568397059, 'total_trades': 136, 'return': 0.08788994489999914, 'max_drawdown': 93.48534859999927, 't_sharpe': 9.55573919006486, 'commission': 0.10926910510000001, 'score': 1.2028326173378268}
+
+Rank 5:
+  Params: {'adx_len': 69, 'rsi_len': 114, 'stoch_len': 90, 'kd': 5, 'vol_len': 64, 'atr_profit': 7, 'atr_loss': 8}
+  Value: 1.1451457721894465
+  Performance: {'net_value': 186.80926395999722, 'win_ratio': 0.6369858650781746, 'single_avg_wlr': 0.9075987836899249, 'total_trades': 146, 'return': 0.09340463197999861, 'max_drawdown': 103.91231315999903, 't_sharpe': 9.696622228292943, 'commission': 0.11732261802, 'score': 1.1451457721894465}
+
+

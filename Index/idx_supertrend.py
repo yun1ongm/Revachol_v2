@@ -102,25 +102,28 @@ class IdxSupertrend:
             print(e)
             return None
     
-    def generate_atr_signal(self) -> pd.DataFrame:
+    def generate_atr_signal(self, vol_len) -> pd.DataFrame:
         try:
             supertrend = self._supertrend()
             kdf_sig = pd.concat([self.kdf, supertrend], axis=1)
-            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.sptr_len, mamode = 'EMA')
-            kdf_sig["volume_ema"] = pta.ema(kdf_sig["volume_U"], length=self.sptr_len)
+            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length= vol_len, mamode = 'EMA')
+            kdf_sig["volume_ema"] = pta.dema(kdf_sig["volume_U"], length= vol_len)
+            kdf_sig["body"] = kdf_sig["close"] - kdf_sig["open"]
             kdf_sig["signal"] = 0
 
             kdf_sig.loc[
                 (kdf_sig["direction"] == 1)
                 & (kdf_sig["direction"].shift(1) == -1)
-                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"])
+                & (abs(kdf_sig["body"]) > kdf_sig["atr"]),
                 "signal",
             ] = 1
 
             kdf_sig.loc[
                 (kdf_sig["direction"] == -1)
                 & (kdf_sig["direction"].shift(1) == 1)
-                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"]),
+                & (kdf_sig["volume_U"] > kdf_sig["volume_ema"])
+                & (abs(kdf_sig["body"]) > kdf_sig["atr"]),
                 "signal",
             ] = -1
 

@@ -13,13 +13,11 @@ class IdxMacdTrend:
     """
     index_name = "idx_macd_trend"
 
-    def __init__(self, kdf, fast, slow, signaling, threshold, dema_len) -> None:
+    def __init__(self, kdf, fast, slow, signaling) -> None:
         self.kdf = kdf
         self.fast = fast
         self.slow = slow
         self.signaling = signaling
-        self.threshold = threshold
-        self.dema_len = dema_len
 
     def _macd(self):
         macd_df = pta.macd(self.kdf["close"], fast=self.fast, slow=self.slow, signal=self.signaling)
@@ -33,29 +31,39 @@ class IdxMacdTrend:
 
         return macd_df
     
-    def _bodyatr(self):
+    def _bodyatr(self, atr_len):
         batr = self.kdf[["high", "low", "close"]]
-        batr["atr"] = pta.atr(batr["high"], batr["low"], batr["close"], self.dema_len)
+        batr["atr"] = pta.atr(batr["high"], batr["low"], batr["close"], atr_len)
         batr['body'] = batr['high'] - batr['low']
         batr['bodyatr'] = batr['body'] / batr['atr']
         return batr[['bodyatr', 'atr']]
     
-    def generate_dematr_signal(self) -> pd.DataFrame:
+    def generate_dematr_signal(self, dema_len, threshold) -> pd.DataFrame:
         try:
             macd = self._macd()
             kdf_sig = pd.concat([self.kdf, macd], axis=1)
-            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length=self.dema_len)
-            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length=self.dema_len)
+            kdf_sig["dema"] = pta.dema(kdf_sig["close"], length= dema_len)
+            kdf_sig["atr"] = pta.atr(kdf_sig["high"], kdf_sig["low"], kdf_sig["close"], length= dema_len)
+            kdf_sig["GX_atr"] = kdf_sig["GXvalue"] / kdf_sig["atr"]
+            kdf_sig["DX_atr"] = kdf_sig["DXvalue"] / kdf_sig["atr"]
             kdf_sig["signal"] = 0
 
             # 零上金叉
             kdf_sig.loc[
-                (kdf_sig["GXvalue"] < self.threshold) & (kdf_sig["GXvalue"] > 0), "signal"
+                (kdf_sig["GXvalue"] < 0.5) & (kdf_sig["GXvalue"] > 0), "signal"
             ] = 1
             # 零下死叉
             kdf_sig.loc[
-                (kdf_sig["DXvalue"] > -self.threshold) & (kdf_sig["DXvalue"] < 0), "signal"
+                (kdf_sig["DXvalue"] > -0.5) & (kdf_sig["DXvalue"] < 0), "signal"
             ] = -1
+            # 零上死叉
+            kdf_sig.loc[
+                (kdf_sig["DXvalue"] > threshold), "signal"
+            ] = -1
+            # 零下金叉
+            kdf_sig.loc[
+                (kdf_sig["GXvalue"] < -threshold), "signal"
+            ] = 1
 
             return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "dema"]]
         except Exception as e:

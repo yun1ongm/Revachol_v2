@@ -28,19 +28,19 @@ class AlpLinboDempct(BacktestFramework):
     index_name = "idx_trendline"
     strategy_name = "stgy_dempct"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
         self._set_params(params)
         self.num_evals = 100
-        self.target = "t_sharpe"
+        self.target = "score"
         self.kdf = self._read_kdf_from_csv()
         self.money = money
         self.leverage = leverage
 
     def _read_kdf_from_csv(self) -> pd.DataFrame:
-        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_{self.timeframe}.csv", index_col=0)
         kdf.index = pd.to_datetime(kdf.index)
         return kdf
     
@@ -90,11 +90,11 @@ class AlpLinboDempct(BacktestFramework):
     
     def objective(self, trial):
         kwargs = {
-            "swing": trial.suggest_int("swing", 10, 100),
-            "reset": trial.suggest_int("reset", 100, 300),
-            "slope": trial.suggest_float("slope", 0.2, 1.5, step=0.1),
-            "profit_pct": trial.suggest_float("profit_pct", 0.002, 0.04, step=0.002),
-            "loss_pct": trial.suggest_float("loss_pct", 0.002, 0.02, step=0.002)
+            "swing": trial.suggest_int("swing", 9, 51, step=3),
+            "reset": trial.suggest_int("reset", 160, 320, step=10),
+            "slope": trial.suggest_float("slope", 0.2, 1, step=0.1),
+            "profit_pct": trial.suggest_float("profit_pct", 0.001, 0.02, step=0.001),
+            "loss_pct": trial.suggest_float("loss_pct", 0.001, 0.01, step=0.001)
         }
         result = self.get_backtest_result(kwargs)
         performance = self.evaluate_performance(result)
@@ -169,7 +169,7 @@ class AlpLinboDempct(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = { "swing": 100, "reset": 200, "slope": 0.4, "profit_pct": 0.02, "loss_pct": 0.02}
+    params = {'swing': 39, 'reset': 280, 'slope': 0.8, 'profit_pct': 0.002, 'loss_pct': 0.006}
 
     def backtest(params):
         alp_backtest = AlpLinboDempct(money = 2000, leverage = 5, params = params)

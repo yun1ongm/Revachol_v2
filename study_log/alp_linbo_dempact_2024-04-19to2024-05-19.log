@@ -1,0 +1,56 @@
+2024-05-21 05:10:37,117, Start optimizing alp_linbo_dempact for goal t_sharpe on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of t_sharpe
+2024-05-21 05:16:33,827, Top 5 results:
+Rank 1:
+  Params: {'swing': 39, 'reset': 280, 'slope': 0.8, 'profit_pct': 0.002, 'loss_pct': 0.006}
+  Value: 19.564171724166897
+  Performance: {'net_value': 311.8744816399999, 'win_ratio': 0.6413036507569013, 'single_avg_wlr': 1.5815469527333448, 'total_trades': 92, 'return': 0.15593724081999993, 'max_drawdown': 79.35160371999905, 't_sharpe': 19.564171724166897, 'commission': 0.03704365918, 'score': 2.52050345836797}
+
+Rank 2:
+  Params: {'swing': 24, 'reset': 250, 'slope': 0.7, 'profit_pct': 0.009000000000000001, 'loss_pct': 0.001}
+  Value: 14.129832405300194
+  Performance: {'net_value': 177.27061731999902, 'win_ratio': 0.34831441105931965, 'single_avg_wlr': 3.452541044867223, 'total_trades': 178, 'return': 0.08863530865999951, 'max_drawdown': 91.56109434000086, 't_sharpe': 14.129832405300194, 'commission': 0.07142869134, 'score': 0.6743676850768447}
+
+Rank 3:
+  Params: {'swing': 21, 'reset': 190, 'slope': 0.7, 'profit_pct': 0.001, 'loss_pct': 0.001}
+  Value: 13.754921537196061
+  Performance: {'net_value': 136.40928001999782, 'win_ratio': 0.5118480986501902, 'single_avg_wlr': 2.0492608799415204, 'total_trades': 211, 'return': 0.06820464000999892, 'max_drawdown': 85.17075001999956, 't_sharpe': 13.754921537196061, 'commission': 0.08468220999, 'score': 0.8197737911513405}
+
+Rank 4:
+  Params: {'swing': 27, 'reset': 220, 'slope': 0.8, 'profit_pct': 0.002, 'loss_pct': 0.002}
+  Value: 13.01235118271778
+  Performance: {'net_value': 216.37523984000154, 'win_ratio': 0.4772723657027532, 'single_avg_wlr': 1.9692763173671635, 'total_trades': 132, 'return': 0.10818761992000077, 'max_drawdown': 86.40884312000048, 't_sharpe': 13.01235118271778, 'commission': 0.05304118008000001, 'score': 1.1951300278551256}
+
+Rank 5:
+  Params: {'swing': 36, 'reset': 270, 'slope': 0.2, 'profit_pct': 0.003, 'loss_pct': 0.006}
+  Value: 12.96092399533479
+  Performance: {'net_value': 256.40954834000013, 'win_ratio': 0.7419330905384176, 'single_avg_wlr': 1.5470205131263808, 'total_trades': 31, 'return': 0.12820477417000006, 'max_drawdown': 32.25740754000003, 't_sharpe': 12.96092399533479, 'commission': 0.012641075830000003, 'score': 5.897502415757193}
+
+
+2024-05-21 05:22:46,779, Start optimizing alp_linbo_dempact for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-21 05:28:40,596, Top 5 results:
+Rank 1:
+  Params: {'swing': 42, 'reset': 240, 'slope': 0.2, 'profit_pct': 0.003, 'loss_pct': 0.006}
+  Value: 14.25631684964665
+  Performance: {'net_value': 285.82687535999867, 'win_ratio': 0.7272694215026295, 'single_avg_wlr': 4.558554212749503, 'total_trades': 22, 'return': 0.14291343767999934, 'max_drawdown': 14.581025580000187, 't_sharpe': 14.329298895620369, 'commission': 0.009004262320000001, 'score': 14.25631684964665}
+
+Rank 2:
+  Params: {'swing': 42, 'reset': 240, 'slope': 0.2, 'profit_pct': 0.003, 'loss_pct': 0.006}
+  Value: 14.25631684964665
+  Performance: {'net_value': 285.82687535999867, 'win_ratio': 0.7272694215026295, 'single_avg_wlr': 4.558554212749503, 'total_trades': 22, 'return': 0.14291343767999934, 'max_drawdown': 14.581025580000187, 't_sharpe': 14.329298895620369, 'commission': 0.009004262320000001, 'score': 14.25631684964665}
+
+Rank 3:
+  Params: {'swing': 42, 'reset': 240, 'slope': 0.2, 'profit_pct': 0.003, 'loss_pct': 0.006}
+  Value: 14.25631684964665
+  Performance: {'net_value': 285.82687535999867, 'win_ratio': 0.7272694215026295, 'single_avg_wlr': 4.558554212749503, 'total_trades': 22, 'return': 0.14291343767999934, 'max_drawdown': 14.581025580000187, 't_sharpe': 14.329298895620369, 'commission': 0.009004262320000001, 'score': 14.25631684964665}
+
+Rank 4:
+  Params: {'swing': 42, 'reset': 250, 'slope': 0.30000000000000004, 'profit_pct': 0.004, 'loss_pct': 0.006}
+  Value: 9.18415268557542
+  Performance: {'net_value': 299.07973627999854, 'win_ratio': 0.6249980468811034, 'single_avg_wlr': 3.1534007465936247, 'total_trades': 32, 'return': 0.14953986813999928, 'max_drawdown': 20.352811960000054, 't_sharpe': 12.775331607527999, 'commission': 0.013022031860000002, 'score': 9.18415268557542}
+
+Rank 5:
+  Params: {'swing': 42, 'reset': 260, 'slope': 0.2, 'profit_pct': 0.002, 'loss_pct': 0.006}
+  Value: 7.025087218590024
+  Performance: {'net_value': 204.65724591999788, 'win_ratio': 0.7586180737307803, 'single_avg_wlr': 2.5325301882260223, 'total_trades': 29, 'return': 0.10232862295999894, 'max_drawdown': 22.10022144000004, 't_sharpe': 12.882706695306315, 'commission': 0.011830177039999999, 'score': 7.025087218590024}
+
+

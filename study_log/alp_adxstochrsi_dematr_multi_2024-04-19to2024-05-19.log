@@ -1,0 +1,28 @@
+2024-05-21 04:59:17,114, Start optimizing alp_adxstochrsi_dematr_multi for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-21 05:03:23,642, Top 5 results:
+Rank 1:
+  Params: {'adx_len': 51, 'rsi_len': 69, 'stoch_len': 75, 'kd': 3, 'dema_len': 12, 'atr_profit': 4, 'atr_loss': 2}
+  Value: 2.677267480860261
+  Performance: {'net_value': 1336.4139695799954, 'win_ratio': 0.6129028303852707, 'single_avg_wlr': 1.3055685024936512, 'total_trades': 155, 'return': 0.6682069847899977, 'max_drawdown': 305.9431463800006, 't_sharpe': 17.814069671815613, 'commission': 0.15330596521, 'score': 2.677267480860261}
+
+Rank 2:
+  Params: {'adx_len': 81, 'rsi_len': 93, 'stoch_len': 93, 'kd': 3, 'dema_len': 15, 'atr_profit': 10, 'atr_loss': 3}
+  Value: 2.5824307540186346
+  Performance: {'net_value': 1258.321257339986, 'win_ratio': 0.6746026392042546, 'single_avg_wlr': 0.9760820138622031, 'total_trades': 126, 'return': 0.629160628669993, 'max_drawdown': 328.7083619199998, 't_sharpe': 15.612779714716071, 'commission': 0.14045842133, 'score': 2.5824307540186346}
+
+Rank 3:
+  Params: {'adx_len': 87, 'rsi_len': 87, 'stoch_len': 93, 'kd': 3, 'dema_len': 12, 'atr_profit': 10, 'atr_loss': 3}
+  Value: 2.428696155269518
+  Performance: {'net_value': 1202.791386959988, 'win_ratio': 0.6666661246616873, 'single_avg_wlr': 0.9656506562759095, 'total_trades': 123, 'return': 0.601395693479994, 'max_drawdown': 330.1607029399984, 't_sharpe': 14.536257844442732, 'commission': 0.14207390652, 'score': 2.428696155269518}
+
+Rank 4:
+  Params: {'adx_len': 87, 'rsi_len': 87, 'stoch_len': 93, 'kd': 3, 'dema_len': 12, 'atr_profit': 10, 'atr_loss': 3}
+  Value: 2.428696155269518
+  Performance: {'net_value': 1202.791386959988, 'win_ratio': 0.6666661246616873, 'single_avg_wlr': 0.9656506562759095, 'total_trades': 123, 'return': 0.601395693479994, 'max_drawdown': 330.1607029399984, 't_sharpe': 14.536257844442732, 'commission': 0.14207390652, 'score': 2.428696155269518}
+
+Rank 5:
+  Params: {'adx_len': 87, 'rsi_len': 87, 'stoch_len': 93, 'kd': 3, 'dema_len': 12, 'atr_profit': 10, 'atr_loss': 3}
+  Value: 2.428696155269518
+  Performance: {'net_value': 1202.791386959988, 'win_ratio': 0.6666661246616873, 'single_avg_wlr': 0.9656506562759095, 'total_trades': 123, 'return': 0.601395693479994, 'max_drawdown': 330.1607029399984, 't_sharpe': 14.536257844442732, 'commission': 0.14207390652, 'score': 2.428696155269518}
+
+

@@ -1,14 +1,20 @@
-from datetime import datetime, timedelta
+import sys
+main_path = "/Users/rivachol/Desktop/Rivachol_v2"
+sys.path.append(main_path)
+import warnings
+warnings.filterwarnings("ignore")
+
+# -*- coding: utf-8 -*-
+from datetime import datetime
 import time
 import logging
 from retry import retry
 import pandas as pd
 from binance.um_futures import UMFutures
-import sys
-sys.path.append("/Users/rivachol/Desktop/Rivachol_v2/")
 import contek_timbersaw as timbersaw
-import warnings
-warnings.filterwarnings("ignore")
+import yaml
+import requests
+import json
 
 class KlineGenerator:
     kdf_columns = [
@@ -48,7 +54,7 @@ class KlineGenerator:
     def _get_klines_df(self) -> pd.DataFrame:
         try:
             ohlcv = self.client.continuous_klines(
-                self.symbol, "PERPETUAL", self.timeframe, limit=100
+                self.symbol, "PERPETUAL", self.timeframe, limit=200
             )
             unfin_candle = ohlcv.pop() # remove unfinished candle
             self.logger.info(f"Market bot initiate with candle of {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)}.\n------------------")
@@ -64,7 +70,7 @@ class KlineGenerator:
 
     def _convert_kdf_datatype(self, kdf) -> pd.DataFrame:
         kdf.opentime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.opentime
+            datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.opentime
         ]
         kdf.open = kdf.open.astype("float")
         kdf.high = kdf.high.astype("float")
@@ -72,7 +78,7 @@ class KlineGenerator:
         kdf.close = kdf.close.astype("float")
         kdf.volume = kdf.volume.astype("float")
         kdf.closetime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.closetime
+            datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.closetime
         ]
         kdf.volume_U = kdf.volume_U.astype("float")
         kdf.num_trade = kdf.num_trade.astype("int")
@@ -107,6 +113,7 @@ class KlineGenerator:
                 self.logger.info(
                     f"Candle close time: {self.kdf.closetime[-1]} Latest price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"
                 )
+                self.push_discord({"content": f"Candle close time: {self.kdf.closetime[-1]} Latest price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"})
                 if len(self.kdf) > 7*24*60/self.timeframe_int:
                     self.kdf = self._get_klines_df()
                     self.logger.warning(f"Market bot reboot candle data.")
@@ -115,6 +122,16 @@ class KlineGenerator:
         except Exception as e:
             self.logger.exception(e)
             return False
+        
+    def push_discord(self, payload:dict, rel_path = "/production/config.yaml"):
+        try:
+            with open(main_path + rel_path, 'r') as stream:
+                config_dict = yaml.safe_load(stream)
+                url = config_dict['discord_webhook']["url"]
+                headers = {'Content-Type': 'application/json'}
+                response = requests.post(url, data=json.dumps(payload), headers=headers)
+        except Exception:
+            self.logger.exception(response.status_code)
 
 if __name__ == "__main__":
     timbersaw.setup()

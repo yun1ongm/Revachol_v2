@@ -1,17 +1,19 @@
+import sys
+main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+sys.path.append(main_path)
+import warnings
+warnings.filterwarnings("ignore")
+
 import logging
 import time
 import pandas as pd
-
-import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
-sys.path.append(temp_path)
+import yaml
 from research.backtest import BacktestFramework
 from production.kline import KlineGenerator
 from Index.idx_supertrend import IdxSupertrend
-from research.Strategy.stgy_openatr import StgyOpenAtr
+from production.strategy.stgy_openatr import StgyOpenAtr
 import contek_timbersaw as timbersaw
-import warnings
-warnings.filterwarnings("ignore")
+
 
 class AlpSuperOpenatr(BacktestFramework):
     """
@@ -24,10 +26,10 @@ class AlpSuperOpenatr(BacktestFramework):
             position and signal in portfolio: pd.DataFrame
     """
     alpha_name = "alp_super_openatr"
-    index_name = "idx_super_dema"
+    index_name = "idx_supertrend"
     strategy_name = "stgy_openatr"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
@@ -38,6 +40,7 @@ class AlpSuperOpenatr(BacktestFramework):
     def _set_params(self, params:dict):
         self.sptr_len = params["sptr_len"]
         self.sptr_k = params["sptr_k"]
+        self.vol_len = params['vol_len']
         self.atr_profit = params["atr_profit"]
         self.atr_loss = params["atr_loss"]
 
@@ -45,7 +48,7 @@ class AlpSuperOpenatr(BacktestFramework):
         try:
             index = IdxSupertrend(kdf, self.sptr_len, self.sptr_k)
             strategy = StgyOpenAtr(self.atr_profit, self.atr_loss, self.money, self.leverage)
-            idx_signal = index.generate_atr_signal()
+            idx_signal = index.generate_atr_signal(self.vol_len)
             update_time = idx_signal.index[-1]
             stgy_signal = strategy.generate_portfolio(idx_signal)
             position = stgy_signal["position"][-1]
@@ -68,16 +71,16 @@ class AlpSuperOpenatr(BacktestFramework):
             self.logger.exception(e)
 
 if __name__ == "__main__":
-    params = {'sptr_len': 39, 'sptr_k': 3.5, 'atr_profit': 16, 'atr_loss': 8}
-    def live_trading(params):
-        timbersaw.setup()
-        alp = AlpSuperOpenatr(money = 1000, leverage = 5, params = params)
-        market = KlineGenerator('BTCUSDT', '5m')
-        while True:
-            market.update_klines()
-            alp.generate_signal_position(market.kdf)
-            time.sleep(10)
-    
-    live_trading(params)
+    timbersaw.setup()
+    rel_path = "/production/config.yaml"
+    with open(main_path + rel_path, 'r') as stream:
+        config = yaml.safe_load(stream)
+        params = config["alpha_params"]["alp_super_openatr"]
+    alp = AlpSuperOpenatr(money = 1000, leverage = 5, params = params)
+    market = KlineGenerator('BTCUSDT', '1m')
+    while True:
+        market.update_klines()
+        alp.generate_signal_position(market.kdf)
+        time.sleep(10)
 
     

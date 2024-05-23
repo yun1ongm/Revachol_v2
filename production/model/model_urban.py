@@ -1,16 +1,19 @@
-# -*- coding: utf-8 -*-
-import yaml
-import logging
-import warnings
-warnings.filterwarnings("ignore")
-import time
-from datetime import datetime, timedelta
 import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
+import warnings
+warnings.filterwarnings("ignore")
+
+# -*- coding: utf-8 -*-
+import yaml
+import logging
+import time
+from datetime import datetime, timedelta
+import requests
+import json
 import contek_timbersaw as timbersaw
 from production.kline import KlineGenerator
-from production.alpha.alp_adxstochrsi_dematr_multi import AlpAdxStochrsiDematrMulti
+from production.alpha.alp_adx_stochrsi_openatr import AlpAdxStochrsiOpenatr
 from production.alpha.alp_super_openatr  import AlpSuperOpenatr
 from production.alpha.alp_linbo_dempact import AlpLinboDempact
 
@@ -30,14 +33,14 @@ class ModelUrban:
     logger = logging.getLogger(model_name)
 
     def __init__(self, symbol:list, timeframe) -> None:
-        config = self._read_config()
+        self._read_config()
         self.alphas = [
-            AlpAdxStochrsiDematrMulti(money = 1000, leverage = 5,
-                                 params = config["alpha_params"]["alp_adx_stochrsi_dematr_multi"]),
+            AlpAdxStochrsiOpenatr(money = 1000, leverage = 5,
+                                 params = self.config["alpha_params"]["alp_adx_stochrsi_openatr"]),
             AlpSuperOpenatr(money = 1000, leverage = 5,
-                            params = config["alpha_params"]["alp_super_openatr"]),
+                            params = self.config["alpha_params"]["alp_super_openatr"]),
             AlpLinboDempact(money = 1000, leverage = 5,
-                            params = config["alpha_params"]["alp_linbo_dempact"])       
+                            params = self.config["alpha_params"]["alp_linbo_dempact"])       
         ]
         self.market = KlineGenerator(symbol, timeframe)
         self.previous_model_position = 0
@@ -45,14 +48,13 @@ class ModelUrban:
         self._export_signal_position()
         self.interval = 10
 
-    def _read_config(self, rel_path = "/production/config.yaml") -> dict:
+    def _read_config(self, rel_path = "/production/config.yaml") -> None:
         try:
             with open(main_path + rel_path, 'r') as stream:
-                config = yaml.safe_load(stream)
+                self.config = yaml.safe_load(stream)
         except FileNotFoundError:
             self.logger.error('Config file not found')
             sys.exit(1)
-        return config
     
     def calculate_alpha(self) -> float:
         merged_position = 0
@@ -62,6 +64,7 @@ class ModelUrban:
                 merged_position += signal_position["position"]
             else:
                 self.logger.info(f"Alpha:{alpha.alpha_name} did not generate a signal")
+                self.market.push_discord({"content": f"Alpha:{alpha.alpha_name} did not generate a signal"})
         return round(merged_position,3)
 
     def merging_signal(self) -> None:
@@ -70,6 +73,7 @@ class ModelUrban:
         if self.model_position != self.previous_model_position:
             change = self.model_position - self.previous_model_position
             model.logger.warning(f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --")
+            self.market.push_discord({"content": f"Signal Position Change:{change}\n-- -- -- -- -- -- -- -- --"})
             self._export_signal_position()
         self.logger.info(f"{self.model_name} Position:{self.model_position}\n-- -- -- -- -- -- -- -- --")
 
@@ -82,6 +86,7 @@ class ModelUrban:
                     {"update_time":str(self.market.kdf.index[-1]),
                     "model_position": str(self.model_position)},
                     }
+            self.market.push_discord({"content": f"Model signal position: {self.model_position}, update_time: {self.market.kdf.index[-1]}\n-- -- -- -- -- -- -- -- --"})
             yaml.dump(model_signal, file)
             
     def _countdown_update(self) -> bool:

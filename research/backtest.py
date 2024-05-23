@@ -27,7 +27,8 @@ class BacktestFramework:
 
         return portfolio
     
-    def record_values_slsp(self, portfolio, index, value, signal, position, entry_price, stop_loss, stop_profit, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
+    def record_values_slsp(self, portfolio, index, value, signal, position, entry_price, 
+                           stop_loss, stop_profit, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
         portfolio["value"].at[index] = value
         portfolio["signal"].at[index] = signal
         portfolio["position"].at[index] = position
@@ -40,7 +41,8 @@ class BacktestFramework:
 
         return portfolio
     
-    def record_values_sp(self, portfolio, index, value, signal, position, entry_price, stop_price, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
+    def record_values_sp(self, portfolio, index, value, signal, position, entry_price, 
+                         stop_price, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
         portfolio["value"].at[index] = value
         portfolio["signal"].at[index] = signal
         portfolio["position"].at[index] = position
@@ -52,7 +54,8 @@ class BacktestFramework:
 
         return portfolio
     
-    def record_values(self, portfolio, index, value, signal, position, entry_price, unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
+    def record_values(self, portfolio, index, value, signal, position, entry_price, 
+                      unrealized_pnl, realized_pnl, commission) -> pd.DataFrame:
         portfolio["value"].at[index] = value
         portfolio["signal"].at[index] = signal
         portfolio["position"].at[index] = position

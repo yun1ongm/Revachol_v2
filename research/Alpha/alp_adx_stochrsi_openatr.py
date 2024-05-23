@@ -9,11 +9,11 @@ main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(main_path)
 from research.backtest import BacktestFramework
 from Index.idx_adxstochrsi import IdxAdxStochrsi
-from research.Strategy.stgy_dema import StgyDema
+from research.Strategy.stgy_openatr import StgyOpenAtr
 import warnings
 warnings.filterwarnings("ignore")
 
-class AlpAdxStochrsiDema(BacktestFramework):
+class AlpAdxStochrsiOpenatr(BacktestFramework):
     """
         Args:
             money (float): initial money
@@ -23,24 +23,24 @@ class AlpAdxStochrsiDema(BacktestFramework):
         Return:
             position and signal in portfolio: pd.DataFrame
     """
-    alpha_name = "alp_adx_stochrsi_dema"
+    alpha_name = "alp_adx_stochrsi_openatr"
     index_name = "idx_adx_stochrsi"
-    strategy_name = "stgy_dema"
+    strategy_name = "stgy_openatr"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
         self._set_params(params)
         self.num_evals = 100
-        self.target = "t_sharpe"
+        self.target = "score"
         self.kdf = self._read_kdf_from_csv()
         self.money = money
         self.leverage = leverage
 
     def _read_kdf_from_csv(self) -> pd.DataFrame:
         try:
-            kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+            kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_{self.timeframe}.csv", index_col=0)
             kdf.index = pd.to_datetime(kdf.index)
             return kdf
         except:
@@ -51,14 +51,15 @@ class AlpAdxStochrsiDema(BacktestFramework):
         self.stoch_len = params["stoch_len"]
         self.rsi_len = params["rsi_len"]
         self.kd = params["kd"]
-        self.dema_len = params["dema_len"]
-        self.profit_pct = params["profit_pct"]
+        self.atr_profit = params["atr_profit"]
+        self.atr_loss = params["atr_loss"]
+        self.vol_len = params['vol_len']
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
-            index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
-            strategy = StgyDema(self.money, self.leverage)
-            idx_signal = index.generate_dematr_signal()
+            index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd)
+            strategy = StgyOpenAtr(self.atr_profit, self.atr_loss, self.money, self.leverage)
+            idx_signal = index.generate_atr_signal(self.vol_len)
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
             position = portfolio[f"position"][-1]
@@ -84,9 +85,9 @@ class AlpAdxStochrsiDema(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
-        strategy = StgyDema(self.profit_pct ,self.money, self.leverage)
-        idx_signal = index.generate_dematr_signal()
+        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd)
+        strategy = StgyOpenAtr(self.atr_profit, self.atr_loss, self.money, self.leverage)
+        idx_signal = index.generate_atr_signal(self.vol_len)
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
 
@@ -97,12 +98,13 @@ class AlpAdxStochrsiDema(BacktestFramework):
 
     def objective(self, trial):
         kwargs = {
-            "adx_len": trial.suggest_int("adx_len",  9, 99, step=3),
-            "rsi_len": trial.suggest_int("rsi_len",  9, 99, step=3),
-            "stoch_len": trial.suggest_int("stoch_len",  9, 99, step=3),
-            "kd": trial.suggest_int("kd", 2, 4),#cant be 1        
-            "dema_len": trial.suggest_int("dema_len",   9, 99, step=3),
-            "profit_pct": trial.suggest_float("profit_pct", 0.01, 0.15, step=0.01)
+            "adx_len": trial.suggest_int("adx_len", 12, 120, step=3),
+            "rsi_len": trial.suggest_int("rsi_len",  12, 120, step=3),
+            "stoch_len": trial.suggest_int("stoch_len",  12, 120, step=3),
+            "kd": trial.suggest_int("kd", 3, 6),#cant be 1        
+            "vol_len": trial.suggest_int("vol_len", 8, 64, step = 2),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 16),
+            "atr_loss": trial.suggest_int("atr_loss", 2, 8),
         }
 
         result = self.get_backtest_result(kwargs)
@@ -141,13 +143,13 @@ class AlpAdxStochrsiDema(BacktestFramework):
             key=operator.attrgetter("value"),
             reverse=True,
         )
-        top_10_trials = sorted_trials[:10]
-        self._write_to_log(top_10_trials)
+        top_5_trials = sorted_trials[:5]
+        self._write_to_log(top_5_trials)
 
         return study.best_params, study.best_value
 
     def _write_to_log(self, trials):
-        log_message = "Top 10 results:\n"
+        log_message = "Top 5 results:\n"
         for i, trial in enumerate(trials):
             log_message += f"Rank {i+1}:\n"
             log_message += f"  Params: {trial.params}\n"
@@ -179,10 +181,10 @@ class AlpAdxStochrsiDema(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'adx_len': 20, 'rsi_len': 47, 'stoch_len': 21, 'kd': 8, 'dema_len': 21, 'profit_pct': 0.05}
+    params = {'adx_len': 84, 'rsi_len': 99, 'stoch_len': 99, 'kd': 2, 'vol_len': 62, 'atr_profit': 10, 'atr_loss': 8}
 
     def backtest(params):
-        alp_backtest = AlpAdxStochrsiDema(money = 2000, leverage = 5, params = params)
+        alp_backtest = AlpAdxStochrsiOpenatr(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()
         print(f"Best parameters: {best_params}")
         print(f"Best value: {best_value}")

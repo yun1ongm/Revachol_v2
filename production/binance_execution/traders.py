@@ -1,11 +1,12 @@
-import logging
-import warnings
-warnings.filterwarnings("ignore")
 import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
+import warnings
+warnings.filterwarnings("ignore")
+# -*- coding: utf-8 -*-
+
+import logging
 from binance.um_futures import UMFutures
-from datetime import datetime
 import pandas as pd
 import yaml
 from retry import retry
@@ -29,8 +30,8 @@ class Traders:
     logger = logging.getLogger(__name__)
 
     def __init__(self, market) -> None:
-        config = self._read_config()
-        self.client = self._connect_api(key=config["bn_api"]["key"], secret=config["bn_api"]["secret"])
+        self.config = self._read_config()
+        self.client = self._connect_api(key=self.config["bn_api"]["key"], secret=self.config["bn_api"]["secret"])
         self.market= market
         self.slippage  = self._determine_slippage(market)
 
@@ -231,4 +232,3 @@ class Traders:
         except Exception as error:
             self.logger.error(error)
 
- 

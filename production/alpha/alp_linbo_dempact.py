@@ -1,17 +1,18 @@
+import sys
+main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
+sys.path.append(main_path)
+import warnings
+warnings.filterwarnings("ignore")
+
 import logging
 import time
 import pandas as pd
-
-import sys
-temp_path = "/Users/rivachol/Desktop/Rivachol_v2/"
-sys.path.append(temp_path)
+import yaml
 from research.backtest import BacktestFramework
 from Index.idx_trendline import IdxTrendline
-from research.Strategy.stgy_dempact import StgyDempact
+from production.strategy.stgy_dempact import StgyDempact
 from production.kline import KlineGenerator
 import contek_timbersaw as timbersaw
-import warnings
-warnings.filterwarnings("ignore")
 
 class AlpLinboDempact(BacktestFramework):
     """
@@ -28,7 +29,7 @@ class AlpLinboDempact(BacktestFramework):
     index_name = "idx_trendline"
     strategy_name = "stgy_dempact"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
@@ -66,15 +67,14 @@ class AlpLinboDempact(BacktestFramework):
             self.logger.exception(e)
 
 if __name__ == "__main__":
-    params = {'swing': 90, 'reset': 281, 'slope': 1.0, 'profit_pct': 0.038, 'loss_pct': 0.002}
-
-    def live_trading(params):
-        timbersaw.setup()
-        alp = AlpLinboDempact(money = 1000, leverage = 5, params = params)
-        market = KlineGenerator('BTCUSDT', '5m')
-        while True:
-            market.update_klines()
-            alp.generate_signal_position(market.kdf)
-            time.sleep(10)
-
-    live_trading(params)
+    timbersaw.setup()
+    rel_path = "/production/config.yaml"
+    with open(main_path + rel_path, 'r') as stream:
+        config = yaml.safe_load(stream)
+        params = config["alpha_params"]["alp_linbo_dempact"]
+    alp = AlpLinboDempact(money = 1000, leverage = 5, params = params)
+    market = KlineGenerator('BTCUSDT', '1m')
+    while True:
+        market.update_klines()
+        alp.generate_signal_position(market.kdf)
+        time.sleep(10)

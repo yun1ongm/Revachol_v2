@@ -1,6 +1,7 @@
 import pandas as pd
 import pandas_ta as pta
 import numpy as np
+
 class IdxFishnet:
     index_name = "idx_fishnet"
     params = {'atr_len': 9, 'thd': 0.1}

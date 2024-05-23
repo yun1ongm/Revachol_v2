@@ -19,7 +19,7 @@ class StgyOpenAtr(BacktestFramework):
         self.atr_loss = atr_loss
         self.money = money
         self.leverage = leverage
-        self.comm = 0.0004
+        self.comm = 0.0002
 
     def _strategy_run(self, value, signal, position, close, high, low, atr, entry_price) -> tuple:
         realized_pnl = 0

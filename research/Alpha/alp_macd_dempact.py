@@ -8,7 +8,7 @@ import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
 sys.path.append(main_path)
 from research.backtest import BacktestFramework
-from Index.idx_macd_trend import IdxMacdTrend
+from Index.idx_macd import IdxMacdTrend
 from research.Strategy.stgy_dempact import StgyDempact
 import warnings
 warnings.filterwarnings("ignore")
@@ -28,19 +28,19 @@ class AlpMacdDema(BacktestFramework):
     index_name = "idx_macd_trend"
     strategy_name = "stgy_dempct"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
         self._set_params(params)
         self.num_evals = 100
-        self.target = "t_sharpe"
+        self.target = "score"
         self.kdf = self._read_kdf_from_csv()
         self.money = money
         self.leverage = leverage
 
     def _read_kdf_from_csv(self) -> pd.DataFrame:
-        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_{self.timeframe}.csv", index_col=0)
         kdf.index = pd.to_datetime(kdf.index)
         return kdf
 
@@ -55,9 +55,9 @@ class AlpMacdDema(BacktestFramework):
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> dict:
         try:
-            index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+            index = IdxMacdTrend(kdf, self.fast, self.slow, self.signaling)
             strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
-            idx_signal = index.generate_dematr_signal()
+            idx_signal = index.generate_dematr_signal(self.dema_len, self.threshold)
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
             position = portfolio[f"position"][-1]
@@ -79,9 +79,9 @@ class AlpMacdDema(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling, self.threshold, self.dema_len)
+        index = IdxMacdTrend(self.kdf, self.fast, self.slow, self.signaling)
         strategy = StgyDempact(self.profit_pct, self.loss_pct, self.money, self.leverage)
-        idx_signal = index.generate_dematr_signal()
+        idx_signal = index.generate_dematr_signal(self.dema_len, self.threshold)
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
 
@@ -95,10 +95,10 @@ class AlpMacdDema(BacktestFramework):
             "fast": trial.suggest_int("fast", 8, 16),
             "slow": trial.suggest_int("slow", 20, 32),
             "signaling": trial.suggest_int("signaling", 6, 12),
-            "threshold": trial.suggest_float("threshold", 0.1, 1, step=0.1),
-            "dema_len": trial.suggest_int("dema_len", 10, 100),
-            "profit_pct": trial.suggest_float("profit_pct", 0.002, 0.04, step=0.002),
-            "loss_pct": trial.suggest_float("loss_pct", 0.002, 0.02, step=0.002)
+            "threshold": trial.suggest_float("threshold", 1, 3, step=0.1),
+            "dema_len": trial.suggest_int("dema_len", 9, 99, step=3),
+            "profit_pct": trial.suggest_float("profit_pct", 0.001, 0.02, step=0.001),
+            "loss_pct": trial.suggest_float("loss_pct", 0.001, 0.01, step=0.001)
         }
 
         result = self.get_backtest_result(kwargs)
@@ -175,7 +175,7 @@ class AlpMacdDema(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100, 'profit_pct': 0.04, 'loss_pct': 0.01}
+    params = {'fast': 11, 'slow': 21, 'signaling': 9, 'threshold': 0.3, 'dema_len': 100, 'profit_pct': 0.01, 'loss_pct': 0.01}
     def backtest(params):
         alp_backtest = AlpMacdDema(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()

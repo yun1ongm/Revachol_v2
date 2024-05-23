@@ -27,19 +27,19 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
     index_name = "idx_adxstochrsi"
     strategy_name = "stgy_dematr_multi"
     symbol = "BTCUSDT"
-    timeframe = "5m"
+    timeframe = "1m"
     logger = logging.getLogger(alpha_name)
 
     def __init__(self, money, leverage, params:dict) -> None:
         self._set_params(params)
         self.num_evals = 100
-        self.target = "t_sharpe"
+        self.target = "score"
         self.kdf = self._read_kdf_from_csv()
         self.money = money
         self.leverage = leverage
 
     def _read_kdf_from_csv(self) -> pd.DataFrame:
-        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_5m.csv", index_col=0)
+        kdf = pd.read_csv(f"{main_path}test_data/{self.symbol}_{self.timeframe}.csv", index_col=0)
         kdf.index = pd.to_datetime(kdf.index)
         return kdf
     
@@ -54,9 +54,9 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
 
     def generate_signal_position(self, kdf:pd.DataFrame) -> float:
         try:
-            index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
+            index = IdxAdxStochrsi(kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd)
             strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
-            idx_signal = index.generate_dematr_signal()
+            idx_signal = index.generate_dematr_signal(self.dema_len)
             update_time = idx_signal.index[-1]
             portfolio = strategy.generate_portfolio(idx_signal)
             position = portfolio[f"position"][-1]
@@ -82,9 +82,9 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         self, params:dict
     ) -> pd.DataFrame:
         self._set_params(params)
-        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd, self.dema_len)
+        index = IdxAdxStochrsi(self.kdf, self.adx_len, self.stoch_len, self.rsi_len, self.kd)
         strategy = StgyDematrMulti(self.atr_profit, self.atr_loss, self.money, self.leverage)
-        idx_signal = index.generate_dematr_signal()
+        idx_signal = index.generate_dematr_signal(self.dema_len)
         portfolio = strategy.generate_portfolio(idx_signal)
         return portfolio
 
@@ -100,8 +100,8 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
             "stoch_len": trial.suggest_int("stoch_len",  9, 99, step=3),
             "kd": trial.suggest_int("kd", 2, 4),#cant be 1        
             "dema_len": trial.suggest_int("dema_len",   9, 99, step=3),
-            "atr_profit": trial.suggest_int("atr_profit", 2, 10),
-            "atr_loss": trial.suggest_int("atr_loss", 2, 5),
+            "atr_profit": trial.suggest_int("atr_profit", 2, 12),
+            "atr_loss": trial.suggest_int("atr_loss", 2, 4),
         }
 
         result = self.get_backtest_result(kwargs)
@@ -177,7 +177,7 @@ class AlpAdxStochrsiDematrMulti(BacktestFramework):
         plt.savefig(f"result_book/{self.alpha_name}_{start_date}to{end_date}_{number}.png")
 
 if __name__ == "__main__":
-    params = {'adx_len': 75, 'rsi_len': 51, 'stoch_len': 21, 'kd': 4, 'dema_len': 27, 'atr_profit': 2, 'atr_loss': 5}
+    params = {'adx_len': 51, 'rsi_len': 69, 'stoch_len': 75, 'kd': 3, 'dema_len': 12, 'atr_profit': 4, 'atr_loss': 2}
     def backtest(params):
         alp_backtest = AlpAdxStochrsiDematrMulti(money = 2000, leverage = 5, params = params)
         best_params, best_value =  alp_backtest.optimize_params()

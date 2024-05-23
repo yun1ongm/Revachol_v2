@@ -21,7 +21,7 @@ class StgyDema(BacktestFramework):
         self.profit_pct = profit_pct
         self.money = money
         self.leverage = leverage
-        self.comm = 0.0004
+        self.comm = 0.0002
 
     def _strategy_run(self, value, signal, position, close, dema, entry_price) -> tuple:
         realized_pnl = 0

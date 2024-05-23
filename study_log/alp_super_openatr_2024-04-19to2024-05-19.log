@@ -1,0 +1,59 @@
+2024-05-22 22:15:49,788, Start optimizing alp_super_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-22 22:19:16,369, Start optimizing alp_super_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-22 22:20:24,399, Start optimizing alp_super_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-22 22:22:14,097, Start optimizing alp_super_openatr for goal score on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of score
+2024-05-22 22:27:45,221, Top 5 results:
+Rank 1:
+  Params: {'sptr_len': 12, 'sptr_k': 2.5, 'vol_len': 36, 'atr_profit': 13, 'atr_loss': 6}
+  Value: 1.5092267673680007
+  Performance: {'net_value': 289.03825667999945, 'win_ratio': 0.4789911941250469, 'single_avg_wlr': 2.6277535369630596, 'total_trades': 119, 'return': 0.14451912833999972, 'max_drawdown': 91.73348352000176, 't_sharpe': 14.83709932735501, 'commission': 0.09552922166000001, 'score': 1.5092267673680007}
+
+Rank 2:
+  Params: {'sptr_len': 18, 'sptr_k': 2.5, 'vol_len': 52, 'atr_profit': 13, 'atr_loss': 8}
+  Value: 1.320756627761099
+  Performance: {'net_value': 336.5479909600017, 'win_ratio': 0.47368379501421487, 'single_avg_wlr': 2.8322079725750076, 'total_trades': 114, 'return': 0.16827399548000085, 'max_drawdown': 120.70141775999946, 't_sharpe': 16.665150773559677, 'commission': 0.09160980451999999, 'score': 1.320756627761099}
+
+Rank 3:
+  Params: {'sptr_len': 21, 'sptr_k': 2.5, 'vol_len': 54, 'atr_profit': 11, 'atr_loss': 8}
+  Value: 1.2289670301730835
+  Performance: {'net_value': 341.62478812000154, 'win_ratio': 0.4715443320777788, 'single_avg_wlr': 2.7359777344615144, 'total_trades': 123, 'return': 0.17081239406000076, 'max_drawdown': 131.0784632, 't_sharpe': 17.151053154085808, 'commission': 0.09882755594, 'score': 1.2289670301730835}
+
+Rank 4:
+  Params: {'sptr_len': 21, 'sptr_k': 2.5, 'vol_len': 46, 'atr_profit': 13, 'atr_loss': 7}
+  Value: 1.168639601796862
+  Performance: {'net_value': 269.6486512800002, 'win_ratio': 0.42622915882855833, 'single_avg_wlr': 2.839612992279061, 'total_trades': 122, 'return': 0.1348243256400001, 'max_drawdown': 98.3468306000018, 't_sharpe': 12.827648478933062, 'commission': 0.09804447436000001, 'score': 1.168639601796862}
+
+Rank 5:
+  Params: {'sptr_len': 21, 'sptr_k': 2.5, 'vol_len': 56, 'atr_profit': 12, 'atr_loss': 6}
+  Value: 1.029552275899912
+  Performance: {'net_value': 268.2055131200018, 'win_ratio': 0.4251965155932948, 'single_avg_wlr': 3.0960755383525047, 'total_trades': 127, 'return': 0.1341027565600009, 'max_drawdown': 110.76654324000083, 't_sharpe': 14.271224149388136, 'commission': 0.10204304344000001, 'score': 1.029552275899912}
+
+
+2024-05-23 12:05:25,611, Start optimizing alp_super_openatr for goal t_sharpe on BTCUSDT 1m from 2024-04-19 to 2024-05-19 based on goal of t_sharpe
+2024-05-23 12:11:02,230, Top 5 results:
+Rank 1:
+  Params: {'sptr_len': 39, 'sptr_k': 2.5, 'vol_len': 38, 'atr_profit': 7, 'atr_loss': 4}
+  Value: 16.063567306240394
+  Performance: {'net_value': 276.10667859999785, 'win_ratio': 0.3765429774426065, 'single_avg_wlr': 3.6385507595724316, 'total_trades': 162, 'return': 0.1380533392999989, 'max_drawdown': 104.53724923999994, 't_sharpe': 16.063567306240394, 'commission': 0.1300811107, 'score': 0.9945347917053426}
+
+Rank 2:
+  Params: {'sptr_len': 42, 'sptr_k': 2.5, 'vol_len': 44, 'atr_profit': 4, 'atr_loss': 5}
+  Value: 15.615034247270712
+  Performance: {'net_value': 234.88349799999742, 'win_ratio': 0.4999997191012814, 'single_avg_wlr': 2.2919961247785032, 'total_trades': 178, 'return': 0.11744174899999871, 'max_drawdown': 104.28667887999927, 't_sharpe': 15.615034247270712, 'commission': 0.142847951, 'score': 1.12614162871655}
+
+Rank 3:
+  Params: {'sptr_len': 42, 'sptr_k': 2.5, 'vol_len': 44, 'atr_profit': 4, 'atr_loss': 5}
+  Value: 15.615034247270712
+  Performance: {'net_value': 234.88349799999742, 'win_ratio': 0.4999997191012814, 'single_avg_wlr': 2.2919961247785032, 'total_trades': 178, 'return': 0.11744174899999871, 'max_drawdown': 104.28667887999927, 't_sharpe': 15.615034247270712, 'commission': 0.142847951, 'score': 1.12614162871655}
+
+Rank 4:
+  Params: {'sptr_len': 42, 'sptr_k': 2.5, 'vol_len': 44, 'atr_profit': 4, 'atr_loss': 5}
+  Value: 15.615034247270712
+  Performance: {'net_value': 234.88349799999742, 'win_ratio': 0.4999997191012814, 'single_avg_wlr': 2.2919961247785032, 'total_trades': 178, 'return': 0.11744174899999871, 'max_drawdown': 104.28667887999927, 't_sharpe': 15.615034247270712, 'commission': 0.142847951, 'score': 1.12614162871655}
+
+Rank 5:
+  Params: {'sptr_len': 42, 'sptr_k': 2.5, 'vol_len': 44, 'atr_profit': 4, 'atr_loss': 5}
+  Value: 15.615034247270712
+  Performance: {'net_value': 234.88349799999742, 'win_ratio': 0.4999997191012814, 'single_avg_wlr': 2.2919961247785032, 'total_trades': 178, 'return': 0.11744174899999871, 'max_drawdown': 104.28667887999927, 't_sharpe': 15.615034247270712, 'commission': 0.142847951, 'score': 1.12614162871655}
+
+

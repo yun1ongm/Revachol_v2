@@ -1,15 +1,19 @@
-import logging
 import warnings
 warnings.filterwarnings("ignore")
-import time
-from datetime import datetime, timedelta
 import sys
 main_path = "/Users/rivachol/Desktop/Rivachol_v2"
 sys.path.append(main_path)
+# -*- coding: utf-8 -*-
+
+import logging
+import time
+from datetime import datetime, timedelta
 from production.binance_execution.traders import Traders
 import contek_timbersaw as timbersaw
 import pandas as pd
 import yaml
+import requests
+import json
 from retry import retry
 
 class ExecPostmodern(Traders):
@@ -34,7 +38,7 @@ class ExecPostmodern(Traders):
 
     def __init__(self, market) -> None:
         super().__init__(market)
-        self.interval = 10
+        self.interval = 20
         self.update_time = datetime.utcnow() - timedelta(days=1)
     
     @retry(tries=3, delay=1)  
@@ -45,10 +49,22 @@ class ExecPostmodern(Traders):
                 model_position = float(signal_position_dict[self.model_name]["model_position"])
                 self.update_time = datetime.strptime(signal_position_dict[self.model_name]["update_time"], "%Y-%m-%d %H:%M:%S")
                 self.logger.info(f"Retrieve signal position: {model_position} update_time:{self.update_time}")
+                self._push_discord({"content": f"Retrieve signal position: {model_position} update_time:{self.update_time}"})
             return model_position
         except FileNotFoundError:
             self.logger.error('Position is not read from the file.')
             return 0
+     
+    def _push_discord(self, payload:dict) -> None:
+        try:
+            rel_path = "/production/config.yaml"
+            with open(main_path + rel_path, 'r') as stream:
+                config = yaml.safe_load(stream)
+                url = config['discord_webhook']["url"]
+                headers = {'Content-Type': 'application/json'}
+                response = requests.post(url, data=json.dumps(payload), headers=headers)
+        except Exception:
+            self.logger.error(response.status_code)
 
     def check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""
@@ -57,6 +73,7 @@ class ExecPostmodern(Traders):
             positionAmt = positions.query("symbol == @self.market").loc[:, "positionAmt"]
             actual_position = float(positionAmt)
             self.logger.info(f"actual position is {actual_position}")
+            self._push_discord({"content": f"actual position is {actual_position}"})
             if actual_position == signal_position:
                 self.logger.info(f"Position & signals are cross checked.\n-- -- -- --")
                 return True
@@ -90,10 +107,10 @@ class ExecPostmodern(Traders):
                 if complete:
                     time.sleep(self.interval)
                 else:
-                    time.sleep(self.interval / 5)
+                    time.sleep(self.interval / 4)
             except Exception as e:
                 self.logger.critical(e)
-                self.logger.critical("Restarting the executor in 10 seconds...")
+                self._push_discord("Restarting the executor in 10 seconds...")
                 time.sleep(self.interval)    
 
 if __name__ == "__main__":
