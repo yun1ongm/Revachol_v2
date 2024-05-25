@@ -1,9 +1,13 @@
-from binance.um_futures import UMFutures
+
 import pandas as pd
 from datetime import datetime
+import time
+import requests
+import warnings
+warnings.filterwarnings("ignore")
 
-def get_kdf() -> pd.DataFrame:       
-    columns = [
+base_url = "https://fapi.binance.com"
+klines_col = [
         "opentime",
         "open",
         "high",
@@ -18,22 +22,37 @@ def get_kdf() -> pd.DataFrame:
         "ignore",
         ]
 
-    client = UMFutures(timeout=3)
-    symbol = "BTCUSDT"
-    timeframe = "1m"
-    klines = client.continuous_klines(symbol, "PERPETUAL", timeframe, limit=1000)
-    kdf = pd.DataFrame(klines, columns=columns)
+def get_kdf(symbol, timeframe) -> pd.DataFrame:  
+    url = f"{base_url}/fapi/v1/continuousKlines"
+    params = {
+        "pair": symbol,
+        "contractType": "PERPETUAL",
+        "interval": timeframe,
+        "limit": 200
+    }
+    try:
+        res = requests.get(url, params=params)
+        ohlcv = res.json()
+        kdf = pd.DataFrame(ohlcv, columns=klines_col)
+        kdf = convert_kdf_datatype(kdf)
+        
+        return kdf
+    except Exception as e:
+        print(e)
+        return None
+    
+def convert_kdf_datatype(kdf) -> pd.DataFrame:
     kdf.opentime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.opentime
-        ]
+        datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.opentime
+    ]
     kdf.open = kdf.open.astype("float")
     kdf.high = kdf.high.astype("float")
     kdf.low = kdf.low.astype("float")
     kdf.close = kdf.close.astype("float")
     kdf.volume = kdf.volume.astype("float")
     kdf.closetime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0) for x in kdf.closetime
-        ]
+        datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.closetime
+    ]
     kdf.volume_U = kdf.volume_U.astype("float")
     kdf.num_trade = kdf.num_trade.astype("int")
     kdf.taker_buy = kdf.taker_buy.astype("float")
@@ -43,4 +62,43 @@ def get_kdf() -> pd.DataFrame:
 
     return kdf
 
-kdf = get_kdf()
+def update_klines(kdf, symbol, timeframe) -> pd.DataFrame:
+    back_time = kdf.closetime[-1]
+    url = f"{base_url}/fapi/v1/continuousKlines"
+    params = {
+        "pair": symbol,
+        "contractType": "PERPETUAL",
+        "interval": timeframe,
+        "startTime": int(back_time.timestamp() * 1000),
+        "endTime": int(datetime.now().timestamp() * 1000)
+    }
+    try:
+        res = requests.get(url, params=params)
+        ohlcv = res.json()
+        latest_kdf = pd.DataFrame(
+                ohlcv,
+                columns= klines_col,
+            )
+        latest_kdf = convert_kdf_datatype(latest_kdf)
+        
+        if len(latest_kdf) >= 2:
+            # remove unfinished candle
+            latest_kdf = latest_kdf.iloc[:-1]
+            kdf = pd.concat([kdf, latest_kdf])
+            kdf.drop_duplicates(inplace=True)
+            print(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
+
+        return kdf
+    except Exception as e:
+        print(e)
+        time.sleep(5)
+        return kdf
+            
+if __name__ == "__main__":
+    symbol = "BTCUSDT"
+    timeframe = "1m"
+    kdf = get_kdf(symbol, timeframe)
+    print(kdf)
+    while True:
+        kdf = update_klines(kdf, symbol, timeframe)
+        time.sleep(5)

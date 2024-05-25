@@ -10,14 +10,17 @@ import time
 import logging
 from retry import retry
 import pandas as pd
-from binance.um_futures import UMFutures
+import requests
 import contek_timbersaw as timbersaw
 import yaml
 import requests
 import json
 
 class KlineGenerator:
-    kdf_columns = [
+    base_url = "https://fapi.binance.com"
+    logger = logging.getLogger(__name__)
+
+    kline_columns = [
         "opentime",
         "open",
         "high",
@@ -31,7 +34,6 @@ class KlineGenerator:
         "taker_buy_volume_U",
         "ignore",
     ]
-    logger = logging.getLogger(__name__)
 
     def __init__(self, symbol, timeframe) -> None:
         """
@@ -41,7 +43,6 @@ class KlineGenerator:
         """
         self.symbol = symbol
         self.timeframe = timeframe
-        self.client = UMFutures(timeout=3)
         self.kdf = self._get_klines_df()
         self.timeframe_int = {
             '1m': 1,
@@ -52,15 +53,21 @@ class KlineGenerator:
     
     @retry(tries=2, delay=1)
     def _get_klines_df(self) -> pd.DataFrame:
+        url = f"{self.base_url}/fapi/v1/continuousKlines"
+        params = {
+            "pair": self.symbol,
+            "contractType": "PERPETUAL",
+            "interval": self.timeframe,
+            "limit": 200
+        }
         try:
-            ohlcv = self.client.continuous_klines(
-                self.symbol, "PERPETUAL", self.timeframe, limit=200
-            )
+            res = requests.get(url, params=params)
+            ohlcv = res.json()
             unfin_candle = ohlcv.pop() # remove unfinished candle
             self.logger.info(f"Market bot initiate with candle of {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)}.\n------------------")
             kdf = pd.DataFrame(
                 ohlcv,
-                columns=self.kdf_columns,
+                columns=self.kline_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
 
@@ -89,35 +96,37 @@ class KlineGenerator:
 
         return kdf
     
-    @retry(tries=1, delay=1)
     def update_klines(self) -> bool:
+        back_time = self.kdf.closetime[-1]
+        url = f"{self.base_url}/fapi/v1/continuousKlines"
+        params = {
+            "pair": self.symbol,
+            "contractType": "PERPETUAL",
+            "interval": self.timeframe,
+            "startTime": int(back_time.timestamp() * 1000),
+            "endTime": int(datetime.now().timestamp() * 1000)
+        }
         try:
-            latest_ohlcv = self.client.continuous_klines(
-                self.symbol, "PERPETUAL", self.timeframe, limit=2
-            )
-            unfin_ohlcv = latest_ohlcv.pop()
+            res = requests.get(url, params=params)
+            ohlcv = res.json()
             latest_kdf = pd.DataFrame(
-                latest_ohlcv,
-                columns=self.kdf_columns,
-            )
-            unfin_kdf = pd.DataFrame(
-                [unfin_ohlcv],
-                columns=self.kdf_columns,
-            )
-            latest_kdf = self._convert_kdf_datatype(latest_kdf)
-            unfin_kdf = self._convert_kdf_datatype(unfin_kdf)
-            if latest_kdf.closetime[-1] == self.kdf.closetime[-1]:
-                return False
-            else:
-                self.kdf = pd.concat([self.kdf, latest_kdf])
-                self.logger.info(
-                    f"Candle close time: {self.kdf.closetime[-1]} Latest price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"
+                    ohlcv,
+                    columns= self.kline_columns,
                 )
-                self.push_discord({"content": f"Candle close time: {self.kdf.closetime[-1]} Latest price: {unfin_kdf.close[0]} Volume(U): {round(float(unfin_kdf.volume_U[-1])/1000000,2)}mil\n------------------"})
-                if len(self.kdf) > 7*24*60/self.timeframe_int:
-                    self.kdf = self._get_klines_df()
-                    self.logger.warning(f"Market bot reboot candle data.")
-                return True
+            latest_kdf = self._convert_kdf_datatype(latest_kdf)
+
+            if len(latest_kdf) >= 2:
+                # remove unfinished candle
+                latest_kdf = latest_kdf.iloc[:-1]
+                self.kdf = pd.concat([self.kdf, latest_kdf])
+                self.kdf.drop_duplicates(inplace=True)
+                self.logger.info(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
+                self.push_discord({"content": 
+                                   f"Market:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.\n------------------"})
+            elif len(self.kdf) > 7*24*60/self.timeframe_int:
+                self.kdf = self._get_klines_df()
+                self.logger.warning(f"Market bot reboot candle data.")
+            return True
         
         except Exception as e:
             self.logger.exception(e)
@@ -137,9 +146,8 @@ if __name__ == "__main__":
     timbersaw.setup()
     test = KlineGenerator("BTCUSDT", "1m")
     while True:
-        try:
-            test.update_klines()
-            time.sleep(5)
-        except Exception as e:
+        if test.update_klines():
+            time.sleep(10)
+        else:
             time.sleep(5)
 

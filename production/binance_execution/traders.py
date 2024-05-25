@@ -34,6 +34,7 @@ class Traders:
         self.client = self._connect_api(key=self.config["bn_api"]["key"], secret=self.config["bn_api"]["secret"])
         self.market= market
         self.slippage  = self._determine_slippage(market)
+        self.try_count = 0
 
     def _read_config(self) -> dict:
         rel_path = "/production/config.yaml"
@@ -163,8 +164,7 @@ class Traders:
             return response
         except Exception as error:
             self.logger.error(error)
-            
-    @retry(tries=1, delay=1)  
+             
     def cancel_open_orders(self) -> None:
         try:
             orders = pd.DataFrame(self.client.get_all_orders(symbol= self.market))
@@ -174,9 +174,14 @@ class Traders:
                 for orderId in open_orders["orderId"]:
                     orders_unfin += 1
                     self.client.cancel_order(symbol= self.market, orderId=orderId)
+            if orders_unfin == 0:
+                self.logger.info("No open orders to cancel")
+                self.try_count = 0
+            else:
+                self.logger.info(f"Cancelled {orders_unfin} open orders.")
+                self.try_count += 1
         except Exception as error:
             self.logger.warning(f"Failed to cancel order because of {error}")  
-        self.logger.info(f"Cancelled {orders_unfin} open orders.")
     
     def cancel_order_by_id(self, orderId) -> None:
         try:
