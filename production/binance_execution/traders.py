@@ -10,7 +10,6 @@ import logging
 from binance.um_futures import UMFutures
 import pandas as pd
 import yaml
-from retry import retry
 
 class Traders:
     columns = [
@@ -46,11 +45,10 @@ class Traders:
             self.logger.error('Config file not found')
             sys.exit(1)
         return config
-
-    @retry(tries=2, delay=1)  
+ 
     def _connect_api(self, key, secret) -> UMFutures:
         """connect binance client with apikey and apisecret"""
-        client = UMFutures(key=key, secret=secret, timeout=3)
+        client = UMFutures(key=key, secret=secret, timeout=5)
 
         return client
     
@@ -66,8 +64,7 @@ class Traders:
             slippage = -0.07
             self.digit = 3
         return slippage
-    
-    @retry(tries=2, delay=1)       
+        
     def _maker_buy(self, amount, ticker) -> dict:
         """send post-only buy order"""
         price = round((ticker + self.slippage), self.digit)
@@ -87,8 +84,7 @@ class Traders:
 
         except Exception as error:
             self.logger.error(error)
-
-    @retry(tries=3, delay=1)  
+ 
     def _maker_sell(self, amount, ticker) -> dict:
         """send post-only sell order"""
         price = round((ticker - self.slippage), self.digit)
@@ -107,8 +103,7 @@ class Traders:
 
         except Exception as error:
             self.logger.error(error)
-    
-    @retry(tries=1, delay=1)       
+         
     def send_batch_order(self, orders_df:pd.DataFrame) -> list:
         """send buy and sell orders based on the maker price dataframe
         Args:

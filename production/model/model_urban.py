@@ -56,20 +56,24 @@ class ModelUrban:
             sys.exit(1)
     
     def merging_signal(self) -> None:
-        for alpha in self.alphas:
-            alpha_name = alpha.alpha_name
-            self.model_position[alpha_name] = alpha.generate_signal_position(self.market.kdf)
+        try:
+            for alpha in self.alphas:
+                alpha_name = alpha.alpha_name
+                self.model_position[alpha_name] = alpha.generate_signal_position(self.market.kdf)
 
-            if self.model_position[alpha_name]["position"] != self.prev_model_position[alpha_name]["position"]:
-                change = self.model_position[alpha_name]["position"] - self.prev_model_position[alpha_name]["position"]
-                self.logger.info(f"{alpha_name} Signal Position Change:{change}")
-                self.market.push_discord({"content": 
-                                          f"{alpha_name} Signal Position Change:{change}\n{self.model_position[alpha_name]}"})
-                self.prev_model_position[alpha_name] = self.model_position[alpha_name]  
+                if self.model_position[alpha_name]["position"] != self.prev_model_position[alpha_name]["position"]:
+                    change = self.model_position[alpha_name]["position"] - self.prev_model_position[alpha_name]["position"]
+                    self.logger.info(f"{alpha_name} Signal Position Change:{change}")
+                    self.market.push_discord({"content": 
+                                            f"{alpha_name} Signal Position Change:{change}\n{self.model_position[alpha_name]}"})
+                    self.prev_model_position[alpha_name] = self.model_position[alpha_name]  
 
-        merged_position = sum([self.model_position[alpha]["position"] for alpha in self.alpha_name])
-        self._export_signal_position(merged_position)
-        self.logger.info(f"{self.model_name} Position:{merged_position}\n-- -- -- -- -- -- -- -- --")
+            merged_position = sum([self.model_position[alpha]["position"] for alpha in self.alpha_name])
+            self._export_signal_position(merged_position)
+            self.logger.info(f"{self.model_name} Position:{merged_position}\n-- -- -- -- -- -- -- -- --")
+        
+        except Exception as error:
+            self.logger.error(error)
 
     def _export_signal_position(self, merged_position:float):
         """export signal position to a yaml file"""

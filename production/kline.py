@@ -9,7 +9,6 @@ warnings.filterwarnings("ignore")
 from datetime import datetime
 import time
 import logging
-from retry import retry
 import pandas as pd
 import requests
 import contek_timbersaw as timbersaw
@@ -52,7 +51,6 @@ class KlineGenerator:
             '1h': 60
         }.get(self.timeframe, 1)
     
-    @retry(tries=2, delay=1)
     def _get_klines_df(self) -> pd.DataFrame:
         url = f"{self.base_url}/fapi/v1/continuousKlines"
         params = {
@@ -130,7 +128,7 @@ class KlineGenerator:
             return True
         
         except Exception as e:
-            self.logger.exception(e)
+            self.logger.error(e)
             return False
         
     def push_discord(self, payload:dict, rel_path = "/production/config.yaml"):

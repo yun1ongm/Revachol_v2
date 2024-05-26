@@ -15,7 +15,6 @@ import pandas as pd
 import yaml
 import requests
 import json
-from retry import retry
 
 class ExecPostmodern(Traders):
     """
@@ -41,8 +40,7 @@ class ExecPostmodern(Traders):
         super().__init__(market)
         self.interval = 20
         self.update_time = datetime.utcnow() - timedelta(days=1)
-    
-    @retry(tries=3, delay=1)  
+     
     def _read_position(self, rel_path = "/production/signal_position.yaml") -> float:
         try:
             with open(main_path + rel_path, 'r') as stream:
@@ -64,8 +62,8 @@ class ExecPostmodern(Traders):
                 url = config['discord_webhook']["url"]
                 headers = {'Content-Type': 'application/json'}
                 response = requests.post(url, data=json.dumps(payload), headers=headers)
-        except Exception:
-            self.logger.error(response.status_code)
+        except Exception as e :
+            self.logger.error(e)
 
     def check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""
@@ -111,7 +109,6 @@ class ExecPostmodern(Traders):
                     time.sleep(self.interval / 4)
             except Exception as e:
                 self.logger.critical(e)
-                self._push_discord("Restarting the executor in 10 seconds...")
                 time.sleep(self.interval)    
 
 if __name__ == "__main__":
