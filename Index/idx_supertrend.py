@@ -127,7 +127,7 @@ class IdxSupertrend:
                 "signal",
             ] = -1
 
-            return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal"]]
+            return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "direction", "body", "volume_ema"]]
         except Exception as e:
             print(e)
             return None

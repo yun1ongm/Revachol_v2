@@ -71,23 +71,23 @@ class ModelUrban:
         self._export_signal_position(merged_position)
         self.logger.info(f"{self.model_name} Position:{merged_position}\n-- -- -- -- -- -- -- -- --")
 
-    def _export_signal_position(self, merged_position:int):
+    def _export_signal_position(self, merged_position:float):
         """export signal position to a yaml file"""
         export_path = "/production/signal_position.yaml"
         with open(main_path + export_path, "w") as file:
             model_signal = {
                 self.model_name:
                     {"update_time":str(self.market.kdf.index[-1]),
-                    "model_position": str(merged_position)},
+                    "model_position": str(round(merged_position, 3)),},
                     }
             self.market.push_discord({"content": f"Model signal position: {merged_position}, update_time: {self.market.kdf.index[-1]}\n-- -- -- -- -- -- -- -- --"})
             yaml.dump(model_signal, file)
             
     def _countdown_update(self) -> bool:
         """check if the time of the candle matches the current time"""
-        now = datetime.utcnow().replace(second=0, microsecond=0)
-        candle_time = self.market.kdf.index[-1].replace(second=0, microsecond=0)
-        if now - timedelta(minutes=self.market.timeframe_int) < candle_time:
+        candle_time = self.market.kdf.closetime[-1]
+        utc_time = datetime.utcnow()
+        if  utc_time - timedelta(minutes=self.market.timeframe_int) < candle_time:
             return True
         else:
             return False
@@ -102,8 +102,7 @@ class ModelUrban:
                     self.merging_signal()
                     time.sleep(self.interval)
                 else:
-                    time.sleep(self.interval)
-
+                    time.sleep(self.interval/2)
 
 if __name__ == "__main__":
     timbersaw.setup()

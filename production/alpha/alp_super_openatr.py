@@ -64,7 +64,10 @@ class AlpSuperOpenatr(BacktestFramework):
                 "stop_profit": stop_profit,
                 "update_time": update_time
             }
-            self.logger.info(f"{signal_position}")
+            if signal_position["signal"] != 0:
+                self.logger.info(f"trigger condition: {idx_signal.iloc[-3:]}")
+            if signal_position["position"] != 0:
+                self.logger.info(f"{signal_position}")
                 
             return signal_position
         except Exception as e:

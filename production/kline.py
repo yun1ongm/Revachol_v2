@@ -1,5 +1,6 @@
 import sys
-main_path = "/Users/rivachol/Desktop/Rivachol_v2"
+import os
+main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 sys.path.append(main_path)
 import warnings
 warnings.filterwarnings("ignore")

@@ -49,7 +49,7 @@ class IdxAdxStochrsi:
                 "signal"
             ] = -1
 
-        return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "dema"]]
+        return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "dema", "adx", "GXvalue", "DXvalue"]]
     
     def generate_atr_signal(self, vol_len) -> pd.DataFrame:
         adx_stochrsi = self._adx_stochrsi()
@@ -65,8 +65,7 @@ class IdxAdxStochrsi:
                 (kdf_sig["adx"] >= 25) & (kdf_sig["DXvalue"] > 85), 
                 "signal"
             ] = -1
-
-        return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal"]]
+        return kdf_sig[["open", "volume_U", "high", "low", "close", "atr", "signal", "adx", "GXvalue", "DXvalue"]]
 
 
 
