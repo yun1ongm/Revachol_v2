@@ -4,6 +4,7 @@ sys.path.append(main_path)
 import warnings
 warnings.filterwarnings("ignore")
 
+# -*- coding: utf-8 -*-
 import logging
 import time
 import pandas as pd

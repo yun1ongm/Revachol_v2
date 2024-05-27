@@ -43,34 +43,39 @@ class KlineGenerator:
         """
         self.symbol = symbol
         self.timeframe = timeframe
-        self.kdf = self._get_klines_df()
         self.timeframe_int = {
             '1m': 1,
             '5m': 5,
             '15m': 15,
             '1h': 60
         }.get(self.timeframe, 1)
+        self._get_klines_df()
     
     def _get_klines_df(self) -> pd.DataFrame:
         url = f"{self.base_url}/fapi/v1/continuousKlines"
+        limit = 200
         params = {
             "pair": self.symbol,
             "contractType": "PERPETUAL",
             "interval": self.timeframe,
-            "limit": 200
+            "limit": limit
         }
         try:
             res = requests.get(url, params=params)
             ohlcv = res.json()
             unfin_candle = ohlcv.pop() # remove unfinished candle
-            self.logger.info(f"Market bot initiate with candle of {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)}.\n------------------")
             kdf = pd.DataFrame(
                 ohlcv,
                 columns=self.kline_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
+            export_dir = main_path + "/production/data/"
+            if not os.path.exists(export_dir):
+                os.makedirs(export_dir)
+            self.export_path = export_dir + f"{self.symbol}_{self.timeframe}.csv"
+            kdf.to_csv(self.export_path)
+            self.logger.info(f"{limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------")
 
-            return kdf
         except Exception as e:
             self.logger.exception(e)
 
@@ -96,8 +101,17 @@ class KlineGenerator:
         return kdf
     
     def update_klines(self) -> bool:
-        back_time = self.kdf.closetime[-1]
         url = f"{self.base_url}/fapi/v1/continuousKlines"
+
+        with open(self.export_path, 'r') as file:
+            kdf = pd.read_csv(file, index_col=0)
+            if len(kdf) > 7*24*60/self.timeframe_int:
+                self._get_klines_df()
+                self.logger.warning(f"Data refreshed up at .")
+                return False
+            kdf.closetime = pd.to_datetime(kdf.closetime)
+            back_time = kdf.closetime[-1]
+            
         params = {
             "pair": self.symbol,
             "contractType": "PERPETUAL",
@@ -117,14 +131,10 @@ class KlineGenerator:
             if len(latest_kdf) >= 2:
                 # remove unfinished candle
                 latest_kdf = latest_kdf.iloc[:-1]
-                self.kdf = pd.concat([self.kdf, latest_kdf])
-                self.kdf.drop_duplicates(inplace=True)
+                latest_kdf.to_csv(self.export_path, mode='a', header=False)
                 self.logger.info(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
                 self.push_discord({"content": 
                                    f"Market:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.\n------------------"})
-            elif len(self.kdf) > 7*24*60/self.timeframe_int:
-                self.kdf = self._get_klines_df()
-                self.logger.warning(f"Market bot reboot candle data.")
             return True
         
         except Exception as e:
