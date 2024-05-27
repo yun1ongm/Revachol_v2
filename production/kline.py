@@ -49,24 +49,25 @@ class KlineGenerator:
             '15m': 15,
             '1h': 60
         }.get(self.timeframe, 1)
-        self._get_klines_df()
+        self._export_kline_csv()
     
-    def _get_klines_df(self) -> pd.DataFrame:
+    def _export_kline_csv(self) -> None:
         url = f"{self.base_url}/fapi/v1/continuousKlines"
-        limit = 200
+        self.limit = 300
+        session = requests.Session()
         params = {
             "pair": self.symbol,
             "contractType": "PERPETUAL",
             "interval": self.timeframe,
-            "limit": limit
+            "limit": self.limit
         }
         try:
-            res = requests.get(url, params=params)
+            res = session.get(url, params=params)
             ohlcv = res.json()
             unfin_candle = ohlcv.pop() # remove unfinished candle
             kdf = pd.DataFrame(
-                ohlcv,
-                columns=self.kline_columns,
+            ohlcv,
+            columns=self.kline_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
             export_dir = main_path + "/production/data/"
@@ -74,10 +75,12 @@ class KlineGenerator:
                 os.makedirs(export_dir)
             self.export_path = export_dir + f"{self.symbol}_{self.timeframe}.csv"
             kdf.to_csv(self.export_path)
-            self.logger.info(f"{limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------")
-
+            self.logger.info(f"{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------")
+            self.push_discord({"content": f"Market:{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------"})
         except Exception as e:
-            self.logger.exception(e)
+            self.logger.error(e)
+        finally:
+            session.close()
 
     def _convert_kdf_datatype(self, kdf) -> pd.DataFrame:
         kdf.opentime = [
@@ -105,13 +108,14 @@ class KlineGenerator:
 
         with open(self.export_path, 'r') as file:
             kdf = pd.read_csv(file, index_col=0)
-            if len(kdf) > 7*24*60/self.timeframe_int:
-                self._get_klines_df()
+            if len(kdf) > 24*60/self.timeframe_int:
+                self._export_kline_csv()
                 self.logger.warning(f"Data refreshed up at .")
                 return False
             kdf.closetime = pd.to_datetime(kdf.closetime)
             back_time = kdf.closetime[-1]
-            
+
+        session = requests.Session()   
         params = {
             "pair": self.symbol,
             "contractType": "PERPETUAL",
@@ -120,7 +124,7 @@ class KlineGenerator:
             "endTime": int(datetime.now().timestamp() * 1000)
         }
         try:
-            res = requests.get(url, params=params)
+            res = session.get(url, params=params)
             ohlcv = res.json()
             latest_kdf = pd.DataFrame(
                     ohlcv,
@@ -140,6 +144,8 @@ class KlineGenerator:
         except Exception as e:
             self.logger.error(e)
             return False
+        finally:
+            session.close()
         
     def push_discord(self, payload:dict, rel_path = "/production/config.yaml"):
         try:
@@ -147,16 +153,18 @@ class KlineGenerator:
                 config_dict = yaml.safe_load(stream)
                 url = config_dict['discord_webhook']["url"]
                 headers = {'Content-Type': 'application/json'}
-                response = requests.post(url, data=json.dumps(payload), headers=headers)
-        except Exception:
-            self.logger.exception(response.status_code)
+                response =requests.post(url, data=json.dumps(payload), headers=headers)
+        except Exception as e:
+            self.logger.exception(e)
+        finally:
+            response.close()
 
 if __name__ == "__main__":
     timbersaw.setup()
     test = KlineGenerator("BTCUSDT", "1m")
     while True:
         if test.update_klines():
-            time.sleep(10)
+            time.sleep(30)
         else:
-            time.sleep(5)
+            time.sleep(20)
 

@@ -7,6 +7,7 @@ sys.path.append(main_path)
 # -*- coding: utf-8 -*-
 
 import logging
+import psutil
 import time
 from datetime import datetime, timedelta
 from production.binance_execution.traders import Traders
@@ -38,6 +39,7 @@ class ExecPostmodern(Traders):
 
     def __init__(self, market) -> None:
         super().__init__(market)
+        self.process = psutil.Process()
         self.interval = 20
         self.update_time = datetime.utcnow() - timedelta(days=1)
      
@@ -64,6 +66,8 @@ class ExecPostmodern(Traders):
                 response = requests.post(url, data=json.dumps(payload), headers=headers)
         except Exception as e :
             self.logger.error(e)
+        finally:
+            response.close()
 
     def check_position_diff(self, signal_position: float) -> bool:
         """compare actual position and signal position & fill the gap if there is one"""
@@ -97,6 +101,9 @@ class ExecPostmodern(Traders):
         """main task of the executor"""
         self.cancel_open_orders()
         compelete = self.check_position_diff(self._read_position())
+        memory_info = self.process.memory_info()
+        self.logger.info(f"Memory usage: {memory_info.rss / 1024 / 1024:.2f} MB")
+        self.logger.info(f"CPU usage: {self.process.cpu_percent(interval=1):.2f}%\n-- -- -- --")
         return compelete
         
     def run(self) -> None:
@@ -106,7 +113,7 @@ class ExecPostmodern(Traders):
                 if complete:
                     time.sleep(self.interval)
                 else:
-                    time.sleep(self.interval / 4)
+                    time.sleep(self.interval / 2)
             except Exception as e:
                 self.logger.critical(e)
                 time.sleep(self.interval)    

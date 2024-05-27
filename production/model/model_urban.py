@@ -18,6 +18,7 @@ from production.alpha.alp_adx_stochrsi_openatr import AlpAdxStochrsiOpenatr
 from production.alpha.alp_super_openatr  import AlpSuperOpenatr
 from production.alpha.alp_linbo_dempact import AlpLinboDempact
 from production.kline import KlineGenerator
+
 class ModelUrban:
     """
     Model Urban is a model that combines multiple alphas to generate a single signal position
@@ -40,7 +41,7 @@ class ModelUrban:
         self._init_alpha(self.alpha_name, config)
         self.prev_model_position = {alpha:{"position":0} for alpha in self.alpha_name}
         self.model_position = {alpha:{"position":0} for alpha in self.alpha_name}
-        self.interval = 10
+        self.interval = 30
     
     def _read_config(self, rel_path = "/production/config.yaml") -> dict:
         try:
@@ -67,14 +68,15 @@ class ModelUrban:
             self.logger.error("Alpha not found")
             sys.exit(1)
 
-    def push_discord(self, payload:dict):
+    def push_discord(self, payload:dict) -> None:
         try:
             headers = {'Content-Type': 'application/json'}
             response = requests.post(self.discord_url, data=json.dumps(payload), headers=headers)
-            return response.status_code
         except Exception as e:
             self.logger.warning(e)
-    
+        finally:
+            response.close()
+
     def read_market(self, symbol:str, timeframe:str) -> pd.DataFrame:
         with open(main_path + f"/production/data/{symbol}_{timeframe}.csv", 'r') as csv_file:
             market = pd.read_csv(csv_file)
@@ -91,7 +93,7 @@ class ModelUrban:
 
                 if self.model_position[alpha_name]["position"] != self.prev_model_position[alpha_name]["position"]:
                     change = self.model_position[alpha_name]["position"] - self.prev_model_position[alpha_name]["position"]
-                    self.logger.info(f"{alpha_name} Signal Position Change:{change}")
+                    self.logger.warning(f"{alpha_name} Signal Position Change:{change}")
                     self.push_discord({"content": 
                                             f"{alpha_name} Signal Position Change:{change}\n{self.model_position[alpha_name]}"})
                     self.prev_model_position[alpha_name] = self.model_position[alpha_name]  
@@ -103,7 +105,7 @@ class ModelUrban:
         except Exception as error:
             self.logger.error(error)
 
-    def _export_signal_position(self, kdf:pd.DataFrame, merged_position:float):
+    def _export_signal_position(self, kdf:pd.DataFrame, merged_position:float) -> None:
         """export signal position to a yaml file"""
         export_path = "/production/signal_position.yaml"
         with open(main_path + export_path, "w") as file:
