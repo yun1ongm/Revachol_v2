@@ -15,6 +15,8 @@ import contek_timbersaw as timbersaw
 import yaml
 import requests
 import json
+import asyncio
+import aiohttp
 
 class KlineGenerator:
     base_url = "https://fapi.binance.com"
@@ -53,6 +55,10 @@ class KlineGenerator:
     
     def _export_kline_csv(self) -> None:
         url = f"{self.base_url}/fapi/v1/continuousKlines"
+        export_dir = main_path + "/production/data/"
+        if not os.path.exists(export_dir):
+            os.makedirs(export_dir)
+        self.export_path = export_dir + f"{self.symbol}_{self.timeframe}.csv"
         self.limit = 300
         session = requests.Session()
         params = {
@@ -66,14 +72,10 @@ class KlineGenerator:
             ohlcv = res.json()
             unfin_candle = ohlcv.pop() # remove unfinished candle
             kdf = pd.DataFrame(
-            ohlcv,
-            columns=self.kline_columns,
+                ohlcv,
+                columns=self.kline_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
-            export_dir = main_path + "/production/data/"
-            if not os.path.exists(export_dir):
-                os.makedirs(export_dir)
-            self.export_path = export_dir + f"{self.symbol}_{self.timeframe}.csv"
             kdf.to_csv(self.export_path)
             self.logger.info(f"{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------")
             self.push_discord({"content": f"Market:{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------"})
@@ -103,68 +105,66 @@ class KlineGenerator:
 
         return kdf
     
-    def update_klines(self) -> bool:
+    async def update_klines(self) -> bool:
         url = f"{self.base_url}/fapi/v1/continuousKlines"
 
         with open(self.export_path, 'r') as file:
             kdf = pd.read_csv(file, index_col=0)
             if len(kdf) > 24*60/self.timeframe_int:
                 self._export_kline_csv()
-                self.logger.warning(f"Data refreshed up at .")
+                self.logger.warning(f"Data refreshed up at {datetime.now()}.\n------------------")
                 return False
             kdf.closetime = pd.to_datetime(kdf.closetime)
             back_time = kdf.closetime[-1]
 
-        session = requests.Session()   
-        params = {
-            "pair": self.symbol,
-            "contractType": "PERPETUAL",
-            "interval": self.timeframe,
-            "startTime": int(back_time.timestamp() * 1000),
-            "endTime": int(datetime.now().timestamp() * 1000)
-        }
-        try:
-            res = session.get(url, params=params)
-            ohlcv = res.json()
-            latest_kdf = pd.DataFrame(
-                    ohlcv,
-                    columns= self.kline_columns,
-                )
-            latest_kdf = self._convert_kdf_datatype(latest_kdf)
+        async with aiohttp.ClientSession() as session:
+            params = {
+                "pair": self.symbol,
+                "contractType": "PERPETUAL",
+                "interval": self.timeframe,
+                "startTime": int(back_time.timestamp() * 1000),
+                "endTime": int(datetime.now().timestamp() * 1000)
+            }
+            try:
+                async with session.get(url, params=params, timeout=10) as response:
+                    ohlcv = await response.json()
+                    latest_kdf = pd.DataFrame(
+                            ohlcv,
+                            columns= self.kline_columns,
+                        )
+                    latest_kdf = self._convert_kdf_datatype(latest_kdf)
 
-            if len(latest_kdf) >= 2:
-                # remove unfinished candle
-                latest_kdf = latest_kdf.iloc[:-1]
-                latest_kdf.to_csv(self.export_path, mode='a', header=False)
-                self.logger.info(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
-                self.push_discord({"content": 
-                                   f"Market:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.\n------------------"})
-            return True
+                    if len(latest_kdf) >= 2:
+                        # remove unfinished candle
+                        latest_kdf = latest_kdf.iloc[:-1]
+                        latest_kdf.to_csv(self.export_path, mode='a', header=False)
+                        self.logger.info(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
+                        await self.push_discord({"content": 
+                                       f"Market:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.\n------------------"})
+                return True
+
+            except Exception as e:
+                self.logger.error(e)
+                return False
         
-        except Exception as e:
-            self.logger.error(e)
-            return False
-        finally:
-            session.close()
-        
-    def push_discord(self, payload:dict, rel_path = "/production/config.yaml"):
+    async def push_discord(self, payload:dict, rel_path = "/production/config.yaml"):
         try:
             with open(main_path + rel_path, 'r') as stream:
                 config_dict = yaml.safe_load(stream)
                 url = config_dict['discord_webhook']["url"]
                 headers = {'Content-Type': 'application/json'}
-                response =requests.post(url, data=json.dumps(payload), headers=headers)
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(url, data=json.dumps(payload), headers=headers) as response:
+                        pass
         except Exception as e:
             self.logger.exception(e)
-        finally:
-            response.close()
 
 if __name__ == "__main__":
     timbersaw.setup()
     test = KlineGenerator("BTCUSDT", "1m")
+    loop = asyncio.get_event_loop()
     while True:
-        if test.update_klines():
-            time.sleep(30)
-        else:
+        if loop.run_until_complete(test.update_klines()):
             time.sleep(20)
-
+        else:
+            time.sleep(10)

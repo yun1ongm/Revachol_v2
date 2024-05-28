@@ -62,7 +62,8 @@ class AlpLinboDempact(BacktestFramework):
                 "update_time": update_time
             }
             if signal_position["signal"] != 0:
-                self.logger.info(f"trigger condition: {idx_signal.iloc[-3:]}")
+                condition = idx_signal[['close', 'upper','lower']][-3:]
+                self.logger.info(f"trigger condition: {condition}")
             if signal_position["position"] != 0:
                 self.logger.info(f"{signal_position}")
 

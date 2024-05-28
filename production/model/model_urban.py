@@ -8,11 +8,11 @@ warnings.filterwarnings("ignore")
 # -*- coding: utf-8 -*-
 import yaml
 import logging
-import time
 from datetime import datetime, timedelta
 import pandas as pd
-import requests
 import json
+import aiohttp
+import asyncio
 import contek_timbersaw as timbersaw
 from production.alpha.alp_adx_stochrsi_openatr import AlpAdxStochrsiOpenatr
 from production.alpha.alp_super_openatr  import AlpSuperOpenatr
@@ -41,7 +41,7 @@ class ModelUrban:
         self._init_alpha(self.alpha_name, config)
         self.prev_model_position = {alpha:{"position":0} for alpha in self.alpha_name}
         self.model_position = {alpha:{"position":0} for alpha in self.alpha_name}
-        self.interval = 30
+        self.interval = 20
     
     def _read_config(self, rel_path = "/production/config.yaml") -> dict:
         try:
@@ -68,10 +68,12 @@ class ModelUrban:
             self.logger.error("Alpha not found")
             sys.exit(1)
 
-    def push_discord(self, payload:dict) -> None:
+    async def push_discord(self, payload: dict) -> None:
         try:
             headers = {'Content-Type': 'application/json'}
-            response = requests.post(self.discord_url, data=json.dumps(payload), headers=headers)
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.discord_url, data=json.dumps(payload), headers=headers) as response:
+                    pass
         except Exception as e:
             self.logger.warning(e)
         finally:
@@ -85,7 +87,7 @@ class ModelUrban:
             market.set_index("opentime", inplace=True)
         return market
 
-    def merging_signal(self, kdf:pd.DataFrame) -> None:
+    async def merging_signal(self, kdf: pd.DataFrame) -> None:
         try:
             for alpha in self.alphas:
                 alpha_name = alpha.alpha_name
@@ -94,30 +96,30 @@ class ModelUrban:
                 if self.model_position[alpha_name]["position"] != self.prev_model_position[alpha_name]["position"]:
                     change = self.model_position[alpha_name]["position"] - self.prev_model_position[alpha_name]["position"]
                     self.logger.warning(f"{alpha_name} Signal Position Change:{change}")
-                    self.push_discord({"content": 
-                                            f"{alpha_name} Signal Position Change:{change}\n{self.model_position[alpha_name]}"})
-                    self.prev_model_position[alpha_name] = self.model_position[alpha_name]  
+                    await self.push_discord({"content": f"{alpha_name} Signal Position Change:{change}\n{self.model_position[alpha_name]}"})
+                    self.prev_model_position[alpha_name] = self.model_position[alpha_name]
 
             merged_position = sum([self.model_position[alpha]["position"] for alpha in self.alpha_name])
-            self._export_signal_position(kdf, merged_position)
+            await self._export_signal_position(kdf, merged_position)
             self.logger.info(f"{self.model_name} Position:{merged_position}\n-- -- -- -- -- -- -- -- --")
-        
+
         except Exception as error:
             self.logger.error(error)
+            raise
 
-    def _export_signal_position(self, kdf:pd.DataFrame, merged_position:float) -> None:
+    async def _export_signal_position(self, kdf: pd.DataFrame, merged_position: float) -> None:
         """export signal position to a yaml file"""
         export_path = "/production/signal_position.yaml"
         with open(main_path + export_path, "w") as file:
             model_signal = {
                 self.model_name:
-                    {"update_time":str(kdf.index[-1]),
-                    "model_position": str(round(merged_position, 3)),},
-                    }
-            self.push_discord({"content": f"Model signal position: {merged_position}, update_time: {kdf.index[-1]}\n-- -- -- -- -- -- -- -- --"})
+                    {"update_time": str(kdf.index[-1]),
+                     "model_position": str(round(merged_position, 3)), },
+            }
+            await self.push_discord({"content": f"Model signal position: {merged_position}, update_time: {kdf.closetime[-1]}\n-- -- -- -- -- -- -- -- --"})
             yaml.dump(model_signal, file)
-            
-    def _cooldown(selfm, kdf:pd.DataFrame, timeframe_int:int) -> bool:
+
+    async def _cooldown(self, kdf: pd.DataFrame, timeframe_int: int) -> bool:
         """check if the time of the candle matches the current time"""
         candle_time = kdf.closetime[-1]
         utc_time = datetime.utcnow()
@@ -125,28 +127,29 @@ class ModelUrban:
             return True
         else:
             return False
-            
-    def run(self, symbol:str, timeframe:str) -> None:
+
+    async def run(self, symbol: str, timeframe: str) -> None:
         market = KlineGenerator(symbol, timeframe)
         timeframe_int = {
-                '1m': 1,
-                '5m': 5,
-                '15m': 15,
-                '1h': 60
-                }.get(timeframe, 1)
+            '1m': 1,
+            '5m': 5,
+            '15m': 15,
+            '1h': 60
+        }.get(timeframe, 1)
         while True:
             kdf = self.read_market(symbol, timeframe)
-            if self._cooldown(kdf,timeframe_int):
-                time.sleep(self.interval)
+            if await self._cooldown(kdf, timeframe_int):
+                await asyncio.sleep(self.interval)
             else:
-                flag = market.update_klines()
+                flag = await market.update_klines()
                 if flag:
-                    self.merging_signal(kdf)
-                    time.sleep(self.interval)
+                    kdf = self.read_market(symbol, timeframe)
+                    await self.merging_signal(kdf)
+                    await asyncio.sleep(self.interval)
                 else:
-                    time.sleep(self.interval/2)
+                    await asyncio.sleep(self.interval / 2)
 
 if __name__ == "__main__":
     timbersaw.setup()
     model = ModelUrban()
-    model.run("BTCUSDT", "1m")
+    asyncio.run(model.run("BTCUSDT", "1m"))
