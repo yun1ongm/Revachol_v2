@@ -8,7 +8,6 @@ warnings.filterwarnings("ignore")
 # -*- coding: utf-8 -*-
 import yaml
 import logging
-from datetime import datetime, timedelta
 import pandas as pd
 import json
 import aiohttp
@@ -80,12 +79,17 @@ class ModelUrban:
             response.close()
 
     def read_market(self, symbol:str, timeframe:str) -> pd.DataFrame:
-        with open(main_path + f"/production/data/{symbol}_{timeframe}.csv", 'r') as csv_file:
-            market = pd.read_csv(csv_file)
-            market["opentime"] = pd.to_datetime(market["opentime"])
-            market["closetime"] = pd.to_datetime(market["closetime"])
-            market.set_index("opentime", inplace=True)
-        return market
+        try:
+            with open(main_path + f"/production/data/{symbol}_{timeframe}.csv", 'r') as csv_file:
+                market = pd.read_csv(csv_file)
+                market["opentime"] = pd.to_datetime(market["opentime"], format="%Y-%m-%d %H:%M:%S")
+                market["closetime"] = pd.to_datetime(market["closetime"], format="%Y-%m-%d %H:%M:%S")
+                market.set_index("opentime", inplace=True)
+            return market
+        except Exception as error:
+            self.logger.error(error)
+            self.push_discord({"content": f"Terminated with Error: {error}"})
+            raise
 
     async def merging_signal(self, kdf: pd.DataFrame) -> None:
         try:
@@ -105,6 +109,7 @@ class ModelUrban:
 
         except Exception as error:
             self.logger.error(error)
+            await self.push_discord({"content": f"Terminated with Error: {error}"})
             raise
 
     async def _export_signal_position(self, kdf: pd.DataFrame, merged_position: float) -> None:
@@ -119,35 +124,25 @@ class ModelUrban:
             await self.push_discord({"content": f"Model signal position: {merged_position}, update_time: {kdf.closetime[-1]}\n-- -- -- -- -- -- -- -- --"})
             yaml.dump(model_signal, file)
 
-    async def _cooldown(self, kdf: pd.DataFrame, timeframe_int: int) -> bool:
-        """check if the time of the candle matches the current time"""
-        candle_time = kdf.closetime[-1]
-        utc_time = datetime.utcnow()
-        if utc_time - timedelta(minutes=timeframe_int) < candle_time:
-            return True
-        else:
-            return False
+    # async def _cooldown(self, kdf: pd.DataFrame, timeframe_int: int) -> bool:
+    #     """check if the time of the candle matches the current time"""
+    #     candle_time = kdf.closetime[-1]
+    #     utc_time = datetime.utcnow()
+    #     if utc_time - timedelta(minutes=timeframe_int) < candle_time:
+    #         return True
+    #     else:
+    #         return False
 
     async def run(self, symbol: str, timeframe: str) -> None:
         market = KlineGenerator(symbol, timeframe)
-        timeframe_int = {
-            '1m': 1,
-            '5m': 5,
-            '15m': 15,
-            '1h': 60
-        }.get(timeframe, 1)
         while True:
-            kdf = self.read_market(symbol, timeframe)
-            if await self._cooldown(kdf, timeframe_int):
+            update = await market.update_klines()
+            if update:
+                kdf = self.read_market(symbol, timeframe)
+                await self.merging_signal(kdf)
                 await asyncio.sleep(self.interval)
             else:
-                flag = await market.update_klines()
-                if flag:
-                    kdf = self.read_market(symbol, timeframe)
-                    await self.merging_signal(kdf)
-                    await asyncio.sleep(self.interval)
-                else:
-                    await asyncio.sleep(self.interval / 2)
+                await asyncio.sleep(self.interval / 2)
 
 if __name__ == "__main__":
     timbersaw.setup()

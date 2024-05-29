@@ -141,7 +141,9 @@ class KlineGenerator:
                         self.logger.info(f"{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.")
                         await self.push_discord({"content": 
                                        f"Market:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added.\n------------------"})
-                return True
+                        return True
+                    else:
+                        return False
 
             except Exception as e:
                 self.logger.error(e)
