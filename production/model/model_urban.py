@@ -82,7 +82,7 @@ class ModelUrban:
         try:
             with open(main_path + f"/production/data/{symbol}_{timeframe}.csv", 'r') as csv_file:
                 market = pd.read_csv(csv_file)
-                market["opentime"] = pd.to_datetime(market["opentime"], format="%Y-%m-%d %H:%M:%S")
+                market["opentime"] = pd.to_datetime(market["opentime"].apply(lambda x: x + ' 00:00:00' if len(x) == 10 else x), format="%Y-%m-%d %H:%M:%S")
                 market["closetime"] = pd.to_datetime(market["closetime"], format="%Y-%m-%d %H:%M:%S")
                 market.set_index("opentime", inplace=True)
             return market

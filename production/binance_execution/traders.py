@@ -79,7 +79,6 @@ class Traders:
                 timeInForce="GTX",
                 price=price,
             )
-            self.logger.info(f"Executing buy price:{price}")
             return response
 
         except Exception as error:

@@ -71,31 +71,28 @@ class KlineGenerator:
             res = session.get(url, params=params)
             ohlcv = res.json()
             unfin_candle = ohlcv.pop() # remove unfinished candle
+            update_time = datetime.utcfromtimestamp(unfin_candle[0] / 1000).strftime("%Y-%m-%d %H:%M:%S")
             kdf = pd.DataFrame(
                 ohlcv,
                 columns=self.kline_columns,
             )
             kdf = self._convert_kdf_datatype(kdf)
             kdf.to_csv(self.export_path)
-            self.logger.info(f"{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------")
-            self.push_discord({"content": f"Market:{self.limit} candles time to {datetime.utcfromtimestamp(int(unfin_candle[0])/1000)} exported.\n------------------"})
+            self.logger.info(f"{self.limit} candles time to {update_time} exported.\n------------------")
+            self.push_discord({"content": f"Market:{self.limit} candles time to {update_time} exported.\n------------------"})
         except Exception as e:
             self.logger.error(e)
         finally:
             session.close()
 
     def _convert_kdf_datatype(self, kdf) -> pd.DataFrame:
-        kdf.opentime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.opentime
-        ]
+        kdf.opentime = [datetime.utcfromtimestamp(x / 1000).strftime("%Y-%m-%d %H:%M:%S") for x in kdf.opentime]
         kdf.open = kdf.open.astype("float")
         kdf.high = kdf.high.astype("float")
         kdf.low = kdf.low.astype("float")
         kdf.close = kdf.close.astype("float")
         kdf.volume = kdf.volume.astype("float")
-        kdf.closetime = [
-            datetime.utcfromtimestamp(int(x) / 1000.0).replace(microsecond=0) for x in kdf.closetime
-        ]
+        kdf.closetime = [datetime.utcfromtimestamp(x / 1000).strftime("%Y-%m-%d %H:%M:%S") for x in kdf.closetime]
         kdf.volume_U = kdf.volume_U.astype("float")
         kdf.num_trade = kdf.num_trade.astype("int")
         kdf.taker_buy = kdf.taker_buy.astype("float")
@@ -110,7 +107,7 @@ class KlineGenerator:
 
         with open(self.export_path, 'r') as file:
             kdf = pd.read_csv(file, index_col=0)
-            if len(kdf) > 24*60/self.timeframe_int:
+            if len(kdf) > 12*60/self.timeframe_int:
                 self._export_kline_csv()
                 self.logger.warning(f"Data refreshed up at {datetime.now()}.\n------------------")
                 return False
