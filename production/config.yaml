@@ -1,0 +1,16 @@
+bn_api:
+    key: "1VUTeJRnyZAqv1Rd8GvXALcOBLXOacqyIhepK3tjckS3YRiCgFB7SAW0koAkkLuj"
+    secret: "zjWU4n4K0ZkxfO6VkM2snODxVDlLGvxvVGf5PT790STADOK3pLPSVxNqvFK3RGcf"
+okx_api:
+    key: "21669db0-a36f-4434-a81b-dec0c76e0fb9"
+    secret: "1D34C6D0BAFD9CF88EF8B589720C92DC"
+    passphrase: "Luckin8*"
+
+backpack_api:
+    key: "MvRvB3dAF+ObKSjrLbypJZ/Kd485RZ88ZrnqoLShCeI="
+    secret: "gM3WctyAMFbDLBtYC911nNH6lCM878ZDvKXI83gdV3Y="
+
+discord_webhook:
+    url: "https://discord.com/api/webhooks/1241409376376455179/kbukhAxvkxUpjoHgfbG8uCtHMWjkk_8qDuit-TRVbxYFDaaDrSfrb9Od3di1Aa-TL99D"
+
+alp_adx_stochrsi_multiple: {'BTCUSD_adx_len': 96, 'BTCUSD_rsi_len': 78, 'BTCUSD_stoch_len': 42, 'BTCUSD_kd': 4, 'BTCUSD_tp_std': 6, 'BTCUSD_sl_std': 7, 'BTCUSD_dema_len': 78}

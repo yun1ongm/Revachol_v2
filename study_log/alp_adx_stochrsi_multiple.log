@@ -1,0 +1,19 @@
+2024-06-14 01:02:02,084, Start optimizing alp_adx_stochrsi_multiple for goal t_sharpe on 1m
+2024-06-14 01:18:05,715, Top 3 results:
+Rank 1:
+  Params: {'BTCUSDT_adx_len': 96, 'BTCUSDT_rsi_len': 78, 'BTCUSDT_stoch_len': 42, 'BTCUSDT_kd': 4, 'BTCUSDT_tp_std': 6, 'BTCUSDT_sl_std': 7, 'BTCUSDT_dema_len': 78}
+  Value: 87.54377900668739
+  Performance: {'net_value': 1357.7216181380627, 'win_ratio': 0.6024690614235727, 'single_avg_wlr': 1.4116405287879359, 'total_trades': 810, 'return': 0.6788608090690313, 'max_drawdown': 300.43349461333537, 't_sharpe': 87.54377900668739, 'commission': 0.6184299040000001, 'score': 2.7226824283978566}
+
+Rank 2:
+  Params: {'BTCUSDT_adx_len': 87, 'BTCUSDT_rsi_len': 72, 'BTCUSDT_stoch_len': 42, 'BTCUSDT_kd': 4, 'BTCUSDT_tp_std': 9, 'BTCUSDT_sl_std': 8, 'BTCUSDT_dema_len': 93}
+  Value: 84.99625573151529
+  Performance: {'net_value': 1288.8296391869562, 'win_ratio': 0.5913042743721398, 'single_avg_wlr': 1.464668080796725, 'total_trades': 805, 'return': 0.6444148195934781, 'max_drawdown': 299.05193258666554, 't_sharpe': 84.99625573151529, 'commission': 0.61228836288, 'score': 2.548354104123655}
+
+Rank 3:
+  Params: {'BTCUSDT_adx_len': 75, 'BTCUSDT_rsi_len': 81, 'BTCUSDT_stoch_len': 42, 'BTCUSDT_kd': 4, 'BTCUSDT_tp_std': 8, 'BTCUSDT_sl_std': 7, 'BTCUSDT_dema_len': 87}
+  Value: 84.10052303602848
+  Performance: {'net_value': 1302.2171378536214, 'win_ratio': 0.5960590398942069, 'single_avg_wlr': 1.4295966827040405, 'total_trades': 812, 'return': 0.6511085689268107, 'max_drawdown': 307.5367615999985, 't_sharpe': 84.10052303602848, 'commission': 0.62046060032, 'score': 2.5239195486503445}
+
+
+2024-06-15 11:01:52,951, Start optimizing alp_adx_stochrsi_multiple for goal t_sharpe on 1m
