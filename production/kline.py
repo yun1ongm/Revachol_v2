@@ -195,8 +195,6 @@ class KlineGenerator:
                         latest_kdf = self._format_candle(ohlcv)
 
                         if len(latest_kdf) >= 2:
-                            # remove unfinished candle
-                            latest_kdf = latest_kdf.iloc[:-1]
                             latest_kdf.to_csv(self.export_path, mode="a", header=False)
                             self.logger.info(
                                 f"{symbol}:{len(latest_kdf)} canlde to {latest_kdf.closetime[-1]} added."
