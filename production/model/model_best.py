@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import os
 
@@ -7,7 +8,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# -*- coding: utf-8 -*-
 import yaml
 import logging
 import pandas as pd

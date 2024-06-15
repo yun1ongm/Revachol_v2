@@ -1,4 +1,8 @@
 import os
+import sys
+
+main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(main_path)
 import logging
 import operator
 import optuna
@@ -6,10 +10,6 @@ import pandas as pd
 import pandas_ta as pta
 import yaml
 import matplotlib.pyplot as plt
-import sys
-
-main_path = "/Users/rivachol/Desktop/Rivachol_v2/"
-sys.path.append(main_path)
 from research.backtest import BacktestFramework
 from index.indicators import Adx, StochRsi
 from strategy.multiple import DemaStd
