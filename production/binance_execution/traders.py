@@ -34,9 +34,7 @@ class Traders:
 
     def __init__(self, pairs) -> None:
         self.config = self._read_config()
-        self.client = self._connect_api(
-            key=self.config["bn_api"]["key"], secret=self.config["bn_api"]["secret"]
-        )
+        self.client = self.get_client()
         self.symbols = self.convert_to_circle(pairs)
         self.try_count = 0
 
@@ -53,11 +51,10 @@ class Traders:
             sys.exit(1)
         return config
 
-    def _connect_api(self, key, secret) -> UMFutures:
-        """connect binance client with apikey and apisecret"""
-        client = UMFutures(key=key, secret=secret, timeout=5)
-
-        return client
+    def get_client(self) -> UMFutures:
+        key = self.config["bn_api"]["key"]
+        secret = self.config["bn_api"]["secret"]
+        return UMFutures(key, secret)
 
     def _order_settings(self, market: str) -> tuple:
         if market == "BTCUSDT" or "BTCUSDC":
@@ -115,10 +112,10 @@ class Traders:
         """send market buy order"""
         amount = round(amount, 3)
         try:
-            response = self.client.new_order(
+            self.client.new_order(
                 symbol=symbol, side="BUY", type="MARKET", quantity=amount
             )
-            return response
+
         except Exception as error:
             self.logger.error(error)
 
@@ -126,10 +123,9 @@ class Traders:
         """send market sell order"""
         amount = round(amount, 3)
         try:
-            response = self.client.new_order(
+            self.client.new_order(
                 symbol=symbol, side="SELL", type="MARKET", quantity=amount
             )
-            return response
         except Exception as error:
             self.logger.error(error)
 
@@ -192,14 +188,12 @@ class Traders:
         except Exception as error:
             self.logger.error(error)
 
-    def cancel_open_orders(self) -> None:
+    async def cancel_open_orders(self) -> None:
         for symbol in self.symbols:
             try:
-                response = self.client.cancel_open_orders(
-                    symbol=symbol, recvWindow=2000
-                )
+                await self.client.cancel_open_orders(symbol=symbol)
             except Exception as error:
-                self.logger.warning(f"{error}")
+                self.logger.error(f"{error}")
 
     def cancel_order_by_id(self, orderId: int, symbol: str) -> None:
         try:

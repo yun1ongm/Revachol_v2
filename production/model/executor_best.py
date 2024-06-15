@@ -7,6 +7,7 @@ import os
 
 main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.append(main_path)
+
 import logging
 import psutil
 from production.binance_execution.traders import Traders
@@ -61,22 +62,30 @@ class ExecBest(Traders):
         finally:
             response.close()
 
+    def get_actual_positions(self) -> pd.DataFrame:
+        try:
+            response = self.client.get_position_risk(recvWindow=5000)
+            positions = pd.DataFrame(response).query("symbol == @self.symbols")
+            return positions
+        except Exception as e:
+            self.logger.error(e)
+
     async def check_position_diff(self, c_symbol_position: dict) -> None:
         """compare actual position and signal position & fill the gap if there is one"""
-        try:
-            positions = pd.DataFrame(
-                self.client.get_position_risk(recvWindow=6000)
-            ).query("symbol == @self.symbols")
+        positions = self.get_actual_positions()
+        if positions is not None:
             for _, row in positions.iterrows():
                 symbol = row["symbol"]
                 actual_position = float(row["positionAmt"])
-                self.logger.info(f"{symbol} actual position is {actual_position}")
                 c_symbol = symbol.replace("USDC", "USD")
                 merged_position = c_symbol_position[c_symbol]["merged_position"]
+                self.logger.info(
+                    f"{symbol} target position is {merged_position} | actual position is {actual_position}"
+                )
                 updated_time = c_symbol_position[c_symbol]["updated_time"]
                 await self.push_discord(
                     {
-                        "content": f"Retrieve {symbol} position: {merged_position} updated_time:{updated_time}"
+                        "content": f"Retrieve {symbol} position: {merged_position} updated_time:{updated_time} | actual position: {actual_position}"
                     }
                 )
                 if abs(actual_position - merged_position) < 0.0001:
@@ -95,19 +104,11 @@ class ExecBest(Traders):
                     else:
                         self.taker_sell(-position_diff, symbol)
 
-        except Exception as error:
-            self.logger.error(error)
-
     async def task(self) -> None:
         """main task of the executor"""
-        self.cancel_open_orders()
+        # self.cancel_open_orders()
         symbol_position = self._read_position()
         await self.check_position_diff(symbol_position)
-        memory_info = self.process.memory_info()
-        self.logger.info(f"Memory usage: {memory_info.rss / 1024 / 1024:.2f} MB")
-        self.logger.info(
-            f"CPU usage: {self.process.cpu_percent(interval=1):.2f}%\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
-        )
 
     async def run(self) -> None:
         while True:
